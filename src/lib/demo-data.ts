@@ -924,6 +924,36 @@ export function filterExtractedContracts({
   });
 }
 
+export function getExtractedContractById(id: string) {
+  return extractedContractRecords.find((record) => record.id === id) ?? null;
+}
+
+export function getSourceDocumentById(id: string) {
+  return uploadedSourceDocuments.find((document) => document.id === id) ?? null;
+}
+
+export function getRelatedDemoContractsForExtractedRecord(recordId: string) {
+  const record = getExtractedContractById(recordId);
+
+  if (!record) {
+    return [];
+  }
+
+  return demoContracts.filter((contract) => {
+    const sharedNaics = contract.naicsCode === record.naicsCode;
+    const sharedState = contract.state === record.state;
+    const sharedAgency = contract.agency === record.agency;
+    const sharedKeyword = record.keyTerms.some((term) =>
+      contract.keyTerms.some((keyTerm) =>
+        term.toLowerCase().includes(keyTerm.toLowerCase()) ||
+        keyTerm.toLowerCase().includes(term.toLowerCase()),
+      ),
+    );
+
+    return sharedNaics || sharedAgency || (sharedState && sharedKeyword);
+  });
+}
+
 export function getSavedContractsWithPlans() {
   return savedContractPlans
     .map((saved) => {

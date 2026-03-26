@@ -5,15 +5,28 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   DataSourceCoverage,
   ExtractedContractRecord,
+  IndustryRecommendation,
   SyncActivity,
   UploadedSourceDocument,
 } from "@/lib/demo-data";
+import { industryRecommendations } from "@/lib/demo-data";
 import {
   addDemoGovUpload,
   forceRefreshGovernmentData,
   getMergedGovData,
   getMergedSyncState,
 } from "@/lib/demo-contract-store";
+
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function parseMultiValue(value?: string) {
+  return (value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 function filterRecords(
   records: ExtractedContractRecord[],
@@ -22,8 +35,10 @@ function filterRecords(
   agency?: string,
   state?: string,
 ) {
+  const naicsCodes = parseMultiValue(naics);
+
   return records.filter((record) => {
-    const matchesNaics = naics ? record.naicsCode === naics : true;
+    const matchesNaics = naicsCodes.length > 0 ? naicsCodes.includes(record.naicsCode) : true;
     const matchesAgency = agency ? record.agency === agency : true;
     const matchesState = state ? record.state === state : true;
     const blob = [
@@ -54,6 +69,7 @@ export function GovernmentDataClient({
   initialNaics,
   initialAgency,
   initialState,
+  initialIndustry,
 }: {
   initialDocuments: UploadedSourceDocument[];
   initialRecords: ExtractedContractRecord[];
@@ -63,6 +79,7 @@ export function GovernmentDataClient({
   initialNaics?: string;
   initialAgency?: string;
   initialState?: string;
+  initialIndustry?: string;
 }) {
   const [documents, setDocuments] = useState(initialDocuments);
   const [records, setRecords] = useState(initialRecords);
@@ -70,6 +87,11 @@ export function GovernmentDataClient({
   const [activities, setActivities] = useState(initialActivities);
   const [lastForcedRefreshAt, setLastForcedRefreshAt] = useState<string | undefined>(undefined);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [searchIndustry, setSearchIndustry] = useState(initialIndustry ?? "");
+  const [searchKeywords, setSearchKeywords] = useState(initialKeywords.join(", "));
+  const [searchNaics, setSearchNaics] = useState(initialNaics ?? "");
+  const [searchAgency, setSearchAgency] = useState(initialAgency ?? "");
+  const [searchState, setSearchState] = useState(initialState ?? "");
 
   useEffect(() => {
     const syncGovData = () => {
@@ -96,9 +118,50 @@ export function GovernmentDataClient({
     };
   }, []);
 
+  const industryMatches = useMemo(() => {
+    const query = normalize(searchIndustry);
+
+    if (!query) {
+      return [] as IndustryRecommendation[];
+    }
+
+    const scored = industryRecommendations
+      .map((recommendation) => {
+        const haystack = [
+          recommendation.industry,
+          recommendation.category,
+          recommendation.summary,
+          ...recommendation.codes.map((code) => `${code.naicsCode} ${code.title} ${code.fitReason}`),
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const score = query
+          .split(/\s+/)
+          .filter(Boolean)
+          .reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0);
+
+        return { recommendation, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((left, right) => right.score - left.score);
+
+    return scored.map((item) => item.recommendation).slice(0, 2);
+  }, [searchIndustry]);
+
+  const recommendedNaicsCodes = useMemo(
+    () =>
+      Array.from(
+        new Set(industryMatches.flatMap((recommendation) => recommendation.codes.map((code) => code.naicsCode))),
+      ),
+    [industryMatches],
+  );
+
+  const appliedKeywordTerms = useMemo(() => parseMultiValue(searchKeywords), [searchKeywords]);
+
   const results = useMemo(
-    () => filterRecords(records, initialKeywords, initialNaics, initialAgency, initialState),
-    [initialAgency, initialKeywords, initialNaics, initialState, records],
+    () => filterRecords(records, appliedKeywordTerms, searchNaics, searchAgency, searchState),
+    [appliedKeywordTerms, records, searchAgency, searchNaics, searchState],
   );
 
   return (
@@ -271,7 +334,18 @@ export function GovernmentDataClient({
               <span>Multiple key terms</span>
               <input
                 name="keywords"
-                defaultValue={initialKeywords.join(", ")}
+                value={searchKeywords}
+                onChange={(event) => setSearchKeywords(event.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
+              <span>Industry or service type</span>
+              <input
+                name="industry"
+                value={searchIndustry}
+                onChange={(event) => setSearchIndustry(event.target.value)}
+                placeholder="Try: pest control, wildlife exclusion, bird deterrent"
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -279,7 +353,8 @@ export function GovernmentDataClient({
               <span>NAICS</span>
               <input
                 name="naics"
-                defaultValue={initialNaics ?? ""}
+                value={searchNaics}
+                onChange={(event) => setSearchNaics(event.target.value)}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -287,7 +362,8 @@ export function GovernmentDataClient({
               <span>Agency</span>
               <input
                 name="agency"
-                defaultValue={initialAgency ?? ""}
+                value={searchAgency}
+                onChange={(event) => setSearchAgency(event.target.value)}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -295,11 +371,59 @@ export function GovernmentDataClient({
               <span>State</span>
               <input
                 name="state"
-                defaultValue={initialState ?? ""}
+                value={searchState}
+                onChange={(event) => setSearchState(event.target.value)}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
           </div>
+          {industryMatches.length > 0 ? (
+            <div className="mt-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-white">Recommended industry codes</p>
+                  <p className="mt-1 text-xs text-emerald-100/90">
+                    Based on &quot;{searchIndustry}&quot;, we found likely-fit NAICS codes for this search.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSearchNaics(recommendedNaicsCodes.join(", "))}
+                  className="rounded-full bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-emerald-300"
+                >
+                  Apply all codes to search
+                </button>
+              </div>
+              <div className="mt-4 space-y-3">
+                {industryMatches.map((recommendation) => (
+                  <div
+                    key={recommendation.id}
+                    className="rounded-[1.25rem] border border-white/10 bg-slate-950/50 p-4"
+                  >
+                    <p className="text-sm font-semibold text-white">{recommendation.industry}</p>
+                    <p className="mt-1 text-xs text-emerald-200">{recommendation.category}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {recommendation.codes.map((code) => (
+                        <button
+                          key={`${recommendation.id}-${code.naicsCode}`}
+                          type="button"
+                          onClick={() => {
+                            const nextCodes = Array.from(
+                              new Set([...parseMultiValue(searchNaics), code.naicsCode]),
+                            );
+                            setSearchNaics(nextCodes.join(", "));
+                          }}
+                          className="rounded-full border border-emerald-400/20 bg-white/5 px-3 py-1 text-xs font-medium text-emerald-100 transition hover:bg-emerald-400/10"
+                        >
+                          {code.naicsCode} / apply
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               type="submit"
@@ -314,6 +438,9 @@ export function GovernmentDataClient({
               Reset search
             </Link>
           </div>
+          {searchNaics ? (
+            <p className="mt-4 text-xs text-slate-400">Active NAICS filter: {searchNaics}</p>
+          ) : null}
         </form>
 
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
@@ -322,15 +449,17 @@ export function GovernmentDataClient({
           </p>
           <div className="mt-5 space-y-4">
             {results.map((result) => (
-              <article
+              <Link
                 key={result.id}
-                className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5"
+                href={`/government-data/${result.id}`}
+                className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
               >
                 <h2 className="text-lg font-semibold text-white">{result.title}</h2>
                 <p className="mt-1 text-sm text-slate-400">
                   {result.agency} / {result.location} / {result.opportunityType}
                 </p>
-              </article>
+                <p className="mt-3 text-sm text-emerald-200">Open contract research</p>
+              </Link>
             ))}
           </div>
         </section>

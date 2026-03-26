@@ -13,6 +13,7 @@ type GovernmentDataPageProps = {
     naics?: string;
     agency?: string;
     state?: string;
+    industry?: string;
   }>;
 };
 
@@ -63,6 +64,7 @@ export default async function GovernmentDataPage({
         initialNaics={params.naics}
         initialAgency={params.agency}
         initialState={params.state}
+        initialIndustry={params.industry}
       />
     </div>
   );
