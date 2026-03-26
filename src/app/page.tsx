@@ -25,7 +25,7 @@ export default function Home() {
           <div className="mb-6 flex items-center gap-4">
             <div className="relative h-20 w-20 overflow-hidden rounded-[1.75rem] border border-emerald-400/30 bg-black/50 shadow-[0_0_30px_rgba(74,222,128,0.18)]">
               <Image
-                src="/BVlogo.png"
+                src="/bid-vault-logo.png"
                 alt="The Bid Vault logo"
                 fill
                 sizes="80px"
@@ -98,7 +98,7 @@ export default function Home() {
           <div className="mb-6 flex items-center gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
             <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/40">
               <Image
-                src="/BVlogo.png"
+                src="/bid-vault-logo.png"
                 alt="The Bid Vault logo mark"
                 fill
                 sizes="56px"

@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { GovernmentDataClient } from "@/components/government-data-client";
-import { extractedContractRecords, uploadedSourceDocuments } from "@/lib/demo-data";
+import {
+  dataSourceCoverage,
+  extractedContractRecords,
+  syncActivities,
+  uploadedSourceDocuments,
+} from "@/lib/demo-data";
 
 type GovernmentDataPageProps = {
   searchParams?: Promise<{
@@ -26,7 +31,7 @@ export default async function GovernmentDataPage({
         <div className="mb-5 flex items-center gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-[1.5rem] border border-emerald-400/30 bg-black/40">
             <Image
-              src="/BVlogo.png"
+              src="/bid-vault-logo.png"
               alt="The Bid Vault logo"
               fill
               sizes="64px"
@@ -52,6 +57,8 @@ export default async function GovernmentDataPage({
       <GovernmentDataClient
         initialDocuments={uploadedSourceDocuments}
         initialRecords={extractedContractRecords}
+        initialSources={dataSourceCoverage}
+        initialActivities={syncActivities}
         initialKeywords={keywords}
         initialNaics={params.naics}
         initialAgency={params.agency}

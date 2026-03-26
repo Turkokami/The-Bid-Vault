@@ -7,9 +7,9 @@ export const metadata: Metadata = {
   description:
     "Track the past, predict the future, and win more contracts without paying finder fees.",
   icons: {
-    icon: "/BVlogo.png",
-    shortcut: "/BVlogo.png",
-    apple: "/BVlogo.png",
+    icon: "/bid-vault-logo.png",
+    shortcut: "/bid-vault-logo.png",
+    apple: "/bid-vault-logo.png",
   },
 };
 

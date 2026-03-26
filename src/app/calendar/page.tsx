@@ -17,7 +17,7 @@ export default async function CalendarPage() {
         <div className="mb-5 flex items-center gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-[1.5rem] border border-emerald-400/30 bg-black/40">
             <Image
-              src="/BVlogo.png"
+              src="/bid-vault-logo.png"
               alt="The Bid Vault logo"
               fill
               sizes="64px"

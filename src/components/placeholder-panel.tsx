@@ -14,7 +14,7 @@ export function PlaceholderPanel({
       <div className="mb-6 flex items-center gap-4">
         <div className="relative h-16 w-16 overflow-hidden rounded-[1.5rem] border border-emerald-400/30 bg-black/40 shadow-[0_0_20px_rgba(74,222,128,0.18)]">
           <Image
-            src="/BVlogo.png"
+            src="/bid-vault-logo.png"
             alt="The Bid Vault logo"
             fill
             sizes="64px"

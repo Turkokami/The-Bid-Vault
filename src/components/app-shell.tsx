@@ -10,6 +10,7 @@ const navigation = [
   { href: "/contracts", label: "Contracts" },
   { href: "/contracts/new", label: "New Contract" },
   { href: "/government-data", label: "Gov Data" },
+  { href: "/sync-center", label: "Sync Center" },
   { href: "/foia", label: "FOIA" },
   { href: "/watchlist", label: "Watchlist" },
   { href: "/calendar", label: "Calendar" },
@@ -27,7 +28,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-3">
               <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-emerald-400/30 bg-black/40 shadow-[0_0_24px_rgba(74,222,128,0.18)]">
                 <Image
-                  src="/BVlogo.png"
+                  src="/bid-vault-logo.png"
                   alt="The Bid Vault logo"
                   fill
                   sizes="56px"
@@ -79,7 +80,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-4">
               <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-emerald-400/30 bg-black/40">
                 <Image
-                  src="/BVlogo.png"
+                  src="/bid-vault-logo.png"
                   alt="The Bid Vault shield logo"
                   fill
                   sizes="48px"
