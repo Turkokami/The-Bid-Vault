@@ -133,6 +133,33 @@ export default async function ContractDetailPage({
       </section>
 
       <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+        <div className="mb-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Next-step actions</p>
+          <p className="mt-2 text-sm leading-6 text-emerald-50/90">
+            Use these actions to move from contract review into competitive research, FOIA planning,
+            and future tracking.
+          </p>
+        </div>
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <Link
+            href={`/contracts?keywords=${encodeURIComponent(contract.keyTerms.join(", "))}&naics=${encodeURIComponent(contract.naicsCode)}`}
+            className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 px-5 py-4 text-sm font-semibold text-emerald-100 shadow-[0_0_20px_rgba(34,197,94,0.08)] transition hover:bg-emerald-400/15"
+          >
+            Compare with contracts
+          </Link>
+          <Link
+            href={`/bids?keywords=${encodeURIComponent(contract.naicsCode)}`}
+            className="rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+          >
+            Review previous winning bids
+          </Link>
+          <Link
+            href={`/foia?agency=${encodeURIComponent(contract.agency)}&facility=${encodeURIComponent(contract.title)}&location=${encodeURIComponent(contract.location)}&industry=${encodeURIComponent(contract.naicsCode)}`}
+            className="rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+          >
+            Build FOIA request
+          </Link>
+        </div>
         <h2 className="text-xl font-semibold text-white">
           Save this contract for planning
         </h2>

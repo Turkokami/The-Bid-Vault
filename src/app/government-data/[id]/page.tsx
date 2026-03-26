@@ -49,19 +49,19 @@ export default async function GovernmentDataRecordDetailPage({
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
           <Link
             href={`/foia?agency=${encodeURIComponent(record.agency)}&facility=${encodeURIComponent(record.title)}&location=${encodeURIComponent(record.location)}&industry=${encodeURIComponent(record.opportunityType)}`}
-            className="rounded-full border border-emerald-400/30 px-4 py-2 text-emerald-200 hover:bg-emerald-400/10"
+            className="rounded-[1.25rem] border border-emerald-400/20 bg-emerald-400/10 px-5 py-3 font-semibold text-emerald-100 shadow-[0_0_20px_rgba(34,197,94,0.08)] transition hover:bg-emerald-400/15"
           >
             File FOIA request
           </Link>
           <Link
             href={`/government-data?keywords=${encodeURIComponent(record.keyTerms.join(", "))}`}
-            className="rounded-full border border-white/10 px-4 py-2 text-slate-300 hover:bg-white/5"
+            className="rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
           >
             Search similar records
           </Link>
           <Link
             href="/watchlist"
-            className="rounded-full border border-white/10 px-4 py-2 text-slate-300 hover:bg-white/5"
+            className="rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
           >
             Add to future watchlist planning
           </Link>
@@ -126,19 +126,19 @@ export default async function GovernmentDataRecordDetailPage({
           <div className="mt-5 space-y-3 text-sm">
             <Link
               href={`/bids?keywords=${encodeURIComponent(record.naicsCode)}`}
-              className="block rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-3 text-slate-200 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+              className="block rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 px-5 py-4 font-semibold text-emerald-100 shadow-[0_0_20px_rgba(34,197,94,0.08)] transition hover:bg-emerald-400/15"
             >
               Review previous winning bids in this market
             </Link>
             <Link
               href={`/contracts?keywords=${encodeURIComponent(record.keyTerms.join(", "))}&naics=${encodeURIComponent(record.naicsCode)}`}
-              className="block rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-3 text-slate-200 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+              className="block rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
             >
               Compare with tracked contracts
             </Link>
             <Link
               href={`/government-data?agency=${encodeURIComponent(record.agency)}&state=${encodeURIComponent(record.state)}`}
-              className="block rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-3 text-slate-200 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+              className="block rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
             >
               Find nearby opportunities from the same agency
             </Link>

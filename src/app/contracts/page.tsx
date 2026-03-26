@@ -9,6 +9,7 @@ type ContractsPageProps = {
     naics?: string;
     agency?: string;
     state?: string;
+    industry?: string;
   }>;
 };
 
@@ -59,6 +60,7 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
         initialNaics={params.naics}
         initialAgency={params.agency}
         initialState={params.state}
+        initialIndustry={params.industry}
         mode={contractsIndex.mode}
       />
     </div>
