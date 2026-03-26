@@ -116,6 +116,31 @@ export type FoiaRequestPlay = {
   timingTip: string;
 };
 
+export type SourceSyncStatus = "Connected" | "Planned" | "Needs Setup";
+
+export type DataSourceCoverage = {
+  id: string;
+  name: string;
+  cadence: string;
+  coverage: string;
+  status: SourceSyncStatus;
+  sourceType: "Opportunities" | "Awards" | "Forecasts" | "Portal";
+  description: string;
+  officialUrl: string;
+  lastSyncedAt: string;
+};
+
+export type SyncActivity = {
+  id: string;
+  sourceId: string;
+  sourceName: string;
+  runLabel: string;
+  ranAt: string;
+  result: "Success" | "Partial" | "Failed";
+  recordsAdded: number;
+  notes: string;
+};
+
 export const demoTenants: DemoTenant[] = [
   {
     id: "tenant-atlas",
@@ -567,6 +592,90 @@ export const foiaRequestPlays: FoiaRequestPlay[] = [
       "Multi-year modernization funding",
     ],
     timingTip: "Use this when trying to spot future bundled work before it hits public bid feeds.",
+  },
+];
+
+export const dataSourceCoverage: DataSourceCoverage[] = [
+  {
+    id: "source-sam-opps",
+    name: "SAM.gov Opportunities",
+    cadence: "Daily",
+    coverage: "Active federal solicitations, amendments, and notices",
+    status: "Connected",
+    sourceType: "Opportunities",
+    description:
+      "Primary federal source for open contract opportunities, notice updates, and solicitation activity.",
+    officialUrl: "https://sam.gov/content/opportunities",
+    lastSyncedAt: "Mar 26, 7:10 AM PT",
+  },
+  {
+    id: "source-usaspending",
+    name: "USAspending.gov Awards",
+    cadence: "Weekly",
+    coverage: "Historical awards, recipients, and agency spend context",
+    status: "Connected",
+    sourceType: "Awards",
+    description:
+      "Award enrichment source used to surface prior winners, agency spending, and incumbent research context.",
+    officialUrl: "https://www.usaspending.gov/",
+    lastSyncedAt: "Mar 25, 6:40 PM PT",
+  },
+  {
+    id: "source-agency-forecasts",
+    name: "Agency Forecasts",
+    cadence: "Weekly",
+    coverage: "Upcoming pipeline visibility before formal bid release",
+    status: "Planned",
+    sourceType: "Forecasts",
+    description:
+      "Forecast monitoring layer for early planning signals and future rebid timing before solicitations post publicly.",
+    officialUrl: "https://sam.gov/content/opportunities",
+    lastSyncedAt: "Forecast setup pending",
+  },
+  {
+    id: "source-gsa-ebuy",
+    name: "GSA eBuy",
+    cadence: "Daily",
+    coverage: "Schedule-holder RFQs and targeted government buying activity",
+    status: "Planned",
+    sourceType: "Portal",
+    description:
+      "Planned secondary portal coverage for contractors working through GSA schedule vehicles and quote requests.",
+    officialUrl: "https://www.ebuy.gsa.gov/",
+    lastSyncedAt: "Connector planned",
+  },
+];
+
+export const syncActivities: SyncActivity[] = [
+  {
+    id: "sync-sam-1",
+    sourceId: "source-sam-opps",
+    sourceName: "SAM.gov Opportunities",
+    runLabel: "Daily opportunities sync",
+    ranAt: "Mar 26, 7:10 AM PT",
+    result: "Success",
+    recordsAdded: 14,
+    notes: "Imported new federal opportunities and updated amended notices.",
+  },
+  {
+    id: "sync-spend-1",
+    sourceId: "source-usaspending",
+    sourceName: "USAspending.gov Awards",
+    runLabel: "Award enrichment",
+    ranAt: "Mar 25, 6:40 PM PT",
+    result: "Success",
+    recordsAdded: 9,
+    notes: "Refreshed award history, recipient names, and agency spend context.",
+  },
+  {
+    id: "sync-forecast-1",
+    sourceId: "source-agency-forecasts",
+    sourceName: "Agency Forecasts",
+    runLabel: "Forecast monitor",
+    ranAt: "Mar 24, 9:00 AM PT",
+    result: "Partial",
+    recordsAdded: 3,
+    notes: "Forecast coverage seeded for initial beta but source automation still needs setup.",
   },
 ];
 
