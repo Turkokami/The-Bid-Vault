@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { IndustryCodeRecommender } from "@/components/industry-code-recommender";
 import { serviceTiers } from "@/lib/demo-data";
@@ -21,6 +22,22 @@ export default function Home() {
     <div className="space-y-10">
       <section className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="rounded-[2rem] border border-white/10 bg-white/6 p-8 shadow-[0_0_40px_rgba(34,197,94,0.10)] backdrop-blur md:p-10">
+          <div className="mb-6 flex items-center gap-4">
+            <div className="relative h-20 w-20 overflow-hidden rounded-[1.75rem] border border-emerald-400/30 bg-black/50 shadow-[0_0_30px_rgba(74,222,128,0.18)]">
+              <Image
+                src="/BVlogo.png"
+                alt="The Bid Vault logo"
+                fill
+                sizes="80px"
+                className="object-contain p-2"
+                priority
+              />
+            </div>
+            <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.35em] text-emerald-200">
+              Secure the lead. Own the margin.
+            </div>
+          </div>
+
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
             Contract acquisition intelligence
           </p>
@@ -78,6 +95,21 @@ export default function Home() {
         </div>
 
         <aside className="rounded-[2rem] border border-emerald-400/20 bg-slate-950/80 p-8 shadow-[0_0_60px_rgba(34,197,94,0.12)]">
+          <div className="mb-6 flex items-center gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
+            <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/40">
+              <Image
+                src="/BVlogo.png"
+                alt="The Bid Vault logo mark"
+                fill
+                sizes="56px"
+                className="object-contain p-1.5"
+              />
+            </div>
+            <p className="text-sm leading-7 text-slate-300">
+              The platform is built to feel like a secure planning vault, not just another contract table.
+            </p>
+          </div>
+
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
             What Phase 1 unlocks
           </p>

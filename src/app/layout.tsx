@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: "The Bid Vault",
   description:
     "Track the past, predict the future, and win more contracts without paying finder fees.",
+  icons: {
+    icon: "/BVlogo.png",
+    shortcut: "/BVlogo.png",
+    apple: "/BVlogo.png",
+  },
 };
 
 export default function RootLayout({
