@@ -23,14 +23,13 @@ export default async function DashboardPage() {
           </div>
         </div>
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-          Dashboard preview
+          Dashboard
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-          Test product dashboard
+          Track opportunities, save contracts, and get alerts before others.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-          Newly created demo contracts now appear here immediately, which makes
-          the prototype much easier to test end to end.
+          This page is your quick starting point. In a few seconds, you can see your totals, the opportunities that need attention, and the next step to take.
         </p>
       </section>
 

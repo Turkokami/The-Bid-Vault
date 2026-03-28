@@ -2,83 +2,38 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ContractCard } from "@/components/contract-card";
+import { FilterSidebar } from "@/components/filter-sidebar";
+import { InfoTip } from "@/components/info-tip";
+import { buttonStyles } from "@/components/ui/button";
+import type { DemoContract, DemoTenant } from "@/lib/demo-data";
 import {
-  industryRecommendations,
-  keywordTrackingGroups,
-  type IndustryRecommendation,
-  type DemoContract,
-  type DemoTenant,
-} from "@/lib/demo-data";
+  buildFilterOptions,
+  enrichContract,
+  filterContracts,
+  type ContractFilters,
+} from "@/lib/contracts-search";
 import { getMergedDemoContracts } from "@/lib/demo-contract-store";
-import { formatCurrency, formatPercent } from "@/lib/format";
 
-function normalize(value: string) {
-  return value.trim().toLowerCase();
-}
-
-function parseMultiValue(value?: string) {
-  return (value ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function filterLocalContracts(
-  contracts: DemoContract[],
-  keywords: string[],
-  naics?: string,
-  agency?: string,
-  state?: string,
-) {
-  const naicsCodes = parseMultiValue(naics);
-
-  return contracts.filter((contract) => {
-    const matchesNaics = naicsCodes.length > 0 ? naicsCodes.includes(contract.naicsCode) : true;
-    const matchesAgency = agency ? contract.agency === agency : true;
-    const matchesState = state ? contract.state === state : true;
-    const blob = [
-      contract.title,
-      contract.summary,
-      contract.agency,
-      contract.location,
-      ...contract.keyTerms,
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    const matchesKeywords =
-      keywords.length === 0 ||
-      keywords.every((keyword) => blob.includes(keyword.toLowerCase()));
-
-    return matchesNaics && matchesAgency && matchesState && matchesKeywords;
-  });
+function toggleValue(values: string[], value: string) {
+  return values.includes(value)
+    ? values.filter((item) => item !== value)
+    : [...values, value];
 }
 
 export function ContractsClient({
   initialContracts,
   tenants,
-  initialKeywords,
-  initialNaics,
-  initialAgency,
-  initialState,
-  initialIndustry,
+  initialFilters,
   mode,
 }: {
   initialContracts: DemoContract[];
   tenants: DemoTenant[];
-  initialKeywords: string[];
-  initialNaics?: string;
-  initialAgency?: string;
-  initialState?: string;
-  initialIndustry?: string;
+  initialFilters: ContractFilters;
   mode: "database" | "demo";
 }) {
-  const [contracts, setContracts] = useState<DemoContract[]>(initialContracts);
-  const [searchIndustry, setSearchIndustry] = useState(initialIndustry ?? "");
-  const [searchKeywords, setSearchKeywords] = useState(initialKeywords.join(", "));
-  const [searchNaics, setSearchNaics] = useState(initialNaics ?? "");
-  const [searchAgency, setSearchAgency] = useState(initialAgency ?? "");
-  const [searchState, setSearchState] = useState(initialState ?? "");
+  const [contracts, setContracts] = useState(initialContracts);
+  const [filters, setFilters] = useState(initialFilters);
 
   useEffect(() => {
     if (mode !== "demo") {
@@ -91,260 +46,208 @@ export function ContractsClient({
     return () => window.removeEventListener("bid-vault-contracts-updated", sync);
   }, [mode]);
 
-  const industryMatches = useMemo(() => {
-    const query = normalize(searchIndustry);
-
-    if (!query) {
-      return [] as IndustryRecommendation[];
-    }
-
-    const scored = industryRecommendations
-      .map((recommendation) => {
-        const haystack = [
-          recommendation.industry,
-          recommendation.category,
-          recommendation.summary,
-          ...recommendation.codes.map((code) => `${code.naicsCode} ${code.title} ${code.fitReason}`),
-        ]
-          .join(" ")
-          .toLowerCase();
-
-        const score = query
-          .split(/\s+/)
-          .filter(Boolean)
-          .reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0);
-
-        return { recommendation, score };
-      })
-      .filter((item) => item.score > 0)
-      .sort((left, right) => right.score - left.score);
-
-    return scored.map((item) => item.recommendation).slice(0, 2);
-  }, [searchIndustry]);
-
-  const recommendedNaicsCodes = useMemo(
-    () =>
-      Array.from(
-        new Set(industryMatches.flatMap((recommendation) => recommendation.codes.map((code) => code.naicsCode))),
-      ),
-    [industryMatches],
-  );
-
-  const appliedKeywordTerms = useMemo(() => parseMultiValue(searchKeywords), [searchKeywords]);
-
-  const filteredContracts = useMemo(
-    () => filterLocalContracts(contracts, appliedKeywordTerms, searchNaics, searchAgency, searchState),
-    [appliedKeywordTerms, contracts, searchAgency, searchNaics, searchState],
-  );
+  const searchRecords = useMemo(() => contracts.map(enrichContract), [contracts]);
+  const filterOptions = useMemo(() => buildFilterOptions(searchRecords), [searchRecords]);
+  const filteredResults = useMemo(() => filterContracts(searchRecords, filters), [filters, searchRecords]);
+  const currentPage = Math.max(filters.page, 1);
+  const pageSize = 6;
+  const totalPages = Math.max(1, Math.ceil(filteredResults.length / pageSize));
+  const visibleResults = filteredResults.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <>
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <form
-          className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6"
-          action="/contracts"
-        >
-          <div className="mb-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">
-              Search contracts like a live opportunity board
-            </p>
-            <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-              Search by plain-language terms, industry type, recommended NAICS codes, agency, and
-              state so you can work more like SAM-style contract discovery without needing the exact
-              wording first.
-            </p>
+    <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+      <FilterSidebar
+        {...filters}
+        options={filterOptions}
+        onAnyWordsChange={(value) => setFilters((current) => ({ ...current, anyWords: value, page: 1 }))}
+        onAllWordsChange={(value) => setFilters((current) => ({ ...current, allWords: value, page: 1 }))}
+        onExactPhraseChange={(value) =>
+          setFilters((current) => ({ ...current, exactPhrase: value, page: 1 }))
+        }
+        onToggleStatus={(value) =>
+          setFilters((current) => ({ ...current, statuses: toggleValue(current.statuses, value), page: 1 }))
+        }
+        onToggleNoticeType={(value) =>
+          setFilters((current) => ({
+            ...current,
+            noticeTypes: toggleValue(current.noticeTypes, value),
+            page: 1,
+          }))
+        }
+        onToggleDepartment={(value) =>
+          setFilters((current) => ({
+            ...current,
+            departments: toggleValue(current.departments, value),
+            page: 1,
+          }))
+        }
+        onToggleSubTier={(value) =>
+          setFilters((current) => ({ ...current, subTiers: toggleValue(current.subTiers, value), page: 1 }))
+        }
+        onToggleOffice={(value) =>
+          setFilters((current) => ({ ...current, offices: toggleValue(current.offices, value), page: 1 }))
+        }
+        onToggleState={(value) =>
+          setFilters((current) => ({ ...current, states: toggleValue(current.states, value), page: 1 }))
+        }
+        onTogglePlace={(value) =>
+          setFilters((current) => ({ ...current, places: toggleValue(current.places, value), page: 1 }))
+        }
+        onToggleNaics={(value) =>
+          setFilters((current) => ({ ...current, naicsCodes: toggleValue(current.naicsCodes, value), page: 1 }))
+        }
+        onTogglePsc={(value) =>
+          setFilters((current) => ({ ...current, pscCodes: toggleValue(current.pscCodes, value), page: 1 }))
+        }
+        onToggleSetAside={(value) =>
+          setFilters((current) => ({ ...current, setAsides: toggleValue(current.setAsides, value), page: 1 }))
+        }
+        onPostedFromChange={(value) => setFilters((current) => ({ ...current, postedFrom: value, page: 1 }))}
+        onPostedToChange={(value) => setFilters((current) => ({ ...current, postedTo: value, page: 1 }))}
+        onResponseFromChange={(value) =>
+          setFilters((current) => ({ ...current, responseFrom: value, page: 1 }))
+        }
+        onResponseToChange={(value) => setFilters((current) => ({ ...current, responseTo: value, page: 1 }))}
+        onUpdatedFromChange={(value) => setFilters((current) => ({ ...current, updatedFrom: value, page: 1 }))}
+        onUpdatedToChange={(value) => setFilters((current) => ({ ...current, updatedTo: value, page: 1 }))}
+      >
+        <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Quick actions</p>
+          <div className="mt-4 flex flex-col gap-3">
+            <Link href="/contracts/new" className={buttonStyles({ variant: "primary", size: "md", className: "w-full" })}>
+              Save a new opportunity
+            </Link>
+            <button
+              type="button"
+              onClick={() =>
+                setFilters({
+                  anyWords: "",
+                  allWords: "",
+                  exactPhrase: "",
+                  statuses: [],
+                  noticeTypes: [],
+                  departments: [],
+                  subTiers: [],
+                  offices: [],
+                  states: [],
+                  places: [],
+                  naicsCodes: [],
+                  pscCodes: [],
+                  setAsides: [],
+                  postedFrom: "",
+                  postedTo: "",
+                  responseFrom: "",
+                  responseTo: "",
+                  updatedFrom: "",
+                  updatedTo: "",
+                  sortBy: "date",
+                  page: 1,
+                })
+              }
+              className={buttonStyles({ variant: "ghost", size: "md", fullWidth: true })}
+            >
+              Clear filters
+            </button>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <label className="space-y-2 text-sm text-slate-200 xl:col-span-2">
-              <span>Multiple key terms</span>
-              <input
-                name="keywords"
-                value={searchKeywords}
-                onChange={(event) => setSearchKeywords(event.target.value)}
-                placeholder="hvac, federal facilities, maintenance"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-slate-200 xl:col-span-2">
-              <span>Industry or service type</span>
-              <input
-                name="industry"
-                value={searchIndustry}
-                onChange={(event) => setSearchIndustry(event.target.value)}
-                placeholder="Try: pest control, wildlife exclusion, janitorial"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>NAICS</span>
-              <input
-                name="naics"
-                value={searchNaics}
-                onChange={(event) => setSearchNaics(event.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>Agency</span>
-              <input
-                name="agency"
-                value={searchAgency}
-                onChange={(event) => setSearchAgency(event.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>State</span>
-              <input
-                name="state"
-                value={searchState}
-                onChange={(event) => setSearchState(event.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-          </div>
+        </div>
+      </FilterSidebar>
 
-          {industryMatches.length > 0 ? (
-            <div className="mt-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-white">Recommended industry codes</p>
-                  <p className="mt-1 text-xs text-emerald-100/90">
-                    Based on &quot;{searchIndustry}&quot;, here are likely-fit NAICS codes for this contract search.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSearchNaics(recommendedNaicsCodes.join(", "))}
-                  className="rounded-full bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-emerald-300"
+      <div className="space-y-6">
+        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Contract search</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                Start by typing what your business does.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+                We&apos;ll help you find government contracts that match your work, then make it easy to review the details.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-200">
+                {filteredResults.length} opportunities found
+              </div>
+              <label className="flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-200">
+                <span className="flex items-center gap-2">
+                  Sort by
+                  <InfoTip>
+                    Choose how to order the results. Newest first shows fresh opportunities. Best match tries to match your search words more closely.
+                  </InfoTip>
+                </span>
+                <select
+                  value={filters.sortBy}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      sortBy: event.target.value === "relevance" ? "relevance" : "date",
+                    }))
+                  }
+                  className="bg-transparent text-sm text-white outline-none"
                 >
-                  Apply all codes
-                </button>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {industryMatches.flatMap((recommendation) =>
-                  recommendation.codes.map((code) => (
-                    <button
-                      key={`${recommendation.id}-${code.naicsCode}`}
-                      type="button"
-                      onClick={() => {
-                        const nextCodes = Array.from(
-                          new Set([...parseMultiValue(searchNaics), code.naicsCode]),
-                        );
-                        setSearchNaics(nextCodes.join(", "));
-                      }}
-                      className="rounded-full border border-emerald-400/20 bg-slate-950/50 px-3 py-2 text-xs font-medium text-emerald-100 transition hover:bg-emerald-400/10"
-                    >
-                      {code.naicsCode} / {code.title}
-                    </button>
-                  )),
-                )}
-              </div>
+                  <option value="date">Newest first</option>
+                  <option value="relevance">Best match</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          {visibleResults.map((contract) => (
+            <ContractCard key={contract.id} contract={contract} />
+          ))}
+          {visibleResults.length === 0 ? (
+            <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/60 p-10 text-center text-sm text-slate-400">
+              No results yet. Try broader words like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;.
             </div>
           ) : null}
+        </section>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-            >
-              Apply filters
-            </button>
-            <Link
-              href="/contracts"
-              className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
-            >
-              Reset
-            </Link>
+        <section className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-slate-950/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-slate-300">
+            Page {currentPage} of {totalPages}
           </div>
-          {searchNaics ? (
-            <p className="mt-4 text-xs text-slate-400">Active NAICS filter: {searchNaics}</p>
-          ) : null}
-        </form>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setFilters((current) => ({ ...current, page: Math.max(1, current.page - 1) }))}
+              className={buttonStyles({ variant: "ghost", size: "sm" })}
+            >
+              Previous page
+            </button>
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() =>
+                setFilters((current) => ({
+                  ...current,
+                  page: Math.min(totalPages, current.page + 1),
+                }))
+              }
+              className={buttonStyles({ variant: "secondary", size: "sm" })}
+            >
+              Next page
+            </button>
+          </div>
+        </section>
 
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            Keyword tracking sets
-          </p>
-          <div className="mt-5 space-y-4">
-            {keywordTrackingGroups.map((group) => (
-              <article
-                key={group.id}
-                className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4"
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Your business workspaces</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {tenants.map((tenant) => (
+              <span
+                key={tenant.id}
+                className="rounded-full border border-white/10 bg-slate-950/60 px-4 py-2 text-sm text-slate-300"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-base font-semibold text-white">{group.label}</h2>
-                    <p className="mt-1 text-sm text-slate-400">
-                      {group.matchCount} matching opportunities
-                    </p>
-                  </div>
-                  <span className="text-xs uppercase tracking-[0.2em] text-emerald-300">
-                    {group.reminderWindow}
-                  </span>
-                </div>
-              </article>
+                {tenant.name}
+              </span>
             ))}
           </div>
         </section>
-      </section>
-
-      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/60">
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-emerald-400/10 px-5 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Contract results</p>
-            <p className="mt-1 text-sm text-slate-200">
-              {filteredContracts.length} matching contracts ready for review
-            </p>
-          </div>
-          <Link
-            href="/contracts/new"
-            className="rounded-full border border-emerald-400/20 bg-slate-950/60 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-400/10"
-          >
-            Add manual contract
-          </Link>
-        </div>
-        <div className="grid grid-cols-[1.5fr_1fr_0.7fr_0.8fr_0.8fr_0.7fr] gap-4 bg-slate-950 px-5 py-4 text-xs uppercase tracking-[0.25em] text-slate-400">
-          <span>Contract</span>
-          <span>Tenant</span>
-          <span>NAICS</span>
-          <span>State</span>
-          <span>Award</span>
-          <span>Confidence</span>
-        </div>
-        {filteredContracts.map((contract) => {
-          const tenant = tenants.find((item) => item.id === contract.tenantId);
-          const isDemo = contract.id.startsWith("demo-contract-");
-
-          return (
-            <div
-              key={contract.id}
-              className="grid grid-cols-[1.5fr_1fr_0.7fr_0.8fr_0.8fr_0.7fr] gap-4 border-t border-white/10 bg-white/5 px-5 py-5 text-sm text-slate-200"
-            >
-              <div>
-                {isDemo ? (
-                  <span className="font-medium text-white">{contract.title}</span>
-                ) : (
-                  <Link
-                    href={`/contracts/${contract.id}`}
-                    className="font-medium text-white hover:text-emerald-200"
-                  >
-                    {contract.title}
-                  </Link>
-                )}
-                <p className="mt-2 text-xs text-slate-400">{contract.agency}</p>
-              </div>
-              <span className="text-slate-300">{tenant?.name ?? "Unknown workspace"}</span>
-              <span>{contract.naicsCode}</span>
-              <span>{contract.state}</span>
-              <span>{formatCurrency(contract.awardAmount)}</span>
-              <span className="text-emerald-300">
-                {formatPercent(contract.confidenceScore)}
-              </span>
-            </div>
-          );
-        })}
-      </section>
-    </>
+      </div>
+    </div>
   );
 }

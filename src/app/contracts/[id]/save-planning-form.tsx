@@ -7,6 +7,7 @@ import {
   initialSavePlanningState,
   saveContractForPlanning,
 } from "@/app/contracts/[id]/actions";
+import { Button, buttonStyles } from "@/components/ui/button";
 import { writeDemoPlanningEntry } from "@/lib/demo-planning-store";
 
 export function SavePlanningForm({ contractId }: { contractId: string }) {
@@ -94,26 +95,27 @@ export function SavePlanningForm({ contractId }: { contractId: string }) {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/watchlist"
-            className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100"
+            className={buttonStyles({ variant: "secondary", size: "sm" })}
           >
             Open watchlist
           </Link>
           <Link
             href="/calendar"
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-300"
+            className={buttonStyles({ variant: "ghost", size: "sm" })}
           >
             Open calendar
           </Link>
         </div>
       ) : null}
 
-      <button
+      <Button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+        variant="primary"
+        size="md"
       >
         {pending ? "Saving..." : "Save to planning calendar"}
-      </button>
+      </Button>
     </form>
   );
 }

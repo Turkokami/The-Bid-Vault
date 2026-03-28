@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { buttonStyles } from "@/components/ui/button";
 import {
   getExtractedContractById,
   getRelatedDemoContractsForExtractedRecord,
@@ -37,41 +38,43 @@ export default async function GovernmentDataRecordDetailPage({
             />
           </div>
           <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-emerald-200">
-            Uploaded opportunity research
+            Uploaded opportunity details
           </div>
         </div>
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-          Government data detail
+          Uploaded contract details
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">{record.title}</h1>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">{record.synopsis}</p>
+        <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
+          This page shows everything we found in the uploaded file for this opportunity. {record.synopsis}
+        </p>
 
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
           <Link
             href={`/foia?agency=${encodeURIComponent(record.agency)}&facility=${encodeURIComponent(record.title)}&location=${encodeURIComponent(record.location)}&industry=${encodeURIComponent(record.opportunityType)}`}
-            className="rounded-[1.25rem] border border-emerald-400/20 bg-emerald-400/10 px-5 py-3 font-semibold text-emerald-100 shadow-[0_0_20px_rgba(34,197,94,0.08)] transition hover:bg-emerald-400/15"
+            className={buttonStyles({ variant: "secondary", size: "lg", className: "rounded-[1.25rem]" })}
           >
-            File FOIA request
+            Start a FOIA request
           </Link>
           <Link
             href={`/government-data?keywords=${encodeURIComponent(record.keyTerms.join(", "))}`}
-            className="rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+            className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.25rem]" })}
           >
-            Search similar records
+            Find similar opportunities
           </Link>
           <Link
             href="/watchlist"
-            className="rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+            className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.25rem]" })}
           >
-            Add to future watchlist planning
+            Save for later
           </Link>
         </div>
       </section>
 
       <section className="grid gap-5 lg:grid-cols-4">
         {[
-          { label: "Agency", value: record.agency },
-          { label: "NAICS", value: record.naicsCode },
+          { label: "Government agency", value: record.agency },
+          { label: "Industry Type (NAICS Code)", value: record.naicsCode },
           { label: "Response deadline", value: formatDate(record.responseDeadline) },
           { label: "Status", value: record.availabilityStatus },
         ].map((item) => (
@@ -87,14 +90,17 @@ export default async function GovernmentDataRecordDetailPage({
 
       <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <h2 className="text-xl font-semibold text-white">Opportunity profile</h2>
+          <h2 className="text-xl font-semibold text-white">Opportunity summary</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            These details help you decide if the opportunity fits your business.
+          </p>
           <dl className="mt-5 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
             <div>
-              <dt className="text-slate-500">Location</dt>
+              <dt className="text-slate-500">Work location</dt>
               <dd className="mt-1 text-white">{record.location}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Opportunity type</dt>
+              <dt className="text-slate-500">Type of opportunity</dt>
               <dd className="mt-1 text-white">{record.opportunityType}</dd>
             </div>
             <div>
@@ -107,7 +113,7 @@ export default async function GovernmentDataRecordDetailPage({
             </div>
           </dl>
           <div className="mt-6">
-            <p className="text-sm text-slate-500">Tracked key terms</p>
+            <p className="text-sm text-slate-500">Search words found in this record</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {record.keyTerms.map((term) => (
                 <span
@@ -122,23 +128,23 @@ export default async function GovernmentDataRecordDetailPage({
         </article>
 
         <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-          <h2 className="text-xl font-semibold text-white">Research actions</h2>
+          <h2 className="text-xl font-semibold text-white">Helpful next steps</h2>
           <div className="mt-5 space-y-3 text-sm">
             <Link
               href={`/bids?keywords=${encodeURIComponent(record.naicsCode)}`}
-              className="block rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 px-5 py-4 font-semibold text-emerald-100 shadow-[0_0_20px_rgba(34,197,94,0.08)] transition hover:bg-emerald-400/15"
+              className={buttonStyles({ variant: "secondary", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
-              Review previous winning bids in this market
+              See previous winning bids in this market
             </Link>
             <Link
               href={`/contracts?keywords=${encodeURIComponent(record.keyTerms.join(", "))}&naics=${encodeURIComponent(record.naicsCode)}`}
-              className="block rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
-              Compare with tracked contracts
+              Compare with saved contracts
             </Link>
             <Link
               href={`/government-data?agency=${encodeURIComponent(record.agency)}&state=${encodeURIComponent(record.state)}`}
-              className="block rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
               Find nearby opportunities from the same agency
             </Link>
@@ -147,7 +153,7 @@ export default async function GovernmentDataRecordDetailPage({
       </section>
 
       <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="text-xl font-semibold text-white">Related tracked contracts</h2>
+        <h2 className="text-xl font-semibold text-white">Related saved contracts</h2>
         {relatedContracts.length > 0 ? (
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
             {relatedContracts.map((contract) => (
@@ -166,8 +172,7 @@ export default async function GovernmentDataRecordDetailPage({
           </div>
         ) : (
           <p className="mt-4 text-sm text-slate-400">
-            No seeded tracked contracts match this uploaded opportunity yet, but you can still use
-            FOIA, similar search, and future watchlist planning from this record.
+            No saved contracts match this uploaded opportunity yet, but you can still use FOIA, similar search, and save-it-for-later tools from this page.
           </p>
         )}
       </section>

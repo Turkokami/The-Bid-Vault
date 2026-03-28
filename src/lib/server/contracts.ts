@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import {
   demoContracts,
   demoTenants,
-  filterContracts,
   getContractById,
   getTenantBySlug,
   type DemoContract,
@@ -189,12 +188,7 @@ export async function getDashboardData(): Promise<DashboardDataView> {
   return getDemoDashboardData(viewer.activeWorkspace?.id);
 }
 
-export async function getContractsIndex(input: {
-  keywords: string[];
-  naics?: string;
-  agency?: string;
-  state?: string;
-}) {
+export async function getContractsIndex() {
   const viewer = await getViewerContext();
 
   try {
@@ -206,9 +200,6 @@ export async function getContractsIndex(input: {
             : {
                 in: viewer.workspaces.map((workspace) => workspace.id),
               },
-          ...(input.naics ? { naicsCode: input.naics } : {}),
-          ...(input.agency ? { agency: input.agency } : {}),
-          ...(input.state ? { state: input.state } : {}),
         },
         include: {
           rebidPredictions: {
@@ -221,27 +212,7 @@ export async function getContractsIndex(input: {
         },
       });
 
-      const mappedContracts = contracts
-        .map(mapDbContract)
-        .filter((contract) => {
-          if (input.keywords.length === 0) {
-            return true;
-          }
-
-          const blob = [
-            contract.title,
-            contract.summary,
-            contract.agency,
-            contract.location,
-            ...contract.keyTerms,
-          ]
-            .join(" ")
-            .toLowerCase();
-
-          return input.keywords.every((keyword) =>
-            blob.includes(keyword.toLowerCase()),
-          );
-        });
+      const mappedContracts = contracts.map(mapDbContract);
 
       const accessibleTenants = demoTenants
         .map((tenant) => {
@@ -272,12 +243,7 @@ export async function getContractsIndex(input: {
 
   return {
     mode: "demo" as const,
-    contracts: filterContracts({
-      keywords: input.keywords,
-      naicsCode: input.naics,
-      agency: input.agency,
-      state: input.state,
-    }).filter((contract) =>
+    contracts: demoContracts.filter((contract) =>
       viewer.activeWorkspace ? contract.tenantId === viewer.activeWorkspace.id : true,
     ),
     tenants: demoTenants.filter((tenant) =>

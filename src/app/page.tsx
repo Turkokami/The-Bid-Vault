@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { IndustryCodeRecommender } from "@/components/industry-code-recommender";
+import { buttonStyles } from "@/components/ui/button";
 import { serviceTiers } from "@/lib/demo-data";
 
 const highlights = [
@@ -53,25 +54,25 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/dashboard"
-              className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_30px_rgba(74,222,128,0.45)] transition hover:bg-emerald-300"
+              className={buttonStyles({ variant: "primary", size: "lg" })}
             >
               Enter dashboard
             </Link>
             <Link
               href="/contracts"
-              className="rounded-full border border-emerald-400/30 px-5 py-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/10"
+              className={buttonStyles({ variant: "secondary", size: "lg" })}
             >
               Browse contracts
             </Link>
             <Link
               href="/government-data"
-              className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
+              className={buttonStyles({ variant: "ghost", size: "lg" })}
             >
               Search uploaded gov data
             </Link>
             <Link
               href="/foia"
-              className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
+              className={buttonStyles({ variant: "ghost", size: "lg" })}
             >
               Build FOIA request
             </Link>

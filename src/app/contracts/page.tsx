@@ -1,30 +1,54 @@
 import Link from "next/link";
 import { ContractsClient } from "@/components/contracts-client";
 import { DemoResetButton } from "@/components/demo-reset-button";
+import { buttonStyles } from "@/components/ui/button";
 import { getContractsIndex } from "@/lib/server/contracts";
+
+function readParam(value?: string | string[]) {
+  if (Array.isArray(value)) {
+    return value[0] ?? "";
+  }
+
+  return value ?? "";
+}
+
+function readArray(value?: string | string[]) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  return value ? [value] : [];
+}
 
 type ContractsPageProps = {
   searchParams?: Promise<{
-    keywords?: string;
-    naics?: string;
-    agency?: string;
-    state?: string;
-    industry?: string;
+    anyWords?: string | string[];
+    allWords?: string | string[];
+    exactPhrase?: string | string[];
+    status?: string | string[];
+    noticeType?: string | string[];
+    department?: string | string[];
+    subTier?: string | string[];
+    office?: string | string[];
+    state?: string | string[];
+    place?: string | string[];
+    naics?: string | string[];
+    psc?: string | string[];
+    setAside?: string | string[];
+    postedFrom?: string | string[];
+    postedTo?: string | string[];
+    responseFrom?: string | string[];
+    responseTo?: string | string[];
+    updatedFrom?: string | string[];
+    updatedTo?: string | string[];
+    sort?: string | string[];
+    page?: string | string[];
   }>;
 };
 
 export default async function ContractsPage({ searchParams }: ContractsPageProps) {
   const params = (await searchParams) ?? {};
-  const keywords = (params.keywords ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  const contractsIndex = await getContractsIndex({
-    keywords,
-    naics: params.naics,
-    agency: params.agency,
-    state: params.state,
-  });
+  const contractsIndex = await getContractsIndex();
 
   return (
     <div className="space-y-8">
@@ -34,20 +58,18 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
             Contracts
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-            Centralized contract visibility by tenant.
+            Find government contracts that match your business.
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-            Search supports multiple tracked keywords at once, alongside NAICS,
-            agency, and state filters, so teams can monitor contract language
-            instead of relying on one exact phrase.
+            Start by typing what your business does. We&apos;ll help you find matching government contracts and narrow the list with simple filters.
           </p>
         </div>
 
         <Link
           href="/contracts/new"
-          className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+          className={buttonStyles({ variant: "primary", size: "lg" })}
         >
-          Add contract
+          Save a new opportunity
         </Link>
       </section>
 
@@ -56,11 +78,29 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
       <ContractsClient
         initialContracts={contractsIndex.contracts}
         tenants={contractsIndex.tenants}
-        initialKeywords={keywords}
-        initialNaics={params.naics}
-        initialAgency={params.agency}
-        initialState={params.state}
-        initialIndustry={params.industry}
+        initialFilters={{
+          anyWords: readParam(params.anyWords),
+          allWords: readParam(params.allWords),
+          exactPhrase: readParam(params.exactPhrase),
+          statuses: readArray(params.status),
+          noticeTypes: readArray(params.noticeType),
+          departments: readArray(params.department),
+          subTiers: readArray(params.subTier),
+          offices: readArray(params.office),
+          states: readArray(params.state),
+          places: readArray(params.place),
+          naicsCodes: readArray(params.naics),
+          pscCodes: readArray(params.psc),
+          setAsides: readArray(params.setAside),
+          postedFrom: readParam(params.postedFrom),
+          postedTo: readParam(params.postedTo),
+          responseFrom: readParam(params.responseFrom),
+          responseTo: readParam(params.responseTo),
+          updatedFrom: readParam(params.updatedFrom),
+          updatedTo: readParam(params.updatedTo),
+          sortBy: readParam(params.sort) === "relevance" ? "relevance" : "date",
+          page: Number(readParam(params.page) || "1"),
+        }}
         mode={contractsIndex.mode}
       />
     </div>

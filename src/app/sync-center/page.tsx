@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { dataSourceCoverage, syncActivities } from "@/lib/demo-data";
+import { buttonStyles } from "@/components/ui/button";
+import { dataSourceCoverage, syncActivities, uploadedSourceDocuments } from "@/lib/demo-data";
 
 export default function SyncCenterPage() {
   return (
@@ -17,13 +18,13 @@ export default function SyncCenterPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             href="/government-data"
-            className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+            className={buttonStyles({ variant: "primary", size: "lg" })}
           >
             Open government data
           </Link>
           <Link
             href="/contracts"
-            className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
+            className={buttonStyles({ variant: "secondary", size: "lg" })}
           >
             Browse contracts
           </Link>
@@ -75,29 +76,54 @@ export default function SyncCenterPage() {
         ))}
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-        <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Recent sync runs</p>
-        <div className="mt-5 space-y-4">
-          {syncActivities.map((activity) => (
-            <article
-              key={activity.id}
-              className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-base font-semibold text-white">{activity.sourceName}</h3>
-                  <p className="mt-1 text-sm text-slate-400">{activity.runLabel}</p>
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Recent sync runs</p>
+          <div className="mt-5 space-y-4">
+            {syncActivities.map((activity) => (
+              <article
+                key={activity.id}
+                className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-base font-semibold text-white">{activity.sourceName}</h3>
+                    <p className="mt-1 text-sm text-slate-400">{activity.runLabel}</p>
+                  </div>
+                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
+                    {activity.result}
+                  </span>
                 </div>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
-                  {activity.result}
-                </span>
-              </div>
-              <p className="mt-3 text-sm text-slate-300">
-                {activity.ranAt} / {activity.recordsAdded} records added
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-400">{activity.notes}</p>
-            </article>
-          ))}
+                <p className="mt-3 text-sm text-slate-300">
+                  {activity.ranAt} / {activity.recordsAdded} records added
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{activity.notes}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Imported source files</p>
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
+              {uploadedSourceDocuments.length} files
+            </span>
+          </div>
+          <div className="mt-5 space-y-4">
+            {uploadedSourceDocuments.map((document) => (
+              <article
+                key={document.id}
+                className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
+              >
+                <h3 className="text-base font-semibold text-white">{document.fileName}</h3>
+                <p className="mt-1 text-sm text-slate-400">{document.sourceAgency}</p>
+                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-slate-500">
+                  Source library record
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
     </div>

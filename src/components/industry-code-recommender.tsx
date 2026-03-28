@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { buttonStyles } from "@/components/ui/button";
 import { industryRecommendations } from "@/lib/demo-data";
 
 function normalize(value: string) {
@@ -83,7 +84,11 @@ export function IndustryCodeRecommender() {
                 key={suggestion}
                 type="button"
                 onClick={() => setIndustryInput(suggestion)}
-                className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-100"
+                className={buttonStyles({
+                  variant: "ghost",
+                  size: "md",
+                  className: "flex w-full justify-start rounded-2xl px-4 py-3 text-left",
+                })}
               >
                 {suggestion}
               </button>

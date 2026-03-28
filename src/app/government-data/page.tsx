@@ -40,18 +40,17 @@ export default async function GovernmentDataPage({
             />
           </div>
           <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-emerald-200">
-            Government file intake
+            Uploaded government files
           </div>
         </div>
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
           Uploaded government data
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-          Search contract opportunities from uploaded source files.
+          Search contract opportunities from uploaded files.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-          Upload, parse, and review government contract records so teams can identify available
-          opportunities before they get lost across spreadsheets and PDFs.
+          Upload files, pull out the contract details, and search them in one place so you do not have to hunt through spreadsheets and PDFs.
         </p>
       </section>
 

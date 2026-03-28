@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { resetDemoState } from "@/lib/demo-contract-store";
 
 export function DemoResetButton() {
@@ -8,16 +9,17 @@ export function DemoResetButton() {
 
   return (
     <div className="flex flex-col items-start gap-3">
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={() => {
           resetDemoState();
           setMessage("Demo data reset. Created contracts, uploads, and planning saves were cleared.");
         }}
-        className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5"
       >
         Reset demo data
-      </button>
+      </Button>
       {message ? <p className="text-xs text-slate-400">{message}</p> : null}
     </div>
   );

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { InfoTip } from "@/components/info-tip";
+import { buttonStyles } from "@/components/ui/button";
 import type {
   DataSourceCoverage,
   ExtractedContractRecord,
@@ -166,95 +168,16 @@ export function GovernmentDataClient({
 
   return (
     <div className="space-y-8">
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[2rem] border border-emerald-400/20 bg-emerald-400/10 p-6 shadow-[0_0_30px_rgba(34,197,94,0.08)]">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-200/90">
-            Automated source coverage
-          </p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Keep government contract data fresh with scheduled syncs and a client force refresh.
-          </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-50/85">
-            The Bid Vault is now modeled to monitor official sources like SAM.gov and
-            USAspending on a recurring cadence. Clients can also trigger a manual refresh when
-            they want the newest opportunities loaded into research immediately.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                forceRefreshGovernmentData();
-                setUploadMessage(
-                  "Force refresh completed. Fresh government contract records were added for client review.",
-                );
-              }}
-              className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-            >
-              Force refresh data
-            </button>
-            <Link
-              href="/government-data"
-              className="rounded-full border border-emerald-200/20 px-5 py-3 text-sm font-semibold text-emerald-50 transition hover:bg-white/5"
-            >
-              View latest imported records
-            </Link>
-          </div>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/50 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Connected sources</p>
-              <p className="mt-2 text-3xl font-semibold text-white">
-                {sources.filter((source) => source.status === "Connected").length}
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/50 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Imported records</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{records.length}</p>
-            </div>
-            <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/50 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Last force refresh</p>
-              <p className="mt-2 text-sm font-medium text-emerald-100">
-                {lastForcedRefreshAt ?? "No manual refresh run yet"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Refresh activity</p>
-          <div className="mt-5 space-y-4">
-            {activities.slice(0, 4).map((activity) => (
-              <article
-                key={activity.id}
-                className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-white">{activity.sourceName}</h3>
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
-                    {activity.result}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-slate-300">{activity.runLabel}</p>
-                <p className="mt-1 text-xs text-slate-400">
-                  {activity.ranAt} / {activity.recordsAdded} records added
-                </p>
-                <p className="mt-2 text-xs leading-6 text-slate-400">{activity.notes}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            Uploaded government contract data
+            Uploaded file search
           </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-            Search uploaded contract files to identify available opportunities.
-          </h1>
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+            Add your source files, then search the contract records inside them.
+          </h2>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-            Upload a demo government file and watch searchable extracted contract
-            records appear immediately in the prototype.
+            This page does two things: it helps you load contract source files and search the records found inside them. Source health and update history live in Sync Center.
           </p>
 
           <div className="mt-6 rounded-[1.75rem] border border-emerald-400/20 bg-slate-950/70 p-5">
@@ -267,9 +190,9 @@ export function GovernmentDataClient({
                     "Demo government data uploaded. New extracted opportunities were added to the search results.",
                   );
                 }}
-                className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+                className={buttonStyles({ variant: "primary", size: "md" })}
               >
-                Upload government data
+                Upload files
               </button>
               <button
                 type="button"
@@ -279,20 +202,27 @@ export function GovernmentDataClient({
                     "Client force refresh completed. Fresh source data was added from the sync pipeline preview.",
                   );
                 }}
-                className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
+                className={buttonStyles({ variant: "secondary", size: "md" })}
               >
-                Force refresh source data
+                Refresh source data now
               </button>
+              <Link
+                href="/sync-center"
+                className={buttonStyles({ variant: "ghost", size: "md" })}
+              >
+                Open Sync Center
+              </Link>
             </div>
           </div>
+
           {uploadMessage ? (
             <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
               <span>{uploadMessage}</span>
               <Link
                 href="/government-data"
-                className="rounded-full border border-emerald-400/20 px-3 py-1 text-xs font-medium text-emerald-100"
+                className={buttonStyles({ variant: "ghost", size: "sm" })}
               >
-                Refresh filters
+                Refresh this page
               </Link>
             </div>
           ) : null}
@@ -301,14 +231,11 @@ export function GovernmentDataClient({
         <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-              Source files
+              Uploaded files
             </p>
-            <Link
-              href="/sync-center"
-              className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/5"
-            >
-              Open sync center
-            </Link>
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
+              {documents.length} files
+            </span>
           </div>
           <div className="mt-5 space-y-4">
             {documents.map((document) => (
@@ -318,6 +245,9 @@ export function GovernmentDataClient({
               >
                 <h2 className="text-base font-semibold text-white">{document.fileName}</h2>
                 <p className="mt-1 text-sm text-slate-400">{document.sourceAgency}</p>
+                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-slate-500">
+                  Source file
+                </p>
               </article>
             ))}
           </div>
@@ -331,7 +261,10 @@ export function GovernmentDataClient({
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
-              <span>Multiple key terms</span>
+              <span>Search words</span>
+              <p className="text-xs leading-5 text-slate-400">
+                Type what you do. Example: pest control, landscaping, roofing.
+              </p>
               <input
                 name="keywords"
                 value={searchKeywords}
@@ -340,7 +273,10 @@ export function GovernmentDataClient({
               />
             </label>
             <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
-              <span>Industry or service type</span>
+              <span className="flex items-center gap-2">
+                Industry or service type
+                <InfoTip>Type the kind of work your business does. We will suggest matching industry codes for you.</InfoTip>
+              </span>
               <input
                 name="industry"
                 value={searchIndustry}
@@ -350,7 +286,10 @@ export function GovernmentDataClient({
               />
             </label>
             <label className="space-y-2 text-sm text-slate-200">
-              <span>NAICS</span>
+              <span className="flex items-center gap-2">
+                Industry Type (NAICS Code)
+                <InfoTip>This is the industry classification the government uses to describe the type of work.</InfoTip>
+              </span>
               <input
                 name="naics"
                 value={searchNaics}
@@ -359,7 +298,7 @@ export function GovernmentDataClient({
               />
             </label>
             <label className="space-y-2 text-sm text-slate-200">
-              <span>Agency</span>
+              <span>Government agency</span>
               <input
                 name="agency"
                 value={searchAgency}
@@ -383,15 +322,15 @@ export function GovernmentDataClient({
                 <div>
                   <p className="text-sm font-semibold text-white">Recommended industry codes</p>
                   <p className="mt-1 text-xs text-emerald-100/90">
-                    Based on &quot;{searchIndustry}&quot;, we found likely-fit NAICS codes for this search.
+                    Based on &quot;{searchIndustry}&quot;, we found likely industry codes for your search.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSearchNaics(recommendedNaicsCodes.join(", "))}
-                  className="rounded-full bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-emerald-300"
+                  className={buttonStyles({ variant: "primary", size: "sm" })}
                 >
-                  Apply all codes to search
+                  Use all suggested codes
                 </button>
               </div>
               <div className="mt-4 space-y-3">
@@ -413,9 +352,9 @@ export function GovernmentDataClient({
                             );
                             setSearchNaics(nextCodes.join(", "));
                           }}
-                          className="rounded-full border border-emerald-400/20 bg-white/5 px-3 py-1 text-xs font-medium text-emerald-100 transition hover:bg-emerald-400/10"
+                          className={buttonStyles({ variant: "secondary", size: "sm" })}
                         >
-                          {code.naicsCode} / apply
+                          {code.naicsCode} / use this code
                         </button>
                       ))}
                     </div>
@@ -427,25 +366,28 @@ export function GovernmentDataClient({
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               type="submit"
-              className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+              className={buttonStyles({ variant: "primary", size: "md" })}
             >
-              Search uploaded data
+              Search contracts
             </button>
             <Link
               href="/government-data"
-              className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
+              className={buttonStyles({ variant: "ghost", size: "md" })}
             >
-              Reset search
+              Clear search
             </Link>
           </div>
           {searchNaics ? (
-            <p className="mt-4 text-xs text-slate-400">Active NAICS filter: {searchNaics}</p>
+            <p className="mt-4 text-xs text-slate-400">Active industry code filter: {searchNaics}</p>
           ) : null}
         </form>
 
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
             Search results
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            These are current government opportunities you may be able to bid on.
           </p>
           <div className="mt-5 space-y-4">
             {results.map((result) => (
@@ -461,61 +403,32 @@ export function GovernmentDataClient({
                 <p className="mt-3 text-sm text-emerald-200">Open contract research</p>
               </Link>
             ))}
+            {results.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
+                No results yet. Try broad terms like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;.
+              </div>
+            ) : null}
           </div>
         </section>
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Source coverage</p>
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-            Auto-refresh daily / weekly with manual override
+      <section className="grid gap-4 md:grid-cols-3">
+        <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Imported records</p>
+          <p className="mt-3 text-3xl font-semibold text-white">{records.length}</p>
+        </article>
+        <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Connected data sources</p>
+          <p className="mt-3 text-3xl font-semibold text-white">
+            {sources.filter((source) => source.status === "Connected").length}
           </p>
-        </div>
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          {sources.map((source) => (
-            <article
-              key={source.id}
-              className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-base font-semibold text-white">{source.name}</h3>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
-                  {source.status}
-                </span>
-              </div>
-              <p className="mt-2 text-sm text-slate-300">{source.description}</p>
-              <div className="mt-4 grid gap-3 text-sm text-slate-400 md:grid-cols-2">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Cadence</p>
-                  <p className="mt-1 text-slate-200">{source.cadence}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Coverage</p>
-                  <p className="mt-1 text-slate-200">{source.coverage}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Type</p>
-                  <p className="mt-1 text-slate-200">{source.sourceType}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Last synced</p>
-                  <p className="mt-1 text-slate-200">{source.lastSyncedAt}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Link
-                  href={source.officialUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm font-medium text-emerald-200 transition hover:text-emerald-100"
-                >
-                  Visit official source
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+        </article>
+        <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Last manual refresh</p>
+          <p className="mt-3 text-sm font-medium text-emerald-100">
+            {lastForcedRefreshAt ?? activities[0]?.ranAt ?? "No manual refresh run yet"}
+          </p>
+        </article>
       </section>
     </div>
   );

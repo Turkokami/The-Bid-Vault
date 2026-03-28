@@ -7,6 +7,7 @@ import {
   createContract,
   initialCreateContractState,
 } from "@/app/contracts/new/actions";
+import { Button, buttonStyles } from "@/components/ui/button";
 import { writeDemoContract } from "@/lib/demo-contract-store";
 
 const fields = [
@@ -109,33 +110,34 @@ export function NewContractForm() {
           {state.contractId ? (
             <Link
               href={`/contracts/${state.contractId}`}
-              className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100"
+              className={buttonStyles({ variant: "secondary", size: "sm" })}
             >
               Open contract
             </Link>
           ) : null}
           <Link
             href="/contracts"
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-300"
+            className={buttonStyles({ variant: "ghost", size: "sm" })}
           >
             View contracts
           </Link>
           <Link
             href="/dashboard"
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-300"
+            className={buttonStyles({ variant: "ghost", size: "sm" })}
           >
             Open dashboard
           </Link>
         </div>
       ) : null}
 
-      <button
+      <Button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+        variant="primary"
+        size="md"
       >
         {pending ? "Saving contract..." : "Create contract"}
-      </button>
+      </Button>
     </form>
   );
 }
