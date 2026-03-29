@@ -38,7 +38,7 @@ export const websRawOpportunities: RawWebsOpportunity[] = [
       "Washington State is seeking qualified vendors to provide inspection, pest treatment, rodent monitoring, entry-point sealing, and reporting across multiple state facilities. Vendors should be prepared for recurring service visits and urgent response calls.",
     city: "Olympia",
     stateCode: "WA",
-    sourceUrl: "https://pr-webs-vendor.des.wa.gov/",
+    sourceUrl: "https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-2026-10017",
     registrationRequired: true,
     registrationNotes:
       "You may need an active WEBS vendor registration before you can submit a bid through the original source system.",
@@ -62,7 +62,7 @@ export const websRawOpportunities: RawWebsOpportunity[] = [
       "The University of Washington is requesting bids for humane bird deterrent systems, roofline and entry-point sealing, cleanup, and inspection reporting. Work spans several academic and administrative buildings.",
     city: "Seattle",
     stateCode: "WA",
-    sourceUrl: "https://pr-webs-vendor.des.wa.gov/",
+    sourceUrl: "https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-2026-10028",
     registrationRequired: true,
     registrationNotes:
       "WEBS registration may be required to access all bid files and complete submission steps.",
@@ -86,7 +86,7 @@ export const websRawOpportunities: RawWebsOpportunity[] = [
       "The Port of Seattle is collecting vendor information for a possible future contract covering airfield bird hazard management, wildlife response, deterrent devices, and compliance reporting. This is an early planning notice and may not be open for bids yet.",
     city: "Seattle",
     stateCode: "WA",
-    sourceUrl: "https://pr-webs-vendor.des.wa.gov/",
+    sourceUrl: "https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-2026-10041",
     registrationRequired: true,
     registrationNotes:
       "Registration in WEBS may be required before later bid steps if this opportunity moves forward.",
@@ -110,7 +110,7 @@ export const websRawOpportunities: RawWebsOpportunity[] = [
       "Spokane County is preparing a facilities protection package covering inspection, wildlife entry-point sealing, attic and crawlspace exclusion repairs, and follow-up monitoring. Vendors should expect recurring service locations and photo documentation requirements.",
     city: "Spokane",
     stateCode: "WA",
-    sourceUrl: "https://pr-webs-vendor.des.wa.gov/",
+    sourceUrl: "https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-2026-10056",
     registrationRequired: false,
     registrationNotes:
       "Review the original posting carefully. Some file access or final submission steps may still happen in WEBS.",
@@ -134,7 +134,7 @@ export const websRawOpportunities: RawWebsOpportunity[] = [
       "The City of Tacoma is seeking a vendor for routine pest control, treatment, monitoring, reporting, and emergency service response. The scope includes prevention work, inspections, and clear recordkeeping for city staff.",
     city: "Tacoma",
     stateCode: "WA",
-    sourceUrl: "https://pr-webs-vendor.des.wa.gov/",
+    sourceUrl: "https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-2026-10072",
     registrationRequired: true,
     registrationNotes:
       "An active vendor profile in WEBS may be needed before you can submit a formal response.",

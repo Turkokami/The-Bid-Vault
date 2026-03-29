@@ -7,9 +7,9 @@ const researchTools = [
     description: "Find work category and commodity codes by plain English, then save the ones that fit your business.",
   },
   {
-    href: "/government-data",
-    label: "Government Data",
-    description: "Upload source files, search extracted opportunities, and open a record for deeper research.",
+    href: "/sam-search",
+    label: "SAM Search",
+    description: "Search federal opportunities in a cleaner SAM-style view and open a record for deeper research.",
   },
   {
     href: "/bids",

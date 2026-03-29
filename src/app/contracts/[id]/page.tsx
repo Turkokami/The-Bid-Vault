@@ -131,7 +131,7 @@ export default async function ContractDetailPage({
               Compare similar contracts
             </Link>
             <Link
-              href={`/bids?keywords=${encodeURIComponent(enriched.naicsCode)}`}
+              href={`/bids?keywords=${encodeURIComponent(enriched.naicsCode)}&contractId=${encodeURIComponent(contract.id)}`}
               className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.5rem] justify-center px-5 py-4" })}
             >
               See previous winning bids

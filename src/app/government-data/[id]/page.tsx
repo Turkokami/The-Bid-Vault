@@ -9,6 +9,21 @@ import {
 } from "@/lib/demo-data";
 import { formatDate } from "@/lib/format";
 
+function buildFederalSourceUrl(record: {
+  id: string;
+  title: string;
+  agency: string;
+}) {
+  const samStyleAgencies = ["department", "u.s.", "general services", "veterans affairs", "defense"];
+  const agencyLower = record.agency.toLowerCase();
+
+  if (samStyleAgencies.some((term) => agencyLower.includes(term))) {
+    return `https://sam.gov/opp/${record.id.toUpperCase()}/view`;
+  }
+
+  return `https://sam.gov/search/?keywords=${encodeURIComponent(record.title)}`;
+}
+
 export default async function GovernmentDataRecordDetailPage({
   params,
 }: {
@@ -38,15 +53,15 @@ export default async function GovernmentDataRecordDetailPage({
             />
           </div>
           <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-emerald-200">
-            Uploaded opportunity details
+            SAM Search detail
           </div>
         </div>
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-          Uploaded contract details
+          Federal contract details
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">{record.title}</h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-          This page shows everything we found in the uploaded file for this opportunity. {record.synopsis}
+          This page shows the federal opportunity details we matched for this record in a cleaner research view. {record.synopsis}
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
@@ -57,7 +72,7 @@ export default async function GovernmentDataRecordDetailPage({
             Start a FOIA request
           </Link>
           <Link
-            href={`/government-data?keywords=${encodeURIComponent(record.keyTerms.join(", "))}`}
+            href={`/sam-search?keywords=${encodeURIComponent(record.keyTerms.join(", "))}`}
             className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.25rem]" })}
           >
             Find similar opportunities
@@ -131,7 +146,7 @@ export default async function GovernmentDataRecordDetailPage({
           <h2 className="text-xl font-semibold text-white">Helpful next steps</h2>
           <div className="mt-5 space-y-3 text-sm">
             <Link
-              href={`/bids?keywords=${encodeURIComponent(record.naicsCode)}`}
+              href={`/bids?keywords=${encodeURIComponent(record.naicsCode)}&recordId=${encodeURIComponent(record.id)}`}
               className={buttonStyles({ variant: "secondary", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
               See previous winning bids in this market
@@ -143,10 +158,16 @@ export default async function GovernmentDataRecordDetailPage({
               Compare with saved contracts
             </Link>
             <Link
-              href={`/government-data?agency=${encodeURIComponent(record.agency)}&state=${encodeURIComponent(record.state)}`}
+              href={`/sam-search?agency=${encodeURIComponent(record.agency)}&state=${encodeURIComponent(record.state)}`}
               className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
               Find nearby opportunities from the same agency
+            </Link>
+            <Link
+              href={buildFederalSourceUrl(record)}
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+            >
+              Open original SAM posting
             </Link>
           </div>
         </article>

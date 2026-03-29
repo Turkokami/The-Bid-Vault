@@ -17,7 +17,7 @@ export default function SyncCenterPage() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href="/government-data"
+            href="/sam-search"
             className={buttonStyles({ variant: "primary", size: "lg" })}
           >
             Open government data

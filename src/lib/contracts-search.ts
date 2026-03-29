@@ -216,12 +216,6 @@ const contractMetadata: Record<
   },
 };
 
-function toTitleCase(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
 function fallbackMetadata(contract: DemoContract) {
   return {
     noticeType: "Solicitation" as NoticeType,
@@ -247,6 +241,44 @@ function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+function buildOriginalPostingUrl(contract: DemoContract, noticeId: string) {
+  const agency = contract.agency.toLowerCase();
+
+  if (
+    agency.includes("u.s.") ||
+    agency.includes("general services administration") ||
+    agency.includes("department") ||
+    agency.includes("defense logistics")
+  ) {
+    return `https://sam.gov/opp/${noticeId}/view`;
+  }
+
+  if (agency.includes("city of los angeles")) {
+    return `https://www.rampla.org/s/solicitations?noticeId=${noticeId}`;
+  }
+
+  if (agency.includes("county of orange")) {
+    return `https://cpo.ocgov.com/solicitations/${noticeId}`;
+  }
+
+  return `https://sam.gov/search/?keywords=${encodeURIComponent(noticeId)}`;
+}
+
+function buildSupportingAttachmentUrl(contract: DemoContract, noticeId: string) {
+  const agency = contract.agency.toLowerCase();
+
+  if (
+    agency.includes("u.s.") ||
+    agency.includes("general services administration") ||
+    agency.includes("department") ||
+    agency.includes("defense logistics")
+  ) {
+    return `https://sam.gov/opp/${noticeId}/attachments`;
+  }
+
+  return `${buildOriginalPostingUrl(contract, noticeId)}#documents`;
+}
+
 export function enrichContract(contract: DemoContract): ContractSearchRecord {
   const metadata = contractMetadata[contract.id] ?? fallbackMetadata(contract);
   const expiration = contract.expirationDate ? new Date(contract.expirationDate) : new Date();
@@ -257,10 +289,12 @@ export function enrichContract(contract: DemoContract): ContractSearchRecord {
   const responseDue = new Date(predicted);
   responseDue.setDate(responseDue.getDate() + 7);
   const today = new Date();
+  const noticeId = `TBV-${contract.id.replace("contract-", "").replaceAll("-", "").slice(0, 10).toUpperCase()}`;
+  const originalPostingUrl = buildOriginalPostingUrl(contract, noticeId);
 
   return {
     ...contract,
-    noticeId: `TBV-${contract.id.replace("contract-", "").replaceAll("-", "").slice(0, 10).toUpperCase()}`,
+    noticeId,
     status: expiration >= today ? "Active" : "Inactive",
     noticeType: metadata.noticeType,
     department: metadata.department,
@@ -276,15 +310,30 @@ export function enrichContract(contract: DemoContract): ContractSearchRecord {
     secondaryContact: metadata.secondaryContact,
     attachments: [
       {
-        label: `${toTitleCase(metadata.noticeType)} summary`,
-        href: "#",
+        label: agencyLinkLabel(contract.agency),
+        href: originalPostingUrl,
       },
       {
-        label: `${contract.naicsCode} supporting attachment`,
-        href: "#",
+        label: `${contract.naicsCode} supporting files`,
+        href: buildSupportingAttachmentUrl(contract, noticeId),
       },
     ],
   };
+}
+
+function agencyLinkLabel(agency: string) {
+  const agencyLower = agency.toLowerCase();
+
+  if (
+    agencyLower.includes("u.s.") ||
+    agencyLower.includes("general services administration") ||
+    agencyLower.includes("department") ||
+    agencyLower.includes("defense logistics")
+  ) {
+    return "Open original SAM.gov posting";
+  }
+
+  return "Open original source posting";
 }
 
 function includesWords(blob: string, value: string, mode: "any" | "all" | "exact") {

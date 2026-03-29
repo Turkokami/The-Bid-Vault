@@ -171,13 +171,13 @@ export function GovernmentDataClient({
       <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            Uploaded file search
+            SAM Search
           </p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-            Add your source files, then search the contract records inside them.
+            Search federal contract records in a simpler view than SAM.gov.
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-            This page does two things: it helps you load contract source files and search the records found inside them. Source health and update history live in Sync Center.
+            This page helps you search federal opportunity records, refresh the source preview, and open a contract record for deeper research. Source health and update history live in Sync Center.
           </p>
 
           <div className="mt-6 rounded-[1.75rem] border border-emerald-400/20 bg-slate-950/70 p-5">
@@ -187,12 +187,12 @@ export function GovernmentDataClient({
                 onClick={() => {
                   addDemoGovUpload();
                   setUploadMessage(
-                    "Demo government data uploaded. New extracted opportunities were added to the search results.",
+                    "Federal source preview refreshed. New opportunity records were added to the search results.",
                   );
                 }}
                 className={buttonStyles({ variant: "primary", size: "md" })}
               >
-                Upload files
+                Refresh federal records
               </button>
               <button
                 type="button"
@@ -219,7 +219,7 @@ export function GovernmentDataClient({
             <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
               <span>{uploadMessage}</span>
               <Link
-                href="/government-data"
+                href="/sam-search"
                 className={buttonStyles({ variant: "ghost", size: "sm" })}
               >
                 Refresh this page
@@ -246,7 +246,7 @@ export function GovernmentDataClient({
                 <h2 className="text-base font-semibold text-white">{document.fileName}</h2>
                 <p className="mt-1 text-sm text-slate-400">{document.sourceAgency}</p>
                 <p className="mt-3 text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Source file
+              Source snapshot
                 </p>
               </article>
             ))}
@@ -256,7 +256,7 @@ export function GovernmentDataClient({
 
       <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <form
-          action="/government-data"
+          action="/sam-search"
           className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6"
         >
           <div className="grid gap-4 md:grid-cols-2">
@@ -371,10 +371,10 @@ export function GovernmentDataClient({
               Search contracts
             </button>
             <Link
-              href="/government-data"
-              className={buttonStyles({ variant: "ghost", size: "md" })}
-            >
-              Clear search
+                href="/sam-search"
+                className={buttonStyles({ variant: "ghost", size: "md" })}
+              >
+                Clear search
             </Link>
           </div>
           {searchNaics ? (
@@ -387,20 +387,20 @@ export function GovernmentDataClient({
             Search results
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            These are current government opportunities you may be able to bid on.
+            These are current federal opportunities you may be able to bid on.
           </p>
           <div className="mt-5 space-y-4">
             {results.map((result) => (
               <Link
                 key={result.id}
-                href={`/government-data/${result.id}`}
+                href={`/sam-search/${result.id}`}
                 className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
               >
                 <h2 className="text-lg font-semibold text-white">{result.title}</h2>
                 <p className="mt-1 text-sm text-slate-400">
                   {result.agency} / {result.location} / {result.opportunityType}
                 </p>
-                <p className="mt-3 text-sm text-emerald-200">Open contract research</p>
+                <p className="mt-3 text-sm text-emerald-200">Open SAM Search detail</p>
               </Link>
             ))}
             {results.length === 0 ? (

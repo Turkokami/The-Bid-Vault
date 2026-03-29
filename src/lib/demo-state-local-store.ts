@@ -139,7 +139,7 @@ export async function forceRefreshStateLocalSource() {
     description:
       "This refreshed WEBS sample includes ferry terminal bird exclusion work, roofline sealing, cleanup, deterrent installation, and inspection reporting.",
     location: "Seattle, WA",
-    sourceUrl: "https://pr-webs-vendor.des.wa.gov/",
+    sourceUrl: `https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-REFRESH-${timestamp}`,
     registrationRequired: true,
     registrationNotes:
       "You may need active WEBS registration before you can submit through the original source system.",

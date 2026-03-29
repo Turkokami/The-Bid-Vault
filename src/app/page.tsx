@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { IndustryCodeRecommender } from "@/components/industry-code-recommender";
+import { HomeCategorySearchSection } from "@/components/home-category-search-section";
 import { buttonStyles } from "@/components/ui/button";
 import { serviceTiers } from "@/lib/demo-data";
 
@@ -65,10 +65,10 @@ export default function Home() {
               Browse contracts
             </Link>
             <Link
-              href="/government-data"
+              href="/sam-search"
               className={buttonStyles({ variant: "ghost", size: "lg" })}
             >
-              Search uploaded gov data
+              Open SAM Search
             </Link>
             <Link
               href="/foia"
@@ -132,13 +132,24 @@ export default function Home() {
       </section>
 
       <section className="space-y-5">
-        <div className="max-w-3xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
             Service tiers
           </p>
           <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
             Level the service to match how much intelligence support your team needs.
           </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            Compare plans, then open the pricing page to start a subscription for your team.
+          </p>
+          </div>
+          <Link
+            href="/pricing"
+            className={buttonStyles({ variant: "secondary", size: "lg" })}
+          >
+            View pricing and subscribe
+          </Link>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
@@ -171,12 +182,24 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+
+              <div className="mt-6">
+                <Link
+                  href="/pricing"
+                  className={buttonStyles({
+                    variant: tier.id === "tier-growth" ? "primary" : "secondary",
+                    size: "md",
+                    fullWidth: true,
+                  })}
+                >
+                  See {tier.name} pricing
+                </Link>
+              </div>
             </article>
           ))}
         </div>
       </section>
-
-      <IndustryCodeRecommender />
+      <HomeCategorySearchSection />
     </div>
   );
 }
