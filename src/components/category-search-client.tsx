@@ -71,14 +71,14 @@ export function CategorySearchClient({
             <label className="mt-4 block space-y-2 text-sm text-slate-200">
               <span className="flex items-center gap-2">
                 What type of work does your business do?
-                <InfoTip>Try words like pest control, landscaping, janitorial, rodent control, or roofing.</InfoTip>
+                <InfoTip>Try words like plumbing, electrical, pest control, door installation, landscaping, janitorial, or roofing.</InfoTip>
               </span>
               <input
                 value={filters.query}
                 onChange={(event) =>
                   setFilters((current) => ({ ...current, query: event.target.value }))
                 }
-                placeholder="Example: pest control"
+                placeholder="Example: plumbing, electrical, door installation, or pest control"
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/40"
               />
             </label>
@@ -248,7 +248,7 @@ export function CategorySearchClient({
               ))}
               {suggestions.length === 0 ? (
                 <p className="text-sm text-slate-400">
-                  Try broad phrases like cleaning, construction, landscaping, or pest control.
+                  Try broad phrases like plumbing, electrical, roofing, landscaping, janitorial, or pest control.
                 </p>
               ) : null}
             </div>
@@ -287,7 +287,7 @@ export function CategorySearchClient({
                 ))
               ) : (
                 <p className="text-sm leading-6 text-emerald-50/80">
-                  Save a few category codes here so you can reuse them in contract and state/local matching later.
+                  Save the codes that match your trade so you can reuse them in contract search, state and local matching, and future alerts.
                 </p>
               )}
             </div>
@@ -296,11 +296,13 @@ export function CategorySearchClient({
           <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Helpful examples</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+              <li>plumbing</li>
+              <li>electrical</li>
+              <li>door contractor</li>
+              <li>hvac</li>
+              <li>roofing</li>
               <li>pest control</li>
-              <li>rodent control</li>
-              <li>bird exclusion</li>
               <li>grounds maintenance</li>
-              <li>janitorial</li>
             </ul>
           </section>
         </aside>
