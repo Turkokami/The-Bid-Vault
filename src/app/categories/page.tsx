@@ -17,6 +17,9 @@ export default function CategoriesPage() {
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
             Search what your business does, explore nearby service categories, and save the codes that best fit your work.
           </p>
+          <p className="mt-3 text-sm text-emerald-200/90">
+            Includes the broader WEBS / NIGP commodity code library plus Bid Vault trade mappings to make searches easier for real contractors.
+          </p>
         </div>
 
         <Link href="/categories/search" className={buttonStyles({ variant: "primary", size: "lg" })}>

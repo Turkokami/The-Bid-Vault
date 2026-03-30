@@ -4,7 +4,6 @@ import {
   dataSourceCoverage,
   extractedContractRecords,
   syncActivities,
-  uploadedSourceDocuments,
 } from "@/lib/demo-data";
 
 type GovernmentDataPageProps = {
@@ -14,6 +13,8 @@ type GovernmentDataPageProps = {
     agency?: string;
     state?: string;
     industry?: string;
+    status?: "all" | "available" | "closing-soon" | "needs-review";
+    sort?: "due-soon" | "newest" | "agency" | "title";
   }>;
 };
 
@@ -55,7 +56,6 @@ export default async function GovernmentDataPage({
       </section>
 
       <GovernmentDataClient
-        initialDocuments={uploadedSourceDocuments}
         initialRecords={extractedContractRecords}
         initialSources={dataSourceCoverage}
         initialActivities={syncActivities}
@@ -64,6 +64,8 @@ export default async function GovernmentDataPage({
         initialAgency={params.agency}
         initialState={params.state}
         initialIndustry={params.industry}
+        initialStatus={params.status}
+        initialSort={params.sort}
       />
     </div>
   );

@@ -7,10 +7,9 @@ import { getViewerContext } from "@/lib/server/workspace";
 const navigation = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/contracts", label: "Contracts" },
+  { href: "/sam-search", label: "Search SAM" },
   { href: "/state-local", label: "State & Local" },
-  { href: "/research", label: "Research" },
-  { href: "/planning", label: "Planning" },
+  { href: "/contracts/new", label: "New Contract" },
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -79,7 +78,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className="rounded-full border border-transparent px-4 py-2 transition hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200"
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200 active:translate-y-0"
                       >
                         {item.label}
                       </Link>

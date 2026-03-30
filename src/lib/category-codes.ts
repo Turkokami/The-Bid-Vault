@@ -1,3 +1,5 @@
+import { nigpCommodityCodeRecords } from "@/lib/generated/nigp-commodity-codes";
+
 export type CategoryCodeRecord = {
   id: string;
   sourceName: "WEBS" | "PSC" | "Bid Vault Map";
@@ -17,7 +19,7 @@ export type CategorySearchFilters = {
   letter: string;
 };
 
-export const categoryCodeRecords: CategoryCodeRecord[] = [
+const curatedCategoryCodeRecords: CategoryCodeRecord[] = [
   {
     id: "cat-webs-910",
     sourceName: "WEBS",
@@ -794,6 +796,35 @@ export const categoryCodeRecords: CategoryCodeRecord[] = [
     ],
   },
 ];
+
+function mergeCategoryCodeRecords(
+  generated: readonly {
+    id: string;
+    sourceName: "WEBS";
+    code: string;
+    title: string;
+    description: string;
+    parentCode?: string;
+    topLevelCategory: string;
+    normalizedKeywords: readonly string[];
+  }[],
+  curated: CategoryCodeRecord[],
+) {
+  const curatedKeys = new Set(curated.map((record) => `${record.sourceName}:${record.code}`));
+  const generatedRecords: CategoryCodeRecord[] = generated
+    .filter((record) => !curatedKeys.has(`${record.sourceName}:${record.code}`))
+    .map((record) => ({
+      ...record,
+      normalizedKeywords: [...record.normalizedKeywords],
+    }));
+
+  return [...curated, ...generatedRecords];
+}
+
+export const categoryCodeRecords: CategoryCodeRecord[] = mergeCategoryCodeRecords(
+  nigpCommodityCodeRecords,
+  curatedCategoryCodeRecords,
+);
 
 export function buildCategoryFilterOptions(records: CategoryCodeRecord[]) {
   const unique = (values: string[]) => Array.from(new Set(values)).sort();

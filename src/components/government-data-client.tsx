@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
 import type {
@@ -9,15 +10,16 @@ import type {
   ExtractedContractRecord,
   IndustryRecommendation,
   SyncActivity,
-  UploadedSourceDocument,
 } from "@/lib/demo-data";
 import { industryRecommendations } from "@/lib/demo-data";
 import {
-  addDemoGovUpload,
   forceRefreshGovernmentData,
   getMergedGovData,
   getMergedSyncState,
 } from "@/lib/demo-contract-store";
+
+type SearchSamStatus = "all" | "available" | "closing-soon" | "needs-review";
+type SearchSamSort = "due-soon" | "newest" | "agency" | "title";
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
@@ -30,12 +32,62 @@ function parseMultiValue(value?: string) {
     .filter(Boolean);
 }
 
+function parseDate(value: string) {
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function buildSamSearchHref(params: {
+  keywords?: string;
+  industry?: string;
+  naics?: string;
+  agency?: string;
+  state?: string;
+  status?: SearchSamStatus;
+  sort?: SearchSamSort;
+}) {
+  const search = new URLSearchParams();
+
+  if (params.keywords) search.set("keywords", params.keywords);
+  if (params.industry) search.set("industry", params.industry);
+  if (params.naics) search.set("naics", params.naics);
+  if (params.agency) search.set("agency", params.agency);
+  if (params.state) search.set("state", params.state);
+  if (params.status && params.status !== "all") search.set("status", params.status);
+  if (params.sort && params.sort !== "due-soon") search.set("sort", params.sort);
+
+  const query = search.toString();
+  return query ? `/sam-search?${query}` : "/sam-search";
+}
+
+function dedupeRecords(records: ExtractedContractRecord[]) {
+  const seen = new Set<string>();
+
+  return records.filter((record) => {
+    const key = [
+      normalize(record.title),
+      normalize(record.agency),
+      normalize(record.naicsCode),
+      normalize(record.state),
+      normalize(record.responseDeadline),
+    ].join("|");
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
 function filterRecords(
   records: ExtractedContractRecord[],
   keywords: string[],
   naics?: string,
   agency?: string,
   state?: string,
+  status: SearchSamStatus = "all",
 ) {
   const naicsCodes = parseMultiValue(naics);
 
@@ -43,6 +95,14 @@ function filterRecords(
     const matchesNaics = naicsCodes.length > 0 ? naicsCodes.includes(record.naicsCode) : true;
     const matchesAgency = agency ? record.agency === agency : true;
     const matchesState = state ? record.state === state : true;
+    const matchesStatus =
+      status === "all"
+        ? true
+        : status === "available"
+          ? record.availabilityStatus === "Available"
+          : status === "closing-soon"
+            ? record.availabilityStatus === "Closing Soon"
+            : record.availabilityStatus === "Needs Review";
     const blob = [
       record.title,
       record.synopsis,
@@ -58,12 +118,45 @@ function filterRecords(
       keywords.length === 0 ||
       keywords.every((keyword) => blob.includes(keyword.toLowerCase()));
 
-    return matchesNaics && matchesAgency && matchesState && matchesKeywords;
+    return matchesNaics && matchesAgency && matchesState && matchesStatus && matchesKeywords;
   });
 }
 
+function sortRecords(records: ExtractedContractRecord[], sort: SearchSamSort) {
+  const sorted = [...records];
+
+  sorted.sort((left, right) => {
+    if (sort === "newest") {
+      return parseDate(right.responseDeadline) - parseDate(left.responseDeadline);
+    }
+
+    if (sort === "agency") {
+      return left.agency.localeCompare(right.agency) || left.title.localeCompare(right.title);
+    }
+
+    if (sort === "title") {
+      return left.title.localeCompare(right.title);
+    }
+
+    return parseDate(left.responseDeadline) - parseDate(right.responseDeadline);
+  });
+
+  return sorted;
+}
+
+function availabilityBadgeClass(status: ExtractedContractRecord["availabilityStatus"]) {
+  if (status === "Available") {
+    return "border-emerald-400/20 bg-emerald-400/10 text-emerald-100";
+  }
+
+  if (status === "Closing Soon") {
+    return "border-amber-400/20 bg-amber-400/10 text-amber-100";
+  }
+
+  return "border-white/10 bg-white/5 text-slate-200";
+}
+
 export function GovernmentDataClient({
-  initialDocuments,
   initialRecords,
   initialSources,
   initialActivities,
@@ -72,8 +165,9 @@ export function GovernmentDataClient({
   initialAgency,
   initialState,
   initialIndustry,
+  initialStatus = "all",
+  initialSort = "due-soon",
 }: {
-  initialDocuments: UploadedSourceDocument[];
   initialRecords: ExtractedContractRecord[];
   initialSources: DataSourceCoverage[];
   initialActivities: SyncActivity[];
@@ -82,23 +176,27 @@ export function GovernmentDataClient({
   initialAgency?: string;
   initialState?: string;
   initialIndustry?: string;
+  initialStatus?: SearchSamStatus;
+  initialSort?: SearchSamSort;
 }) {
-  const [documents, setDocuments] = useState(initialDocuments);
+  const router = useRouter();
+  const [isNavigating, startTransition] = useTransition();
   const [records, setRecords] = useState(initialRecords);
   const [sources, setSources] = useState(initialSources);
   const [activities, setActivities] = useState(initialActivities);
   const [lastForcedRefreshAt, setLastForcedRefreshAt] = useState<string | undefined>(undefined);
-  const [uploadMessage, setUploadMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const [searchIndustry, setSearchIndustry] = useState(initialIndustry ?? "");
   const [searchKeywords, setSearchKeywords] = useState(initialKeywords.join(", "));
   const [searchNaics, setSearchNaics] = useState(initialNaics ?? "");
   const [searchAgency, setSearchAgency] = useState(initialAgency ?? "");
   const [searchState, setSearchState] = useState(initialState ?? "");
+  const [searchStatus, setSearchStatus] = useState<SearchSamStatus>(initialStatus);
+  const [sortBy, setSortBy] = useState<SearchSamSort>(initialSort);
 
   useEffect(() => {
     const syncGovData = () => {
       const next = getMergedGovData();
-      setDocuments(next.documents);
       setRecords(next.records);
     };
 
@@ -148,7 +246,7 @@ export function GovernmentDataClient({
       .filter((item) => item.score > 0)
       .sort((left, right) => right.score - left.score);
 
-    return scored.map((item) => item.recommendation).slice(0, 2);
+    return scored.map((item) => item.recommendation).slice(0, 3);
   }, [searchIndustry]);
 
   const recommendedNaicsCodes = useMemo(
@@ -161,105 +259,138 @@ export function GovernmentDataClient({
 
   const appliedKeywordTerms = useMemo(() => parseMultiValue(searchKeywords), [searchKeywords]);
 
-  const results = useMemo(
-    () => filterRecords(records, appliedKeywordTerms, searchNaics, searchAgency, searchState),
-    [appliedKeywordTerms, records, searchAgency, searchNaics, searchState],
+  const filteredResults = useMemo(
+    () =>
+      sortRecords(
+        dedupeRecords(
+          filterRecords(records, appliedKeywordTerms, searchNaics, searchAgency, searchState, searchStatus),
+        ),
+        sortBy,
+      ),
+    [appliedKeywordTerms, records, searchAgency, searchNaics, searchState, searchStatus, sortBy],
   );
+
+  const availableCount = useMemo(
+    () => dedupeRecords(records).filter((record) => record.availabilityStatus === "Available").length,
+    [records],
+  );
+
+  const applySearch = (next?: Partial<{
+    keywords: string;
+    industry: string;
+    naics: string;
+    agency: string;
+    state: string;
+    status: SearchSamStatus;
+    sort: SearchSamSort;
+  }>) => {
+    const href = buildSamSearchHref({
+      keywords: next?.keywords ?? searchKeywords,
+      industry: next?.industry ?? searchIndustry,
+      naics: next?.naics ?? searchNaics,
+      agency: next?.agency ?? searchAgency,
+      state: next?.state ?? searchState,
+      status: next?.status ?? searchStatus,
+      sort: next?.sort ?? sortBy,
+    });
+
+    startTransition(() => {
+      router.push(href);
+    });
+  };
 
   return (
     <div className="space-y-8">
-      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            SAM Search
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-            Search federal contract records in a simpler view than SAM.gov.
-          </h2>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-            This page helps you search federal opportunity records, refresh the source preview, and open a contract record for deeper research. Source health and update history live in Sync Center.
-          </p>
-
-          <div className="mt-6 rounded-[1.75rem] border border-emerald-400/20 bg-slate-950/70 p-5">
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  addDemoGovUpload();
-                  setUploadMessage(
-                    "Federal source preview refreshed. New opportunity records were added to the search results.",
-                  );
-                }}
-                className={buttonStyles({ variant: "primary", size: "md" })}
-              >
-                Refresh federal records
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  forceRefreshGovernmentData();
-                  setUploadMessage(
-                    "Client force refresh completed. Fresh source data was added from the sync pipeline preview.",
-                  );
-                }}
-                className={buttonStyles({ variant: "secondary", size: "md" })}
-              >
-                Refresh source data now
-              </button>
-              <Link
-                href="/sync-center"
-                className={buttonStyles({ variant: "ghost", size: "md" })}
-              >
-                Open Sync Center
-              </Link>
-            </div>
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+              Search SAM
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+              Search or browse federal contracts in one clean place.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              Start by typing what your business does, or browse all available opportunities and scroll through the list freely.
+            </p>
           </div>
 
-          {uploadMessage ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-              <span>{uploadMessage}</span>
-              <Link
-                href="/sam-search"
-                className={buttonStyles({ variant: "ghost", size: "sm" })}
-              >
-                Refresh this page
-              </Link>
-            </div>
-          ) : null}
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setSearchKeywords("");
+                setSearchIndustry("");
+                setSearchNaics("");
+                setSearchAgency("");
+                setSearchState("");
+                setSearchStatus("available");
+                setSortBy("due-soon");
+                applySearch({
+                  keywords: "",
+                  industry: "",
+                  naics: "",
+                  agency: "",
+                  state: "",
+                  status: "available",
+                  sort: "due-soon",
+                });
+              }}
+              className={buttonStyles({ variant: "secondary", size: "md" })}
+            >
+              Browse all available contracts
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                forceRefreshGovernmentData();
+                setStatusMessage("Fresh federal records were added from the latest source preview.");
+              }}
+              className={buttonStyles({ variant: "primary", size: "md" })}
+            >
+              Refresh SAM records now
+            </button>
+          </div>
         </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-              Uploaded files
-            </p>
-            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
-              {documents.length} files
-            </span>
+        {statusMessage ? (
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+            <span>{statusMessage}</span>
+            <Link
+              href="/sam-search"
+              className={buttonStyles({ variant: "ghost", size: "sm" })}
+            >
+              Refresh this page
+            </Link>
           </div>
-          <div className="mt-5 space-y-4">
-            {documents.map((document) => (
-              <article
-                key={document.id}
-                className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
-              >
-                <h2 className="text-base font-semibold text-white">{document.fileName}</h2>
-                <p className="mt-1 text-sm text-slate-400">{document.sourceAgency}</p>
-                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-slate-500">
-              Source snapshot
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+        ) : null}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <section className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <form
-          action="/sam-search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            applySearch();
+          }}
           className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6"
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+                Narrow results
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Use these filters to quickly find contracts that match your business.
+              </p>
+            </div>
+            {isNavigating ? (
+              <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
+                Searching...
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
               <span>Search words</span>
               <p className="text-xs leading-5 text-slate-400">
@@ -272,6 +403,7 @@ export function GovernmentDataClient({
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
+
             <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
               <span className="flex items-center gap-2">
                 Industry or service type
@@ -285,6 +417,7 @@ export function GovernmentDataClient({
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
+
             <label className="space-y-2 text-sm text-slate-200">
               <span className="flex items-center gap-2">
                 Industry Type (NAICS Code)
@@ -297,6 +430,7 @@ export function GovernmentDataClient({
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
+
             <label className="space-y-2 text-sm text-slate-200">
               <span>Government agency</span>
               <input
@@ -306,6 +440,7 @@ export function GovernmentDataClient({
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
+
             <label className="space-y-2 text-sm text-slate-200">
               <span>State</span>
               <input
@@ -315,7 +450,23 @@ export function GovernmentDataClient({
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
+
+            <label className="space-y-2 text-sm text-slate-200">
+              <span>Status</span>
+              <select
+                name="status"
+                value={searchStatus}
+                onChange={(event) => setSearchStatus(event.target.value as SearchSamStatus)}
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
+              >
+                <option value="all">All records</option>
+                <option value="available">Available now</option>
+                <option value="closing-soon">Closing soon</option>
+                <option value="needs-review">Needs review</option>
+              </select>
+            </label>
           </div>
+
           {industryMatches.length > 0 ? (
             <div className="mt-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -363,6 +514,7 @@ export function GovernmentDataClient({
               </div>
             </div>
           ) : null}
+
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               type="submit"
@@ -370,42 +522,124 @@ export function GovernmentDataClient({
             >
               Search contracts
             </button>
-            <Link
-                href="/sam-search"
-                className={buttonStyles({ variant: "ghost", size: "md" })}
-              >
-                Clear search
-            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchKeywords("");
+                setSearchIndustry("");
+                setSearchNaics("");
+                setSearchAgency("");
+                setSearchState("");
+                setSearchStatus("all");
+                setSortBy("due-soon");
+                applySearch({
+                  keywords: "",
+                  industry: "",
+                  naics: "",
+                  agency: "",
+                  state: "",
+                  status: "all",
+                  sort: "due-soon",
+                });
+              }}
+              className={buttonStyles({ variant: "ghost", size: "md" })}
+            >
+              Clear search
+            </button>
           </div>
-          {searchNaics ? (
-            <p className="mt-4 text-xs text-slate-400">Active industry code filter: {searchNaics}</p>
-          ) : null}
+
+          <p className="mt-4 text-xs text-slate-400">
+            Tip: leave the search blank and choose Available now if you want to scroll through all active opportunities.
+          </p>
         </form>
 
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            Search results
-          </p>
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            These are current federal opportunities you may be able to bid on.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+                Search results
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                These are current federal opportunities you may be able to bid on.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-100">
+                {filteredResults.length} matching {filteredResults.length === 1 ? "result" : "results"}
+              </div>
+
+              <label className="space-y-1 text-sm text-slate-200">
+                <span className="sr-only">Sort results</span>
+                <select
+                  name="sort"
+                  value={sortBy}
+                  onChange={(event) => {
+                    const nextSort = event.target.value as SearchSamSort;
+                    setSortBy(nextSort);
+                    applySearch({ sort: nextSort });
+                  }}
+                  className="rounded-full border border-white/10 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+                >
+                  <option value="due-soon">Sort: due soonest</option>
+                  <option value="newest">Sort: newest due date</option>
+                  <option value="agency">Sort: agency</option>
+                  <option value="title">Sort: title</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
           <div className="mt-5 space-y-4">
-            {results.map((result) => (
+            {records.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
+                Federal records are not available right now. Try refreshing the page or open Sync Center to check source status.
+              </div>
+            ) : null}
+
+            {filteredResults.map((result) => (
               <Link
                 key={result.id}
                 href={`/sam-search/${result.id}`}
                 className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
               >
-                <h2 className="text-lg font-semibold text-white">{result.title}</h2>
-                <p className="mt-1 text-sm text-slate-400">
-                  {result.agency} / {result.location} / {result.opportunityType}
-                </p>
-                <p className="mt-3 text-sm text-emerald-200">Open SAM Search detail</p>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="max-w-3xl">
+                    <h2 className="text-lg font-semibold text-white">{result.title}</h2>
+                    <p className="mt-2 text-sm text-slate-400">
+                      {result.agency} / {result.location}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs font-medium ${availabilityBadgeClass(result.availabilityStatus)}`}
+                  >
+                    {result.availabilityStatus}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-3 text-sm text-slate-300 md:grid-cols-3">
+                  <div>
+                    <p className="text-slate-500">Type of opportunity</p>
+                    <p className="mt-1 text-white">{result.opportunityType}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500">Industry Type (NAICS Code)</p>
+                    <p className="mt-1 text-white">{result.naicsCode}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500">Due date</p>
+                    <p className="mt-1 text-white">{result.responseDeadline}</p>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-sm leading-6 text-slate-400">{result.synopsis}</p>
+                <p className="mt-4 text-sm text-emerald-200">Open SAM Search detail</p>
               </Link>
             ))}
-            {results.length === 0 ? (
+
+            {records.length > 0 && filteredResults.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
-                No results yet. Try broad terms like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;.
+                No results yet. Try broad terms like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;, or use Browse all available contracts.
               </div>
             ) : null}
           </div>
@@ -414,19 +648,28 @@ export function GovernmentDataClient({
 
       <section className="grid gap-4 md:grid-cols-3">
         <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Imported records</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{records.length}</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Available to browse now</p>
+          <p className="mt-3 text-3xl font-semibold text-white">{availableCount}</p>
+          <p className="mt-2 text-sm text-slate-400">
+            Use Browse all available contracts to scroll the full active list.
+          </p>
         </article>
         <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Connected data sources</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Connected federal sources</p>
           <p className="mt-3 text-3xl font-semibold text-white">
             {sources.filter((source) => source.status === "Connected").length}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Federal sources currently ready for search in this preview.
           </p>
         </article>
         <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Last manual refresh</p>
           <p className="mt-3 text-sm font-medium text-emerald-100">
             {lastForcedRefreshAt ?? activities[0]?.ranAt ?? "No manual refresh run yet"}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Refresh anytime when you want the newest source preview.
           </p>
         </article>
       </section>
