@@ -2,23 +2,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buttonStyles } from "@/components/ui/button";
-import {
-  getExtractedContractById,
-  getRelatedDemoContractsForExtractedRecord,
-  getSourceDocumentById,
-} from "@/lib/demo-data";
 import { formatDate } from "@/lib/format";
+import { getSamOpportunityById, getSamSearchSnapshot } from "@/lib/server/sam-search";
+import { getContractsIndex } from "@/lib/server/contracts";
 
 function buildFederalSourceUrl(record: {
-  id: string;
+  noticeId?: string;
+  sourceUrl?: string;
   title: string;
   agency: string;
 }) {
+  if (record.sourceUrl) {
+    return record.sourceUrl;
+  }
+
   const samStyleAgencies = ["department", "u.s.", "general services", "veterans affairs", "defense"];
   const agencyLower = record.agency.toLowerCase();
 
   if (samStyleAgencies.some((term) => agencyLower.includes(term))) {
-    return `https://sam.gov/opp/${record.id.toUpperCase()}/view`;
+    return `https://sam.gov/opp/${encodeURIComponent(record.noticeId ?? record.title)}/view`;
   }
 
   return `https://sam.gov/search/?keywords=${encodeURIComponent(record.title)}`;
@@ -30,14 +32,23 @@ export default async function GovernmentDataRecordDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const record = getExtractedContractById(id);
+  const record = await getSamOpportunityById(id);
 
   if (!record) {
     notFound();
   }
 
-  const sourceDocument = getSourceDocumentById(record.sourceDocumentId);
-  const relatedContracts = getRelatedDemoContractsForExtractedRecord(record.id);
+  const [{ contracts }, snapshot] = await Promise.all([
+    getContractsIndex(),
+    getSamSearchSnapshot(),
+  ]);
+
+  const relatedContracts = contracts.filter((contract) => {
+    const sharedNaics = contract.naicsCode === record.naicsCode;
+    const sharedAgency = contract.agency === record.agency;
+    const sharedState = contract.state === record.state;
+    return sharedNaics || sharedAgency || sharedState;
+  });
 
   return (
     <div className="space-y-8">
@@ -120,11 +131,11 @@ export default async function GovernmentDataRecordDetailPage({
             </div>
             <div>
               <dt className="text-slate-500">Source document</dt>
-              <dd className="mt-1 text-white">{sourceDocument?.fileName ?? "Uploaded source file"}</dd>
+              <dd className="mt-1 text-white">Live SAM.gov source</dd>
             </div>
             <div>
               <dt className="text-slate-500">Source agency</dt>
-              <dd className="mt-1 text-white">{sourceDocument?.sourceAgency ?? record.agency}</dd>
+              <dd className="mt-1 text-white">{record.agency}</dd>
             </div>
           </dl>
           <div className="mt-6">
@@ -170,6 +181,11 @@ export default async function GovernmentDataRecordDetailPage({
               Open original SAM posting
             </Link>
           </div>
+          {!snapshot.liveConfigured ? (
+            <p className="mt-4 text-sm leading-6 text-amber-100">
+              Search SAM is not fully live until a SAM.gov API key is configured in the app environment.
+            </p>
+          ) : null}
         </article>
       </section>
 

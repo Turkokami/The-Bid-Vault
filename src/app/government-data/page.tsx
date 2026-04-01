@@ -1,10 +1,6 @@
 import Image from "next/image";
 import { GovernmentDataClient } from "@/components/government-data-client";
-import {
-  dataSourceCoverage,
-  extractedContractRecords,
-  syncActivities,
-} from "@/lib/demo-data";
+import { getSamSearchSnapshot } from "@/lib/server/sam-search";
 
 type GovernmentDataPageProps = {
   searchParams?: Promise<{
@@ -21,6 +17,7 @@ type GovernmentDataPageProps = {
 export default async function GovernmentDataPage({
   searchParams,
 }: GovernmentDataPageProps) {
+  const snapshot = await getSamSearchSnapshot();
   const params = (await searchParams) ?? {};
   const keywords = (params.keywords ?? "")
     .split(",")
@@ -56,9 +53,9 @@ export default async function GovernmentDataPage({
       </section>
 
       <GovernmentDataClient
-        initialRecords={extractedContractRecords}
-        initialSources={dataSourceCoverage}
-        initialActivities={syncActivities}
+        initialRecords={snapshot.records}
+        initialSources={snapshot.sources}
+        initialActivities={snapshot.activities}
         initialKeywords={keywords}
         initialNaics={params.naics}
         initialAgency={params.agency}
@@ -66,6 +63,8 @@ export default async function GovernmentDataPage({
         initialIndustry={params.industry}
         initialStatus={params.status}
         initialSort={params.sort}
+        initialErrorMessage={snapshot.errorMessage}
+        liveConfigured={snapshot.liveConfigured}
       />
     </div>
   );

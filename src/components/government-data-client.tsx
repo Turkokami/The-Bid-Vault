@@ -167,6 +167,8 @@ export function GovernmentDataClient({
   initialIndustry,
   initialStatus = "all",
   initialSort = "due-soon",
+  initialErrorMessage,
+  liveConfigured,
 }: {
   initialRecords: ExtractedContractRecord[];
   initialSources: DataSourceCoverage[];
@@ -178,6 +180,8 @@ export function GovernmentDataClient({
   initialIndustry?: string;
   initialStatus?: SearchSamStatus;
   initialSort?: SearchSamSort;
+  initialErrorMessage?: string;
+  liveConfigured: boolean;
 }) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
@@ -186,6 +190,7 @@ export function GovernmentDataClient({
   const [activities, setActivities] = useState(initialActivities);
   const [lastForcedRefreshAt, setLastForcedRefreshAt] = useState<string | undefined>(undefined);
   const [statusMessage, setStatusMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(initialErrorMessage ?? "");
   const [searchIndustry, setSearchIndustry] = useState(initialIndustry ?? "");
   const [searchKeywords, setSearchKeywords] = useState(initialKeywords.join(", "));
   const [searchNaics, setSearchNaics] = useState(initialNaics ?? "");
@@ -193,18 +198,29 @@ export function GovernmentDataClient({
   const [searchState, setSearchState] = useState(initialState ?? "");
   const [searchStatus, setSearchStatus] = useState<SearchSamStatus>(initialStatus);
   const [sortBy, setSortBy] = useState<SearchSamSort>(initialSort);
+  const [isLiveConfigured, setIsLiveConfigured] = useState(liveConfigured);
 
   useEffect(() => {
-    const syncGovData = () => {
-      const next = getMergedGovData();
-      setRecords(next.records);
+    const syncGovData = async () => {
+      try {
+        const next = await getMergedGovData();
+        setRecords(next.records);
+      } catch {
+        setErrorMessage("We could not load live SAM records right now.");
+      }
     };
 
-    const syncSourceState = () => {
-      const next = getMergedSyncState();
-      setSources(next.sources);
-      setActivities(next.activities);
-      setLastForcedRefreshAt(next.lastForcedRefreshAt);
+    const syncSourceState = async () => {
+      try {
+        const next = await getMergedSyncState();
+        setSources(next.sources);
+        setActivities(next.activities);
+        setLastForcedRefreshAt(next.lastForcedRefreshAt);
+        setErrorMessage(next.errorMessage ?? "");
+        setIsLiveConfigured(next.liveConfigured);
+      } catch {
+        setErrorMessage("We could not load live SAM source status right now.");
+      }
     };
 
     syncGovData();
@@ -326,6 +342,7 @@ export function GovernmentDataClient({
                 setSearchState("");
                 setSearchStatus("available");
                 setSortBy("due-soon");
+                setErrorMessage("");
                 applySearch({
                   keywords: "",
                   industry: "",
@@ -343,8 +360,19 @@ export function GovernmentDataClient({
             <button
               type="button"
               onClick={() => {
-                forceRefreshGovernmentData();
-                setStatusMessage("Fresh federal records were added from the latest source preview.");
+                void forceRefreshGovernmentData()
+                  .then((snapshot) => {
+                    setRecords(snapshot.records);
+                    setSources(snapshot.sources);
+                    setActivities(snapshot.activities);
+                    setLastForcedRefreshAt(snapshot.activities[0]?.ranAt);
+                    setErrorMessage(snapshot.errorMessage ?? "");
+                    setIsLiveConfigured(snapshot.liveConfigured);
+                    setStatusMessage("Live SAM records refreshed.");
+                  })
+                  .catch(() => {
+                    setErrorMessage("We could not refresh live SAM records right now.");
+                  });
               }}
               className={buttonStyles({ variant: "primary", size: "md" })}
             >
@@ -362,6 +390,11 @@ export function GovernmentDataClient({
             >
               Refresh this page
             </Link>
+          </div>
+        ) : null}
+        {errorMessage ? (
+          <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+            {errorMessage}
           </div>
         ) : null}
       </section>
@@ -593,7 +626,9 @@ export function GovernmentDataClient({
           <div className="mt-5 space-y-4">
             {records.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
-                Federal records are not available right now. Try refreshing the page or open Sync Center to check source status.
+                {isLiveConfigured
+                  ? "No live SAM opportunities were returned right now. Try refreshing the page or broadening your filters."
+                  : "Search SAM needs a live SAM.gov API key before it can load real federal opportunities."}
               </div>
             ) : null}
 

@@ -1,4 +1,6 @@
 import { websConnector, websSourceSummary } from "@/lib/sources/webs";
+import { fetchLiveWebsRawOpportunities } from "@/lib/sources/webs-live";
+import { allowDemoSourceData } from "@/lib/sources/source-runtime";
 import type {
   NormalizedStateLocalOpportunity,
   StateLocalSourceSummary,
@@ -49,6 +51,50 @@ export async function getStateLocalSyncSnapshot(): Promise<{
   syncLogs: StateLocalSourceSyncLog[];
   sources: StateLocalSourceSummary[];
 }> {
+  try {
+    const raws = await fetchLiveWebsRawOpportunities();
+    const opportunities = raws.map(websConnector.normalize);
+    const syncLogs = [websConnector.createSyncLog(raws)];
+
+    return {
+      opportunities,
+      syncLogs,
+      sources: [
+        {
+          ...websSourceSummary,
+          status: "Connected",
+          cadence: "Live public site",
+          lastSyncedAt: new Date().toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
+          }),
+        },
+        ...plannedSources,
+      ],
+    };
+  } catch {
+    if (!allowDemoSourceData()) {
+      return {
+        opportunities: [],
+        syncLogs: [],
+        sources: [
+          {
+            ...websSourceSummary,
+            status: "Connected",
+            cadence: "Live public site",
+            lastSyncedAt: "Unable to load live WEBS records",
+            helperText:
+              "WEBS is connected as a live public source, but the latest fetch did not return records. Try again shortly.",
+          },
+          ...plannedSources,
+        ],
+      };
+    }
+  }
+
   const raws = await websConnector.fetchOpportunities();
   const opportunities = raws.map(websConnector.normalize);
   const syncLogs = [websConnector.createSyncLog(raws)];

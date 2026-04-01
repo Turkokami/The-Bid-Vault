@@ -51,7 +51,6 @@ export function StateLocalDetailClient({
     () => sources.find((item) => item.sourceCode === sourceCode) ?? null,
     [sourceCode, sources],
   );
-  const isWebsOpportunity = opportunity?.sourceName === "WEBS" || opportunity?.sourceCode === "washington";
 
   const similar = useMemo(() => {
     if (!opportunity) {
@@ -203,18 +202,9 @@ export function StateLocalDetailClient({
               <p className="text-sm text-slate-400">Where this came from</p>
               <p className="mt-3 text-lg font-semibold text-white">{source?.sourceName ?? opportunity.sourceName}</p>
               <p className="mt-2 text-sm leading-6 text-slate-300">{source?.helperText}</p>
-              {isWebsOpportunity ? (
-                <div className="mt-4 rounded-[1.25rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
-                  <p className="text-sm font-medium text-white">Search this reference number in WEBS</p>
-                  <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                    WEBS does not always expose a stable public page for every sample posting. Open the WEBS bid list, then search for reference number{" "}
-                    <span className="font-semibold text-white">{opportunity.externalId}</span>.
-                  </p>
-                </div>
-              ) : null}
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link href={opportunity.sourceUrl} className={buttonStyles({ variant: "primary", size: "md" })}>
-                  {isWebsOpportunity ? "Open WEBS bid list" : "Open original posting"}
+                  Open original posting
                 </Link>
                 <Link href="/state-local/washington" className={buttonStyles({ variant: "ghost", size: "md" })}>
                   Back to Washington list

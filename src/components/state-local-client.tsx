@@ -48,11 +48,14 @@ export function StateLocalClient({
 
   useEffect(() => {
     const sync = async () => {
-      const snapshot = await getMergedStateLocalSnapshot();
-      setOpportunities(snapshot.opportunities);
-      setSources(snapshot.sources);
-      setSyncLogs(snapshot.syncLogs);
-      setSavedCount(readSavedStateLocalEntries().length);
+      try {
+        const snapshot = await getMergedStateLocalSnapshot();
+        setOpportunities(snapshot.opportunities);
+        setSources(snapshot.sources);
+        setSyncLogs(snapshot.syncLogs);
+      } finally {
+        setSavedCount(readSavedStateLocalEntries().length);
+      }
     };
 
     void sync();
@@ -100,12 +103,16 @@ export function StateLocalClient({
               <button
                 type="button"
                 onClick={async () => {
-                  await forceRefreshStateLocalSource();
-                  setRefreshMessage("Washington opportunities refreshed. New WEBS records were added to your search.");
+                  try {
+                    await forceRefreshStateLocalSource();
+                    setRefreshMessage("Washington opportunities refreshed from the live WEBS source.");
+                  } catch {
+                    setRefreshMessage("We could not refresh live WEBS records right now. Please try again.");
+                  }
                 }}
                 className={buttonStyles({ variant: "primary", size: "md", fullWidth: true })}
               >
-                Refresh Washington source
+                Refresh live WEBS records
               </button>
               <button
                 type="button"
