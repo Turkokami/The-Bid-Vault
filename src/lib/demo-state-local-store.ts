@@ -11,6 +11,7 @@ import type {
 
 const STATE_LOCAL_REFRESH_KEY = "bid-vault-state-local-refresh";
 const STATE_LOCAL_SAVED_KEY = "bid-vault-state-local-saved";
+const WEBS_BID_CALENDAR_URL = "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx";
 
 type StateLocalRefreshState = {
   opportunities: NormalizedStateLocalOpportunity[];
@@ -139,7 +140,7 @@ export async function forceRefreshStateLocalSource() {
     description:
       "This refreshed WEBS sample includes ferry terminal bird exclusion work, roofline sealing, cleanup, deterrent installation, and inspection reporting.",
     location: "Seattle, WA",
-    sourceUrl: `https://pr-webs-vendor.des.wa.gov/solicitation/WEBS-REFRESH-${timestamp}`,
+    sourceUrl: WEBS_BID_CALENDAR_URL,
     registrationRequired: true,
     registrationNotes:
       "You may need active WEBS registration before you can submit through the original source system.",
