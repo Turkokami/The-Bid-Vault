@@ -13,6 +13,20 @@ import type {
   StateLocalSourceSummary,
 } from "@/lib/sources/types";
 
+function getDirectSourceUrl(opportunity: NormalizedStateLocalOpportunity) {
+  if (!opportunity.sourceUrl) {
+    return "";
+  }
+
+  if (opportunity.sourceName === "WEBS") {
+    return /Search_BidDetails\.aspx\?ID=\d+/i.test(opportunity.sourceUrl)
+      ? opportunity.sourceUrl
+      : "";
+  }
+
+  return opportunity.sourceUrl;
+}
+
 export function StateLocalDetailClient({
   sourceCode,
   opportunityId,
@@ -67,6 +81,8 @@ export function StateLocalDetailClient({
       )
       .slice(0, 3);
   }, [opportunities, opportunity]);
+
+  const directSourceUrl = opportunity ? getDirectSourceUrl(opportunity) : "";
 
   if (!opportunity) {
     return (
@@ -202,10 +218,17 @@ export function StateLocalDetailClient({
               <p className="text-sm text-slate-400">Where this came from</p>
               <p className="mt-3 text-lg font-semibold text-white">{source?.sourceName ?? opportunity.sourceName}</p>
               <p className="mt-2 text-sm leading-6 text-slate-300">{source?.helperText}</p>
+              {!directSourceUrl ? (
+                <div className="mt-4 rounded-[1.25rem] border border-amber-400/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
+                  We could not confirm a direct WEBS detail-page link for this record yet. We only show true source-detail links here, not the general bid list.
+                </div>
+              ) : null}
               <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={opportunity.sourceUrl} className={buttonStyles({ variant: "primary", size: "md" })}>
-                  Open original posting
-                </Link>
+                {directSourceUrl ? (
+                  <Link href={directSourceUrl} className={buttonStyles({ variant: "primary", size: "md" })}>
+                    Open original posting
+                  </Link>
+                ) : null}
                 <Link href="/state-local/washington" className={buttonStyles({ variant: "ghost", size: "md" })}>
                   Back to Washington list
                 </Link>
