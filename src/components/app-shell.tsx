@@ -10,6 +10,7 @@ const navigation = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/sam-search", label: "Search SAM" },
   { href: "/state-local", label: "State & Local" },
+  { href: "/foia", label: "FOIA" },
   { href: "/pricing", label: "Pricing" },
 ];
 
