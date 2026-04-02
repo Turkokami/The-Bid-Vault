@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { demoTenants } from "@/lib/demo-data";
+import { getAuthenticatedUser } from "@/lib/server/auth";
 
 export const DEMO_USER_EMAIL = "demo@thebidvault.local";
 export const ACTIVE_WORKSPACE_COOKIE = "bid-vault-active-workspace";
@@ -14,6 +15,7 @@ export type WorkspaceOption = {
 };
 
 export type ViewerContext = {
+  isAuthenticated: boolean;
   mode: "database" | "demo";
   user: {
     email: string;
@@ -35,6 +37,33 @@ function demoWorkspaceDescription(slug: string) {
 export async function getViewerContext(): Promise<ViewerContext> {
   const cookieStore = await cookies();
   const requestedWorkspace = cookieStore.get(ACTIVE_WORKSPACE_COOKIE)?.value;
+  const authenticatedUser = await getAuthenticatedUser();
+
+  if (authenticatedUser) {
+    const workspaces = authenticatedUser.memberships.map((membership) => ({
+      id: membership.tenant.id,
+      slug: membership.tenant.slug,
+      name: membership.tenant.name,
+      role: roleLabel(membership.role),
+      description: "Your workspace",
+    }));
+
+    const activeWorkspace =
+      workspaces.find((workspace) => workspace.slug === requestedWorkspace) ??
+      workspaces[0] ??
+      null;
+
+    return {
+      isAuthenticated: true,
+      mode: "database",
+      user: {
+        email: authenticatedUser.email,
+        name: authenticatedUser.name ?? "Bid Vault user",
+      },
+      workspaces,
+      activeWorkspace,
+    };
+  }
 
   try {
     const user = await db.user.findUnique({
@@ -66,6 +95,7 @@ export async function getViewerContext(): Promise<ViewerContext> {
         null;
 
       return {
+        isAuthenticated: false,
         mode: "database",
         user: {
           email: user.email,
@@ -88,6 +118,7 @@ export async function getViewerContext(): Promise<ViewerContext> {
   }));
 
   return {
+    isAuthenticated: false,
     mode: "demo",
     user: {
       email: DEMO_USER_EMAIL,

@@ -1,10 +1,27 @@
 import Image from "next/image";
 import { GovernmentDataClient } from "@/components/government-data-client";
-import { getSamSearchSnapshot } from "@/lib/server/sam-search";
+import { getSamSearchSnapshot, type SamKeywordMode } from "@/lib/server/sam-search";
+
+function parseKeywordTerms(value: string, mode: SamKeywordMode) {
+  const input = value.trim();
+  if (!input) {
+    return [];
+  }
+
+  if (mode === "exact") {
+    return [input];
+  }
+
+  return input
+    .split(/[,\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 type GovernmentDataPageProps = {
   searchParams?: Promise<{
     keywords?: string;
+    keywordMode?: SamKeywordMode;
     naics?: string;
     agency?: string;
     state?: string;
@@ -17,12 +34,19 @@ type GovernmentDataPageProps = {
 export default async function GovernmentDataPage({
   searchParams,
 }: GovernmentDataPageProps) {
-  const snapshot = await getSamSearchSnapshot();
   const params = (await searchParams) ?? {};
-  const keywords = (params.keywords ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+  const keywordMode = params.keywordMode ?? "all";
+  const keywords = parseKeywordTerms(params.keywords ?? "", keywordMode);
+  const snapshot = await getSamSearchSnapshot({
+    keywords,
+    keywordMode,
+    naics: params.naics,
+    agency: params.agency,
+    state: params.state,
+    industry: params.industry,
+    status: params.status,
+    sort: params.sort,
+  });
 
   return (
     <div className="space-y-8">
@@ -57,6 +81,7 @@ export default async function GovernmentDataPage({
         initialSources={snapshot.sources}
         initialActivities={snapshot.activities}
         initialKeywords={keywords}
+        initialKeywordMode={keywordMode}
         initialNaics={params.naics}
         initialAgency={params.agency}
         initialState={params.state}

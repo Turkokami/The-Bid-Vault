@@ -5,9 +5,9 @@ import {
   demoTenants,
   type DataSourceCoverage,
   type DemoContract,
-  type ExtractedContractRecord,
   type SyncActivity,
 } from "@/lib/demo-data";
+import type { SamOpportunityRecord } from "@/lib/server/sam-search";
 
 const CONTRACTS_KEY = "bid-vault-demo-contracts";
 const PLANNING_KEY = "bid-vault-demo-planning";
@@ -24,15 +24,42 @@ export type DemoContractDraft = Omit<
 >;
 
 type SamSnapshot = {
-  records: ExtractedContractRecord[];
+  records: SamOpportunityRecord[];
   sources: DataSourceCoverage[];
   activities: SyncActivity[];
   liveConfigured: boolean;
   errorMessage?: string;
 };
 
-async function fetchSamSnapshot(): Promise<SamSnapshot> {
-  const response = await fetch("/api/sam-search/snapshot", {
+type SamSnapshotQuery = {
+  keywords?: string;
+  keywordMode?: "all" | "any" | "exact";
+  industry?: string;
+  naics?: string;
+  agency?: string;
+  state?: string;
+  status?: "all" | "available" | "closing-soon" | "needs-review";
+  sort?: "due-soon" | "newest" | "agency" | "title";
+};
+
+function buildSamSnapshotUrl(query?: SamSnapshotQuery) {
+  const params = new URLSearchParams();
+
+  if (query?.keywords) params.set("keywords", query.keywords);
+  if (query?.keywordMode) params.set("keywordMode", query.keywordMode);
+  if (query?.industry) params.set("industry", query.industry);
+  if (query?.naics) params.set("naics", query.naics);
+  if (query?.agency) params.set("agency", query.agency);
+  if (query?.state) params.set("state", query.state);
+  if (query?.status) params.set("status", query.status);
+  if (query?.sort) params.set("sort", query.sort);
+
+  const search = params.toString();
+  return search ? `/api/sam-search/snapshot?${search}` : "/api/sam-search/snapshot";
+}
+
+async function fetchSamSnapshot(query?: SamSnapshotQuery): Promise<SamSnapshot> {
+  const response = await fetch(buildSamSnapshotUrl(query), {
     cache: "no-store",
   });
 
@@ -101,8 +128,16 @@ export async function getMergedGovData() {
   };
 }
 
-export async function getMergedSyncState() {
-  const snapshot = await fetchSamSnapshot();
+export async function getMergedGovDataForQuery(query?: SamSnapshotQuery) {
+  const snapshot = await fetchSamSnapshot(query);
+  return {
+    documents: [],
+    records: snapshot.records,
+  };
+}
+
+export async function getMergedSyncState(query?: SamSnapshotQuery) {
+  const snapshot = await fetchSamSnapshot(query);
   return {
     sources: snapshot.sources,
     activities: snapshot.activities,
@@ -112,8 +147,8 @@ export async function getMergedSyncState() {
   };
 }
 
-export async function forceRefreshGovernmentData() {
-  const snapshot = await fetchSamSnapshot();
+export async function forceRefreshGovernmentData(query?: SamSnapshotQuery) {
+  const snapshot = await fetchSamSnapshot(query);
   window.dispatchEvent(new CustomEvent("bid-vault-gov-data-updated"));
   window.dispatchEvent(new CustomEvent("bid-vault-sync-updated"));
   return snapshot;
@@ -129,4 +164,3 @@ export function resetDemoState() {
   window.dispatchEvent(new CustomEvent("bid-vault-contracts-updated"));
   window.dispatchEvent(new CustomEvent("bid-vault-planning-updated"));
 }
-

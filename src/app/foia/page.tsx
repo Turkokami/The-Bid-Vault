@@ -1,7 +1,24 @@
 import Image from "next/image";
 import { FoiaRequestBuilder } from "@/components/foia-request-builder";
 
-export default function FoiaPage() {
+export default async function FoiaPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    agency?: string;
+    facility?: string;
+    location?: string;
+    industry?: string;
+    title?: string;
+    source?: string;
+  }>;
+}) {
+  const params = (await searchParams) ?? {};
+  const contextTitle = params.title ?? params.facility ?? "";
+  const contextualSubtitle = contextTitle
+    ? `This request is pre-filled from the opportunity you were reviewing: ${contextTitle}.`
+    : "Use this page to build a records request around the contract, facility, or program you are researching.";
+
   return (
     <div className="space-y-8">
       <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
@@ -30,6 +47,9 @@ export default function FoiaPage() {
           uncover historical budgets, scope changes, and facility planning
           records that can sharpen pricing and rebid strategy.
         </p>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-100/90">
+          {contextualSubtitle}
+        </p>
       </section>
 
       <section className="grid gap-5 md:grid-cols-3">
@@ -57,7 +77,15 @@ export default function FoiaPage() {
         ))}
       </section>
 
-      <FoiaRequestBuilder />
+      <FoiaRequestBuilder
+        initialValues={{
+          agencyName: params.agency,
+          facilityName: params.facility ?? params.title,
+          facilityLocation: params.location,
+          industry: params.industry,
+          sourceName: params.source,
+        }}
+      />
     </div>
   );
 }

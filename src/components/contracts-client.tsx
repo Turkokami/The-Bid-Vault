@@ -6,6 +6,11 @@ import { ContractCard } from "@/components/contract-card";
 import { FilterSidebar } from "@/components/filter-sidebar";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
+import {
+  readSavedNaicsCodeLists,
+  removeNaicsCodeList,
+  type SavedNaicsCodeList,
+} from "@/lib/demo-category-store";
 import type { DemoContract, DemoTenant } from "@/lib/demo-data";
 import {
   buildFilterOptions,
@@ -34,6 +39,7 @@ export function ContractsClient({
 }) {
   const [contracts, setContracts] = useState(initialContracts);
   const [filters, setFilters] = useState(initialFilters);
+  const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
 
   useEffect(() => {
     if (mode !== "demo") {
@@ -45,6 +51,13 @@ export function ContractsClient({
     window.addEventListener("bid-vault-contracts-updated", sync);
     return () => window.removeEventListener("bid-vault-contracts-updated", sync);
   }, [mode]);
+
+  useEffect(() => {
+    const sync = () => setSavedCodeLists(readSavedNaicsCodeLists());
+    sync();
+    window.addEventListener("bid-vault-naics-code-lists-updated", sync);
+    return () => window.removeEventListener("bid-vault-naics-code-lists-updated", sync);
+  }, []);
 
   const searchRecords = useMemo(() => contracts.map(enrichContract), [contracts]);
   const filterOptions = useMemo(() => buildFilterOptions(searchRecords), [searchRecords]);
@@ -150,6 +163,48 @@ export function ContractsClient({
             </button>
           </div>
         </div>
+
+        {savedCodeLists.length > 0 ? (
+          <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Saved code lists</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Apply the NAICS code lists you saved from recommendations to narrow contract results faster.
+            </p>
+            <div className="mt-4 space-y-3">
+              {savedCodeLists.map((list) => (
+                <div
+                  key={list.id}
+                  className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4"
+                >
+                  <p className="font-medium text-white">{list.name}</p>
+                  <p className="mt-1 text-xs text-slate-400">{list.codes.join(", ")}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFilters((current) => ({
+                          ...current,
+                          naicsCodes: list.codes,
+                          page: 1,
+                        }))
+                      }
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      Apply to contracts
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeNaicsCodeList(list.id)}
+                      className={buttonStyles({ variant: "ghost", size: "sm" })}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </FilterSidebar>
 
       <div className="space-y-6">

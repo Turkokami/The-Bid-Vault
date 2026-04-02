@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { foiaRequestPlays } from "@/lib/demo-data";
+import { buttonStyles } from "@/components/ui/button";
 
 const defaultForm = {
   requesterName: "Demo Capture Team",
@@ -16,10 +17,37 @@ const defaultForm = {
   planningGoal:
     "We are researching prior budget patterns and potential future facilities support opportunities tied to this location.",
   deliveryPreference: "Electronic records by email",
+  sourceName: "",
 };
 
-export function FoiaRequestBuilder() {
-  const [form, setForm] = useState(defaultForm);
+type FoiaRequestBuilderProps = {
+  initialValues?: Partial<typeof defaultForm>;
+};
+
+function buildCustomDefaults(initialValues?: Partial<typeof defaultForm>) {
+  const merged = {
+    ...defaultForm,
+    ...initialValues,
+  };
+
+  const facilityLabel = merged.facilityName || "this contract or facility";
+  const industryLabel = merged.industry || "the service scope";
+
+  return {
+    ...merged,
+    recordsRequested:
+      initialValues?.facilityName || initialValues?.agencyName || initialValues?.industry
+        ? `Approved operating budgets, prior contract awards, scope changes, work orders, modifications, planning records, and budget documents related to ${facilityLabel} and ${industryLabel}.`
+        : merged.recordsRequested,
+    planningGoal:
+      initialValues?.facilityName || initialValues?.agencyName || initialValues?.industry
+        ? `We are researching prior budgets, scope changes, and likely future bid timing connected to ${facilityLabel} so we can decide whether this opportunity is worth pursuing.`
+        : merged.planningGoal,
+  };
+}
+
+export function FoiaRequestBuilder({ initialValues }: FoiaRequestBuilderProps) {
+  const [form, setForm] = useState(() => buildCustomDefaults(initialValues));
 
   const requestDraft = useMemo(() => {
     return `To ${form.agencyName},
@@ -41,6 +69,8 @@ ${form.requesterName}
 ${form.companyName}`;
   }, [form]);
 
+  const canCopyDraft = typeof navigator !== "undefined" && !!navigator.clipboard;
+
   return (
     <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
@@ -55,6 +85,11 @@ ${form.companyName}`;
           modifications, and planning documents that can help forecast upcoming
           bid size and scope.
         </p>
+        {form.sourceName ? (
+          <div className="mt-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-6 text-emerald-100">
+            This draft was started from a source record in {form.sourceName}, so the request is already aimed at the contract you were reviewing.
+          </div>
+        ) : null}
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {[
@@ -118,9 +153,22 @@ ${form.companyName}`;
 
       <div className="space-y-6">
         <article className="rounded-[2rem] border border-emerald-400/20 bg-white/5 p-6">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            Request preview
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+              Request preview
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (canCopyDraft) {
+                  void navigator.clipboard.writeText(requestDraft);
+                }
+              }}
+              className={buttonStyles({ variant: "secondary", size: "sm" })}
+            >
+              Copy draft
+            </button>
+          </div>
           <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 text-sm leading-7 text-slate-200">
             {requestDraft}
           </pre>

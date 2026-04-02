@@ -5,18 +5,24 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
+import {
+  readSavedNaicsCodeLists,
+  removeNaicsCodeList,
+  saveNaicsCodeList,
+  type SavedNaicsCodeList,
+} from "@/lib/demo-category-store";
 import type {
   DataSourceCoverage,
-  ExtractedContractRecord,
   IndustryRecommendation,
   SyncActivity,
 } from "@/lib/demo-data";
 import { industryRecommendations } from "@/lib/demo-data";
 import {
   forceRefreshGovernmentData,
-  getMergedGovData,
+  getMergedGovDataForQuery,
   getMergedSyncState,
 } from "@/lib/demo-contract-store";
+import type { SamKeywordMode, SamOpportunityRecord } from "@/lib/server/sam-search";
 
 type SearchSamStatus = "all" | "available" | "closing-soon" | "needs-review";
 type SearchSamSort = "due-soon" | "newest" | "agency" | "title";
@@ -32,6 +38,22 @@ function parseMultiValue(value?: string) {
     .filter(Boolean);
 }
 
+function parseKeywordTerms(value: string, mode: SamKeywordMode) {
+  const input = value.trim();
+  if (!input) {
+    return [];
+  }
+
+  if (mode === "exact") {
+    return [input];
+  }
+
+  return input
+    .split(/[,\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function parseDate(value: string) {
   const timestamp = Date.parse(value);
   return Number.isNaN(timestamp) ? 0 : timestamp;
@@ -39,6 +61,7 @@ function parseDate(value: string) {
 
 function buildSamSearchHref(params: {
   keywords?: string;
+  keywordMode?: SamKeywordMode;
   industry?: string;
   naics?: string;
   agency?: string;
@@ -49,6 +72,7 @@ function buildSamSearchHref(params: {
   const search = new URLSearchParams();
 
   if (params.keywords) search.set("keywords", params.keywords);
+  if (params.keywordMode && params.keywordMode !== "all") search.set("keywordMode", params.keywordMode);
   if (params.industry) search.set("industry", params.industry);
   if (params.naics) search.set("naics", params.naics);
   if (params.agency) search.set("agency", params.agency);
@@ -60,7 +84,7 @@ function buildSamSearchHref(params: {
   return query ? `/sam-search?${query}` : "/sam-search";
 }
 
-function dedupeRecords(records: ExtractedContractRecord[]) {
+function dedupeRecords(records: SamOpportunityRecord[]) {
   const seen = new Set<string>();
 
   return records.filter((record) => {
@@ -82,8 +106,9 @@ function dedupeRecords(records: ExtractedContractRecord[]) {
 }
 
 function filterRecords(
-  records: ExtractedContractRecord[],
+  records: SamOpportunityRecord[],
   keywords: string[],
+  keywordMode: SamKeywordMode,
   naics?: string,
   agency?: string,
   state?: string,
@@ -116,18 +141,28 @@ function filterRecords(
 
     const matchesKeywords =
       keywords.length === 0 ||
-      keywords.every((keyword) => blob.includes(keyword.toLowerCase()));
+      (keywordMode === "exact"
+        ? blob.includes(keywords.join(" ").toLowerCase())
+        : keywordMode === "any"
+          ? keywords.some((keyword) => blob.includes(keyword.toLowerCase()))
+          : keywords.every((keyword) => blob.includes(keyword.toLowerCase())));
 
     return matchesNaics && matchesAgency && matchesState && matchesStatus && matchesKeywords;
   });
 }
 
-function sortRecords(records: ExtractedContractRecord[], sort: SearchSamSort) {
+function sortRecords(records: SamOpportunityRecord[], sort: SearchSamSort) {
   const sorted = [...records];
 
   sorted.sort((left, right) => {
     if (sort === "newest") {
-      return parseDate(right.responseDeadline) - parseDate(left.responseDeadline);
+      const rightDate = "postedDate" in right && typeof right.postedDate === "string"
+        ? parseDate(right.postedDate)
+        : parseDate(right.responseDeadline);
+      const leftDate = "postedDate" in left && typeof left.postedDate === "string"
+        ? parseDate(left.postedDate)
+        : parseDate(left.responseDeadline);
+      return rightDate - leftDate;
     }
 
     if (sort === "agency") {
@@ -144,7 +179,7 @@ function sortRecords(records: ExtractedContractRecord[], sort: SearchSamSort) {
   return sorted;
 }
 
-function availabilityBadgeClass(status: ExtractedContractRecord["availabilityStatus"]) {
+function availabilityBadgeClass(status: SamOpportunityRecord["availabilityStatus"]) {
   if (status === "Available") {
     return "border-emerald-400/20 bg-emerald-400/10 text-emerald-100";
   }
@@ -161,6 +196,7 @@ export function GovernmentDataClient({
   initialSources,
   initialActivities,
   initialKeywords,
+  initialKeywordMode = "all",
   initialNaics,
   initialAgency,
   initialState,
@@ -170,10 +206,11 @@ export function GovernmentDataClient({
   initialErrorMessage,
   liveConfigured,
 }: {
-  initialRecords: ExtractedContractRecord[];
+  initialRecords: SamOpportunityRecord[];
   initialSources: DataSourceCoverage[];
   initialActivities: SyncActivity[];
   initialKeywords: string[];
+  initialKeywordMode?: SamKeywordMode;
   initialNaics?: string;
   initialAgency?: string;
   initialState?: string;
@@ -185,7 +222,7 @@ export function GovernmentDataClient({
 }) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
-  const [records, setRecords] = useState(initialRecords);
+  const [records, setRecords] = useState<SamOpportunityRecord[]>(initialRecords);
   const [sources, setSources] = useState(initialSources);
   const [activities, setActivities] = useState(initialActivities);
   const [lastForcedRefreshAt, setLastForcedRefreshAt] = useState<string | undefined>(undefined);
@@ -193,17 +230,29 @@ export function GovernmentDataClient({
   const [errorMessage, setErrorMessage] = useState(initialErrorMessage ?? "");
   const [searchIndustry, setSearchIndustry] = useState(initialIndustry ?? "");
   const [searchKeywords, setSearchKeywords] = useState(initialKeywords.join(", "));
+  const [keywordMode, setKeywordMode] = useState<SamKeywordMode>(initialKeywordMode);
   const [searchNaics, setSearchNaics] = useState(initialNaics ?? "");
   const [searchAgency, setSearchAgency] = useState(initialAgency ?? "");
   const [searchState, setSearchState] = useState(initialState ?? "");
   const [searchStatus, setSearchStatus] = useState<SearchSamStatus>(initialStatus);
   const [sortBy, setSortBy] = useState<SearchSamSort>(initialSort);
   const [isLiveConfigured, setIsLiveConfigured] = useState(liveConfigured);
+  const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
+  const [newListName, setNewListName] = useState("");
 
   useEffect(() => {
     const syncGovData = async () => {
       try {
-        const next = await getMergedGovData();
+        const next = await getMergedGovDataForQuery({
+          keywords: searchKeywords,
+          keywordMode,
+          industry: searchIndustry,
+          naics: searchNaics,
+          agency: searchAgency,
+          state: searchState,
+          status: searchStatus,
+          sort: sortBy,
+        });
         setRecords(next.records);
       } catch {
         setErrorMessage("We could not load live SAM records right now.");
@@ -212,7 +261,16 @@ export function GovernmentDataClient({
 
     const syncSourceState = async () => {
       try {
-        const next = await getMergedSyncState();
+        const next = await getMergedSyncState({
+          keywords: searchKeywords,
+          keywordMode,
+          industry: searchIndustry,
+          naics: searchNaics,
+          agency: searchAgency,
+          state: searchState,
+          status: searchStatus,
+          sort: sortBy,
+        });
         setSources(next.sources);
         setActivities(next.activities);
         setLastForcedRefreshAt(next.lastForcedRefreshAt);
@@ -225,14 +283,18 @@ export function GovernmentDataClient({
 
     syncGovData();
     syncSourceState();
+    const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
+    syncSavedLists();
     window.addEventListener("bid-vault-gov-data-updated", syncGovData);
     window.addEventListener("bid-vault-sync-updated", syncSourceState);
+    window.addEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
 
     return () => {
       window.removeEventListener("bid-vault-gov-data-updated", syncGovData);
       window.removeEventListener("bid-vault-sync-updated", syncSourceState);
+      window.removeEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
     };
-  }, []);
+  }, [keywordMode, searchAgency, searchIndustry, searchKeywords, searchNaics, searchState, searchStatus, sortBy]);
 
   const industryMatches = useMemo(() => {
     const query = normalize(searchIndustry);
@@ -273,17 +335,29 @@ export function GovernmentDataClient({
     [industryMatches],
   );
 
-  const appliedKeywordTerms = useMemo(() => parseMultiValue(searchKeywords), [searchKeywords]);
+  const appliedKeywordTerms = useMemo(
+    () => parseKeywordTerms(searchKeywords, keywordMode),
+    [keywordMode, searchKeywords],
+  );
+  const appliedNaicsCodes = useMemo(() => parseMultiValue(searchNaics), [searchNaics]);
 
   const filteredResults = useMemo(
     () =>
       sortRecords(
         dedupeRecords(
-          filterRecords(records, appliedKeywordTerms, searchNaics, searchAgency, searchState, searchStatus),
+          filterRecords(
+            records,
+            appliedKeywordTerms,
+            keywordMode,
+            searchNaics,
+            searchAgency,
+            searchState,
+            searchStatus,
+          ),
         ),
         sortBy,
       ),
-    [appliedKeywordTerms, records, searchAgency, searchNaics, searchState, searchStatus, sortBy],
+    [appliedKeywordTerms, keywordMode, records, searchAgency, searchNaics, searchState, searchStatus, sortBy],
   );
 
   const availableCount = useMemo(
@@ -293,6 +367,7 @@ export function GovernmentDataClient({
 
   const applySearch = (next?: Partial<{
     keywords: string;
+    keywordMode: SamKeywordMode;
     industry: string;
     naics: string;
     agency: string;
@@ -302,6 +377,7 @@ export function GovernmentDataClient({
   }>) => {
     const href = buildSamSearchHref({
       keywords: next?.keywords ?? searchKeywords,
+      keywordMode: next?.keywordMode ?? keywordMode,
       industry: next?.industry ?? searchIndustry,
       naics: next?.naics ?? searchNaics,
       agency: next?.agency ?? searchAgency,
@@ -350,6 +426,7 @@ export function GovernmentDataClient({
                   agency: "",
                   state: "",
                   status: "available",
+                  keywordMode: "all",
                   sort: "due-soon",
                 });
               }}
@@ -360,7 +437,16 @@ export function GovernmentDataClient({
             <button
               type="button"
               onClick={() => {
-                void forceRefreshGovernmentData()
+                void forceRefreshGovernmentData({
+                  keywords: searchKeywords,
+                  keywordMode,
+                  industry: searchIndustry,
+                  naics: searchNaics,
+                  agency: searchAgency,
+                  state: searchState,
+                  status: searchStatus,
+                  sort: sortBy,
+                })
                   .then((snapshot) => {
                     setRecords(snapshot.records);
                     setSources(snapshot.sources);
@@ -429,6 +515,25 @@ export function GovernmentDataClient({
               <p className="text-xs leading-5 text-slate-400">
                 Type what you do. Example: pest control, landscaping, roofing.
               </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "all", label: "Match all words" },
+                  { value: "any", label: "Match any word" },
+                  { value: "exact", label: "Match exact phrase" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setKeywordMode(option.value as SamKeywordMode)}
+                    className={buttonStyles({
+                      variant: keywordMode === option.value ? "primary" : "ghost",
+                      size: "sm",
+                    })}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
               <input
                 name="keywords"
                 value={searchKeywords}
@@ -545,6 +650,72 @@ export function GovernmentDataClient({
                   </div>
                 ))}
               </div>
+              <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-slate-950/50 p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end">
+                  <label className="flex-1 space-y-2 text-sm text-slate-200">
+                    <span>Save these as your code list</span>
+                    <input
+                      value={newListName}
+                      onChange={(event) => setNewListName(event.target.value)}
+                      placeholder="Example: Pest Control Search Codes"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      saveNaicsCodeList(
+                        newListName || `${searchIndustry || "My"} search codes`,
+                        recommendedNaicsCodes,
+                      );
+                      setNewListName("");
+                    }}
+                    className={buttonStyles({ variant: "primary", size: "md" })}
+                  >
+                    Save code list
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {savedCodeLists.length > 0 ? (
+            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+              <p className="text-sm font-semibold text-white">Your saved code lists</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">
+                Apply a saved list to instantly reuse your preferred codes in Search SAM.
+              </p>
+              <div className="mt-4 space-y-3">
+                {savedCodeLists.map((list) => (
+                  <div
+                    key={list.id}
+                    className="rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4"
+                  >
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <p className="font-medium text-white">{list.name}</p>
+                        <p className="mt-1 text-xs text-slate-400">{list.codes.join(", ")}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSearchNaics(list.codes.join(", "))}
+                          className={buttonStyles({ variant: "secondary", size: "sm" })}
+                        >
+                          Apply list
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeNaicsCodeList(list.id)}
+                          className={buttonStyles({ variant: "ghost", size: "sm" })}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
 
@@ -572,6 +743,7 @@ export function GovernmentDataClient({
                   agency: "",
                   state: "",
                   status: "all",
+                  keywordMode: "all",
                   sort: "due-soon",
                 });
               }}
@@ -582,7 +754,7 @@ export function GovernmentDataClient({
           </div>
 
           <p className="mt-4 text-xs text-slate-400">
-            Tip: leave the search blank and choose Available now if you want to scroll through all active opportunities.
+            Tip: leave the search blank and choose Available now if you want to scroll through all active opportunities. You can also reuse your saved code lists here anytime.
           </p>
         </form>
 
@@ -601,6 +773,11 @@ export function GovernmentDataClient({
               <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-100">
                 {filteredResults.length} matching {filteredResults.length === 1 ? "result" : "results"}
               </div>
+              {appliedNaicsCodes.length > 0 ? (
+                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                  Using codes: {appliedNaicsCodes.join(", ")}
+                </div>
+              ) : null}
 
               <label className="space-y-1 text-sm text-slate-200">
                 <span className="sr-only">Sort results</span>
@@ -635,7 +812,7 @@ export function GovernmentDataClient({
             {filteredResults.map((result) => (
               <Link
                 key={result.id}
-                href={`/sam-search/${result.id}`}
+                href={`/sam-search/${encodeURIComponent(result.noticeId)}`}
                 className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">

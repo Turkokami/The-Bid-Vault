@@ -137,7 +137,7 @@ export default async function ContractDetailPage({
               See previous winning bids
             </Link>
             <Link
-              href={`/foia?agency=${encodeURIComponent(enriched.department)}&facility=${encodeURIComponent(enriched.title)}&location=${encodeURIComponent(enriched.location)}&industry=${encodeURIComponent(enriched.naicsCode)}`}
+              href={`/foia?agency=${encodeURIComponent(enriched.department)}&facility=${encodeURIComponent(enriched.title)}&location=${encodeURIComponent(enriched.location)}&industry=${encodeURIComponent(enriched.naicsCode)}&source=${encodeURIComponent("Tracked Contract")}`}
               className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.5rem] justify-center px-5 py-4" })}
             >
               Start a FOIA request

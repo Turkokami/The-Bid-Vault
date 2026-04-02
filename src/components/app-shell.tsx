@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { signOutAction } from "@/app/auth/actions";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import { getViewerContext } from "@/lib/server/workspace";
 
@@ -9,7 +10,7 @@ const navigation = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/sam-search", label: "Search SAM" },
   { href: "/state-local", label: "State & Local" },
-  { href: "/contracts/new", label: "New Contract" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -86,14 +87,51 @@ export async function AppShell({ children }: { children: ReactNode }) {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <WorkspaceSwitcher
-                      workspaces={viewer.workspaces}
-                      activeWorkspaceSlug={viewer.activeWorkspace?.slug}
-                    />
-                    <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
-                      {viewer.user.name} / {viewer.activeWorkspace?.role ?? "viewer"} /{" "}
-                      {viewer.mode === "database" ? "beta database" : "demo mode"}
-                    </div>
+                    {viewer.workspaces.length > 0 ? (
+                      <WorkspaceSwitcher
+                        workspaces={viewer.workspaces}
+                        activeWorkspaceSlug={viewer.activeWorkspace?.slug}
+                      />
+                    ) : null}
+                    {viewer.isAuthenticated ? (
+                      <>
+                        <Link
+                          href="/workspaces/new"
+                          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200 active:translate-y-0"
+                        >
+                          New workspace
+                        </Link>
+                        <form action={signOutAction}>
+                          <button
+                            type="submit"
+                            className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200 active:translate-y-0"
+                          >
+                            Sign out
+                          </button>
+                        </form>
+                        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
+                          {viewer.user.name} / {viewer.activeWorkspace?.role ?? "owner"} / personal workspace
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/sign-in"
+                          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200 active:translate-y-0"
+                        >
+                          Sign in
+                        </Link>
+                        <Link
+                          href="/sign-up"
+                          className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100 shadow-[0_8px_24px_rgba(34,197,94,0.12)] transition hover:-translate-y-0.5 hover:border-emerald-400/40 hover:bg-emerald-400/15 hover:text-white active:translate-y-0"
+                        >
+                          Create account
+                        </Link>
+                        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
+                          Demo mode / sample workspace
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

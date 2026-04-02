@@ -224,6 +224,12 @@ export function StateLocalDetailClient({
                 </div>
               ) : null}
               <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href={`/foia?agency=${encodeURIComponent(opportunity.issuingEntity)}&facility=${encodeURIComponent(opportunity.title)}&location=${encodeURIComponent(opportunity.location)}&industry=${encodeURIComponent(opportunity.categoryCode)}&source=${encodeURIComponent(opportunity.sourceName)}`}
+                  className={buttonStyles({ variant: "secondary", size: "md" })}
+                >
+                  Start a FOIA request
+                </Link>
                 {directSourceUrl ? (
                   <Link href={directSourceUrl} className={buttonStyles({ variant: "primary", size: "md" })}>
                     Open original posting

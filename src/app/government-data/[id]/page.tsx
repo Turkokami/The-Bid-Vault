@@ -77,7 +77,7 @@ export default async function GovernmentDataRecordDetailPage({
 
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
           <Link
-            href={`/foia?agency=${encodeURIComponent(record.agency)}&facility=${encodeURIComponent(record.title)}&location=${encodeURIComponent(record.location)}&industry=${encodeURIComponent(record.opportunityType)}`}
+            href={`/foia?agency=${encodeURIComponent(record.agency)}&facility=${encodeURIComponent(record.title)}&location=${encodeURIComponent(record.location)}&industry=${encodeURIComponent(record.opportunityType)}&source=${encodeURIComponent("SAM.gov")}`}
             className={buttonStyles({ variant: "secondary", size: "lg", className: "rounded-[1.25rem]" })}
           >
             Start a FOIA request
