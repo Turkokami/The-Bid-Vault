@@ -86,6 +86,7 @@ function buildSamSearchHref(params: {
 
 function buildSamDetailHref(record: SamOpportunityRecord) {
   const search = new URLSearchParams({
+    noticeId: record.noticeId,
     title: record.title,
     agency: record.agency,
     location: record.location,
@@ -103,7 +104,7 @@ function buildSamDetailHref(record: SamOpportunityRecord) {
   if (record.setAside) search.set("setAside", record.setAside);
   if (record.synopsis) search.set("summary", record.synopsis);
 
-  return `/sam-search/${encodeURIComponent(record.noticeId || record.id)}?${search.toString()}`;
+  return `/sam-search/${encodeURIComponent(record.id)}?${search.toString()}`;
 }
 
 function dedupeRecords(records: SamOpportunityRecord[]) {

@@ -33,6 +33,7 @@ function pickParam(params: Record<string, string | string[] | undefined>, key: s
 
 function buildFallbackRecord(id: string, params: Record<string, string | string[] | undefined>): SamOpportunityRecord | null {
   const title = pickParam(params, "title");
+  const noticeId = pickParam(params, "noticeId") || id;
 
   if (!title) {
     return null;
@@ -45,7 +46,7 @@ function buildFallbackRecord(id: string, params: Record<string, string | string[
   return {
     id: id.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     sourceDocumentId: "sam-live",
-    noticeId: id,
+    noticeId,
     title,
     agency,
     naicsCode: pickParam(params, "naics") || "Not listed",
@@ -84,7 +85,8 @@ export default async function GovernmentDataRecordDetailPage({
 }) {
   const { id } = await params;
   const queryParams = (await searchParams) ?? {};
-  const liveRecord = await getSamOpportunityById(id);
+  const lookupId = pickParam(queryParams, "noticeId") || id;
+  const liveRecord = await getSamOpportunityById(lookupId);
   const fallbackRecord = buildFallbackRecord(id, queryParams);
   const record = liveRecord ?? fallbackRecord;
 
@@ -101,7 +103,7 @@ export default async function GovernmentDataRecordDetailPage({
             Back to Search SAM
           </Link>
           <Link
-            href={`https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(id)}`}
+            href={`https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(lookupId)}`}
             className={buttonStyles({ variant: "ghost", size: "md" })}
           >
             Search this notice on SAM.gov
