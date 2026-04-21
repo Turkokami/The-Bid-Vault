@@ -3,7 +3,13 @@ export function allowDemoSourceData() {
 }
 
 export function getSamApiKey() {
-  return process.env.SAM_GOV_API_KEY?.trim() ?? "";
+  return (
+    process.env.SAM_GOV_API_KEY?.trim() ||
+    process.env.SAM_API_KEY?.trim() ||
+    process.env.SAM_API_TOKEN?.trim() ||
+    process.env.NEXT_PUBLIC_SAM_GOV_API_KEY?.trim() ||
+    ""
+  );
 }
 
 export function samLiveConfigured() {
@@ -13,4 +19,3 @@ export function samLiveConfigured() {
 export function websLiveConfigured() {
   return true;
 }
-

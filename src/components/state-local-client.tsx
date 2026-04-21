@@ -53,6 +53,11 @@ export function StateLocalClient({
         setOpportunities(snapshot.opportunities);
         setSources(snapshot.sources);
         setSyncLogs(snapshot.syncLogs);
+        setRefreshMessage("");
+      } catch {
+        setRefreshMessage(
+          "WEBS could not load live records right now. The page is still available, so you can try refreshing again.",
+        );
       } finally {
         setSavedCount(readSavedStateLocalEntries().length);
       }
@@ -107,7 +112,7 @@ export function StateLocalClient({
                     await forceRefreshStateLocalSource();
                     setRefreshMessage("Washington opportunities refreshed from the live WEBS source.");
                   } catch {
-                    setRefreshMessage("We could not refresh live WEBS records right now. Please try again.");
+                    setRefreshMessage("WEBS could not refresh live records right now. Please try again.");
                   }
                 }}
                 className={buttonStyles({ variant: "primary", size: "md", fullWidth: true })}

@@ -120,6 +120,7 @@ export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunit
 
   return matches.slice(0, 40).map((match, index) => {
     const href = match[1];
+    const sourceId = href.match(/ID=(\d+)/i)?.[1] ?? `${index + 1}`;
     const title = stripHtml(match[2]);
     const start = match.index ?? 0;
     const end = matches[index + 1]?.index ?? html.length;
@@ -128,8 +129,8 @@ export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunit
     const dates = Array.from(text.matchAll(/\b\d{2}\/\d{2}\/\d{2}\b/g)).map(
       (item) => item[0],
     );
-    const refMatch = text.match(/Ref #:\s*([A-Z0-9-]+)/i);
-    const solicitationNumber = refMatch?.[1] ?? `WEBS-LIVE-${index + 1}`;
+    const refMatch = text.match(/Ref #:\s*([^\n]+?)(?=\s+\d{2}\/\d{2}\/\d{2}\b|$)/i);
+    const solicitationNumber = refMatch?.[1]?.trim() || `WEBS-${sourceId}`;
     const dueDate = toIsoDate(dates[0]);
     const postedDate = toIsoDate(dates[1] ?? dates[0]);
     const fullUrl = new URL(href, WEBS_ROOT_URL).toString();
@@ -163,4 +164,3 @@ export async function fetchLiveWebsOpportunities() {
   const raws = await fetchLiveWebsRawOpportunities();
   return raws.map(normalizeWebsOpportunity);
 }
-

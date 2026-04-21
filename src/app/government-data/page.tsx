@@ -2,6 +2,9 @@ import Image from "next/image";
 import { GovernmentDataClient } from "@/components/government-data-client";
 import { getSamSearchSnapshot, type SamKeywordMode } from "@/lib/server/sam-search";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function parseKeywordTerms(value: string, mode: SamKeywordMode) {
   const input = value.trim();
   if (!input) {

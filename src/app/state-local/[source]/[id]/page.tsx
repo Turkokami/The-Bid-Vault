@@ -5,6 +5,9 @@ import type { StateLocalSourceCode } from "@/lib/sources/types";
 
 const knownSources: StateLocalSourceCode[] = ["washington", "oregon", "idaho", "california"];
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function StateLocalOpportunityDetailPage({
   params,
 }: {

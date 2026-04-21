@@ -1,6 +1,9 @@
 import { StateLocalClient } from "@/components/state-local-client";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function WashingtonStateLocalPage() {
   const snapshot = await getStateLocalSyncSnapshot();
 

@@ -43,9 +43,13 @@ export function StateLocalDetailClient({
 
   useEffect(() => {
     const sync = async () => {
-      const snapshot = await getMergedStateLocalSnapshot();
-      setOpportunities(snapshot.opportunities);
-      setSources(snapshot.sources);
+      try {
+        const snapshot = await getMergedStateLocalSnapshot();
+        setOpportunities(snapshot.opportunities);
+        setSources(snapshot.sources);
+      } catch {
+        // Keep the server-rendered opportunity visible if the browser refresh fails.
+      }
     };
 
     void sync();
