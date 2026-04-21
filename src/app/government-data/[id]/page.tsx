@@ -1,10 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { buttonStyles } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
-import { getSamOpportunityById, getSamSearchSnapshot } from "@/lib/server/sam-search";
+import {
+  getSamOpportunityById,
+  getSamSearchSnapshot,
+  type SamOpportunityRecord,
+} from "@/lib/server/sam-search";
 import { getContractsIndex } from "@/lib/server/contracts";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function buildFederalSourceUrl(record: {
   noticeId?: string;
@@ -13,35 +19,99 @@ function buildFederalSourceUrl(record: {
   agency: string;
 }) {
   if (record.sourceUrl) {
-    return record.sourceUrl;
+    const oppId = record.sourceUrl.match(/\/opp\/([^/?#]+)\/view/i)?.[1];
+    return oppId ? `https://sam.gov/opp/${encodeURIComponent(oppId)}/view` : record.sourceUrl;
   }
 
-  const samStyleAgencies = ["department", "u.s.", "general services", "veterans affairs", "defense"];
-  const agencyLower = record.agency.toLowerCase();
+  return `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(record.noticeId ?? record.title)}`;
+}
 
-  if (samStyleAgencies.some((term) => agencyLower.includes(term))) {
-    return `https://sam.gov/opp/${encodeURIComponent(record.noticeId ?? record.title)}/view`;
+function pickParam(params: Record<string, string | string[] | undefined>, key: string) {
+  const value = params[key];
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
+
+function buildFallbackRecord(id: string, params: Record<string, string | string[] | undefined>): SamOpportunityRecord | null {
+  const title = pickParam(params, "title");
+
+  if (!title) {
+    return null;
   }
 
-  return `https://sam.gov/search/?keywords=${encodeURIComponent(record.title)}`;
+  const sourceUrl = pickParam(params, "sourceUrl");
+  const agency = pickParam(params, "agency") || "Federal agency";
+  const location = pickParam(params, "location") || "United States";
+
+  return {
+    id: id.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    sourceDocumentId: "sam-live",
+    noticeId: id,
+    title,
+    agency,
+    naicsCode: pickParam(params, "naics") || "Not listed",
+    state: location.split(", ").at(-1) ?? "US",
+    location,
+    opportunityType: pickParam(params, "type") || "Federal opportunity",
+    synopsis: pickParam(params, "summary") || "Live SAM opportunity. Open the original posting for the full source record.",
+    responseDeadline: pickParam(params, "due"),
+    availabilityStatus:
+      pickParam(params, "status") === "Closing Soon"
+        ? "Closing Soon"
+        : pickParam(params, "status") === "Needs Review"
+          ? "Needs Review"
+          : "Available",
+    keyTerms: title
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((term) => term.length > 4)
+      .slice(0, 8),
+    sourceUrl,
+    postedDate: pickParam(params, "posted"),
+    updatedDate: pickParam(params, "updated"),
+    office: pickParam(params, "office") || "See SAM posting",
+    pscCode: pickParam(params, "psc") || "Not listed",
+    setAside: pickParam(params, "setAside") || "Not listed",
+    fullDescription: pickParam(params, "summary") || "Open the original SAM posting to review the complete description.",
+  };
 }
 
 export default async function GovernmentDataRecordDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id } = await params;
-  const record = await getSamOpportunityById(id);
+  const queryParams = (await searchParams) ?? {};
+  const liveRecord = await getSamOpportunityById(id);
+  const fallbackRecord = buildFallbackRecord(id, queryParams);
+  const record = liveRecord ?? fallbackRecord;
 
   if (!record) {
-    notFound();
+    return (
+      <div className="rounded-[2rem] border border-amber-400/20 bg-amber-400/10 p-8 text-amber-50">
+        <p className="text-xs uppercase tracking-[0.35em] text-amber-100/80">SAM detail unavailable</p>
+        <h1 className="mt-4 text-3xl font-semibold text-white">We could not load this SAM record right now.</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7">
+          SAM may be rate-limiting the API or the record may have moved. Go back to Search SAM and try again, or open SAM.gov directly with the notice number.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/sam-search" className={buttonStyles({ variant: "primary", size: "md" })}>
+            Back to Search SAM
+          </Link>
+          <Link
+            href={`https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(id)}`}
+            className={buttonStyles({ variant: "ghost", size: "md" })}
+          >
+            Search this notice on SAM.gov
+          </Link>
+        </div>
+      </div>
+    );
   }
 
-  const [{ contracts }, snapshot] = await Promise.all([
-    getContractsIndex(),
-    getSamSearchSnapshot(),
-  ]);
+  const [{ contracts }, snapshot] = await Promise.all([getContractsIndex(), getSamSearchSnapshot()]);
 
   const relatedContracts = contracts.filter((contract) => {
     const sharedNaics = contract.naicsCode === record.naicsCode;
@@ -74,6 +144,11 @@ export default async function GovernmentDataRecordDetailPage({
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
           This page shows the federal opportunity details we matched for this record in a cleaner research view. {record.synopsis}
         </p>
+        {!liveRecord ? (
+          <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-100">
+            SAM did not return the full detail record on this request, so we are showing the result-card details and linking you to the original SAM posting.
+          </div>
+        ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
           <Link

@@ -134,7 +134,10 @@ type Props = {
 
 export function StateLocalFilterSidebar(props: Props) {
   return (
-    <aside className="sticky top-36 h-fit space-y-4 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-[0_16px_50px_rgba(0,0,0,0.35)] backdrop-blur">
+    <aside
+      id="webs-filters"
+      className="order-2 max-h-[80vh] overflow-y-auto rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.35)] backdrop-blur xl:sticky xl:top-36 xl:order-1 xl:h-fit xl:rounded-[2rem] xl:p-5"
+    >
       <div className="mb-2">
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Narrow your results</p>
         <p className="mt-2 text-sm leading-6 text-slate-300">
@@ -155,7 +158,7 @@ export function StateLocalFilterSidebar(props: Props) {
         </Field>
       </Section>
 
-      <Section title="Where this came from">
+      <Section title="Where this came from" defaultOpen={false}>
         <Field label="State">
           <CheckboxList options={props.options.states} values={props.states} onToggle={props.onToggleState} />
         </Field>
@@ -167,7 +170,7 @@ export function StateLocalFilterSidebar(props: Props) {
         </Field>
       </Section>
 
-      <Section title="Type of opportunity">
+      <Section title="Type of opportunity" defaultOpen={false}>
         <CheckboxList
           options={props.options.opportunityTypes}
           values={props.opportunityTypes}
@@ -175,7 +178,7 @@ export function StateLocalFilterSidebar(props: Props) {
         />
       </Section>
 
-      <Section title="Who posted this">
+      <Section title="Who posted this" defaultOpen={false}>
         <CheckboxList
           options={props.options.entities}
           values={props.entities}
@@ -183,7 +186,7 @@ export function StateLocalFilterSidebar(props: Props) {
         />
       </Section>
 
-      <Section title="Status">
+      <Section title="Status" defaultOpen={false}>
         <CheckboxList
           options={props.options.statuses}
           values={props.statuses}
@@ -191,7 +194,7 @@ export function StateLocalFilterSidebar(props: Props) {
         />
       </Section>
 
-      <Section title="Work type">
+      <Section title="Work type" defaultOpen={false}>
         <Field
           label="Work Category Code"
           tip="This is the category code the source system uses to group the type of work."
@@ -204,7 +207,7 @@ export function StateLocalFilterSidebar(props: Props) {
         </Field>
       </Section>
 
-      <Section title="Important dates">
+      <Section title="Important dates" defaultOpen={false}>
         <Field label="Due date from">
           <TextInput type="date" value={props.dueFrom} onChange={props.onDueFromChange} />
         </Field>
@@ -213,7 +216,7 @@ export function StateLocalFilterSidebar(props: Props) {
         </Field>
       </Section>
 
-      <Section title="Before you bid">
+      <Section title="Before you bid" defaultOpen={false}>
         <Field
           label="Need to register before bidding?"
           tip="Some source systems require registration before you can submit a bid."

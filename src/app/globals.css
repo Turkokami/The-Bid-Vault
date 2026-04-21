@@ -6,7 +6,7 @@
 }
 
 :root {
-  --app-shell-offset: 17rem;
+  --app-shell-offset: 1.5rem;
 }
 
 html {
@@ -22,6 +22,6 @@ body {
 
 @media (min-width: 1024px) {
   :root {
-    --app-shell-offset: 13.5rem;
+    --app-shell-offset: 2rem;
   }
 }

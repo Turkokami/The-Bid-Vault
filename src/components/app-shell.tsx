@@ -19,14 +19,14 @@ export async function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.18),_transparent_24%),linear-gradient(180deg,#050816_0%,#08101d_50%,#0b1324_100%)] text-slate-100">
-      <div className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-slate-950/72 shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/58">
-        <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <header className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 shadow-[0_0_40px_rgba(34,197,94,0.08)]">
-            <div className="relative overflow-hidden border-b border-emerald-400/10 bg-[linear-gradient(90deg,rgba(2,6,23,0.98)_0%,rgba(3,12,24,0.98)_35%,rgba(5,18,30,0.98)_65%,rgba(2,6,23,0.98)_100%)] px-4 py-4 xl:px-6">
+      <div className="sticky inset-x-0 top-0 z-50 border-b border-white/8 bg-slate-950/72 shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/58">
+        <div className="mx-auto w-full max-w-7xl px-3 py-2 sm:px-6 lg:px-8 lg:py-4">
+          <header className="overflow-hidden rounded-[1.35rem] border border-white/10 bg-slate-950/85 shadow-[0_0_40px_rgba(34,197,94,0.08)] lg:rounded-[2rem]">
+            <div className="relative overflow-hidden border-b border-emerald-400/10 bg-[linear-gradient(90deg,rgba(2,6,23,0.98)_0%,rgba(3,12,24,0.98)_35%,rgba(5,18,30,0.98)_65%,rgba(2,6,23,0.98)_100%)] px-3 py-3 xl:px-6 xl:py-4">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(34,197,94,0.18),transparent_32%),radial-gradient(circle_at_center,rgba(74,222,128,0.10),transparent_24%)]" />
-              <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-[1.35rem] border border-emerald-400/30 bg-black/60 shadow-[0_0_30px_rgba(74,222,128,0.16)]">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-[1rem] border border-emerald-400/30 bg-black/60 shadow-[0_0_30px_rgba(74,222,128,0.16)] sm:h-16 sm:w-16 sm:rounded-[1.35rem]">
                     <Image
                       src="/bid-vault-logo.png"
                       alt="The Bid Vault logo"
@@ -37,23 +37,23 @@ export async function AppShell({ children }: { children: ReactNode }) {
                     />
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.45em] text-emerald-300/85">
+                    <p className="text-[10px] uppercase tracking-[0.32em] text-emerald-300/85 sm:text-[11px] sm:tracking-[0.45em]">
                       The Bid Vault
                     </p>
-                    <p className="mt-2 max-w-xl text-lg font-semibold tracking-[-0.02em] text-white md:text-xl">
+                    <p className="mt-1 max-w-xl text-sm font-semibold tracking-[-0.02em] text-white sm:mt-2 sm:text-lg md:text-xl">
                       Find contracts, understand them fast, and plan your next move.
                     </p>
                   </div>
                 </div>
-                <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.28em] text-emerald-100">
+                <div className="hidden rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.28em] text-emerald-100 sm:block">
                   Start here
                 </div>
               </div>
             </div>
 
-            <div className="px-4 py-3 xl:px-6">
+            <div className="px-3 py-3 xl:px-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-center gap-3">
+                <div className="hidden items-center gap-3 lg:flex">
                   <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-emerald-400/30 bg-black/40 shadow-[0_0_24px_rgba(74,222,128,0.18)]">
                     <Image
                       src="/bid-vault-logo.png"
@@ -75,19 +75,19 @@ export async function AppShell({ children }: { children: ReactNode }) {
                 </div>
 
                 <div className="flex flex-col gap-3 lg:items-end">
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
+                  <div className="-mx-1 flex snap-x items-center gap-2 overflow-x-auto px-1 pb-1 text-sm text-slate-300 lg:flex-wrap lg:overflow-visible lg:pb-0">
                     {navigation.map((item) => (
                       <Link
                         key={item.href}
                         href={item.href}
-                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200 active:translate-y-0"
+                        className="snap-start whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200 active:translate-y-0 sm:px-4"
                       >
                         {item.label}
                       </Link>
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 lg:gap-3">
                     {viewer.workspaces.length > 0 ? (
                       <WorkspaceSwitcher
                         workspaces={viewer.workspaces}
@@ -110,7 +110,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
                             Sign out
                           </button>
                         </form>
-                        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
+                        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-100 sm:px-4 sm:text-sm">
                           {viewer.user.name} / {viewer.activeWorkspace?.role ?? "owner"} / personal workspace
                         </div>
                       </>
@@ -128,7 +128,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
                         >
                           Create account
                         </Link>
-                        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
+                        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-100 sm:px-4 sm:text-sm">
                           Demo mode / sample workspace
                         </div>
                       </>

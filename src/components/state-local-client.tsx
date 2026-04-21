@@ -145,20 +145,20 @@ export function StateLocalClient({
           </div>
         </StateLocalFilterSidebar>
 
-        <div className="space-y-6">
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur">
+        <div className="order-1 space-y-4 xl:order-2 xl:space-y-6">
+          <section className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur sm:p-6 xl:rounded-[2rem]">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">State & local opportunities</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   Washington opportunities in a simpler view than WEBS.
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:leading-7">
                   This page helps you find contract opportunities from Washington and other state or local government sources.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <div className="rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-200">
                   {results.length} opportunities found
                 </div>
@@ -193,6 +193,29 @@ export function StateLocalClient({
               </div>
             </div>
 
+            <div className="mt-5 space-y-3 rounded-[1.25rem] border border-emerald-400/15 bg-slate-950/60 p-3 xl:hidden">
+              <label className="block text-sm font-medium text-white" htmlFor="mobile-webs-search">
+                Search WEBS
+              </label>
+              <input
+                id="mobile-webs-search"
+                value={filters.keywords}
+                onChange={(event) =>
+                  setFilters((current) => ({ ...current, keywords: event.target.value, page: 1 }))
+                }
+                placeholder="Try pest control, roofing, janitorial..."
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-base text-white outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/20"
+              />
+              <div className="flex flex-wrap gap-2">
+                <a href="#webs-results" className={buttonStyles({ variant: "primary", size: "sm" })}>
+                  View results
+                </a>
+                <a href="#webs-filters" className={buttonStyles({ variant: "ghost", size: "sm" })}>
+                  More filters
+                </a>
+              </div>
+            </div>
+
             {refreshMessage ? (
               <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
                 {refreshMessage}
@@ -200,7 +223,7 @@ export function StateLocalClient({
             ) : null}
           </section>
 
-          <section className="grid gap-4 md:grid-cols-3">
+          <section className="hidden gap-4 md:grid-cols-3 xl:grid">
             <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Where this came from</p>
               <p className="mt-3 text-lg font-semibold text-white">WEBS</p>
@@ -222,7 +245,7 @@ export function StateLocalClient({
             </article>
           </section>
 
-          <section className="space-y-4">
+          <section id="webs-results" className="scroll-mt-40 space-y-3 sm:space-y-4">
             {visibleResults.map((opportunity) => (
               <StateLocalOpportunityCard key={opportunity.id} opportunity={opportunity} />
             ))}

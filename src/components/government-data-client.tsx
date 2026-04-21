@@ -84,6 +84,28 @@ function buildSamSearchHref(params: {
   return query ? `/sam-search?${query}` : "/sam-search";
 }
 
+function buildSamDetailHref(record: SamOpportunityRecord) {
+  const search = new URLSearchParams({
+    title: record.title,
+    agency: record.agency,
+    location: record.location,
+    naics: record.naicsCode,
+    due: record.responseDeadline,
+    type: record.opportunityType,
+    status: record.availabilityStatus,
+    sourceUrl: record.sourceUrl,
+  });
+
+  if (record.postedDate) search.set("posted", record.postedDate);
+  if (record.updatedDate) search.set("updated", record.updatedDate);
+  if (record.pscCode) search.set("psc", record.pscCode);
+  if (record.office) search.set("office", record.office);
+  if (record.setAside) search.set("setAside", record.setAside);
+  if (record.synopsis) search.set("summary", record.synopsis);
+
+  return `/sam-search/${encodeURIComponent(record.noticeId || record.id)}?${search.toString()}`;
+}
+
 function dedupeRecords(records: SamOpportunityRecord[]) {
   const seen = new Set<string>();
 
@@ -812,7 +834,7 @@ export function GovernmentDataClient({
             {filteredResults.map((result) => (
               <Link
                 key={result.id}
-                href={`/sam-search/${encodeURIComponent(result.noticeId)}`}
+                href={buildSamDetailHref(result)}
                 className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">

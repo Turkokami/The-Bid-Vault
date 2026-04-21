@@ -16,7 +16,7 @@ export function StateLocalOpportunityCard({
         : "border-white/10 bg-white/5 text-slate-300";
 
   return (
-    <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/75 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.24)] transition hover:border-emerald-400/25 hover:bg-slate-950/90">
+    <article className="rounded-[1.35rem] border border-white/10 bg-slate-950/75 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.24)] transition hover:border-emerald-400/25 hover:bg-slate-950/90 sm:rounded-[1.75rem] sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -38,18 +38,18 @@ export function StateLocalOpportunityCard({
 
           <Link
             href={`/state-local/${opportunity.sourceCode}/${opportunity.id}`}
-            className="mt-4 block text-2xl font-semibold tracking-tight text-white transition hover:text-emerald-200"
+            className="mt-4 block text-xl font-semibold tracking-tight text-white transition hover:text-emerald-200 sm:text-2xl"
           >
             {opportunity.title}
           </Link>
 
-          <p className="mt-3 text-sm leading-7 text-slate-300">{opportunity.summary}</p>
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300 sm:leading-7">{opportunity.summary}</p>
         </div>
 
         <StateLocalSaveButton opportunityId={opportunity.id} />
       </div>
 
-      <div className="mt-5 grid gap-4 text-sm text-slate-300 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-5 grid gap-3 text-sm text-slate-300 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Who posted this</p>
           <p className="mt-2 text-white">{opportunity.issuingEntity}</p>

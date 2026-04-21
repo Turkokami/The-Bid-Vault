@@ -154,10 +154,14 @@ function buildSynopsis(record: Record<string, unknown>, title: string, agency: s
 }
 
 function buildSourceUrl(record: Record<string, unknown>, noticeId: string) {
-  return (
-    pickString(record.uiLink, record.link, record.url) ||
-    `https://sam.gov/opp/${encodeURIComponent(noticeId)}/view`
-  );
+  const rawUrl = pickString(record.uiLink, record.link, record.url);
+  const oppId = rawUrl.match(/\/opp\/([^/?#]+)\/view/i)?.[1];
+
+  if (oppId) {
+    return `https://sam.gov/opp/${encodeURIComponent(oppId)}/view`;
+  }
+
+  return rawUrl || `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(noticeId)}`;
 }
 
 function getResponseArray(payload: unknown): Record<string, unknown>[] {
@@ -542,13 +546,8 @@ export async function getSamOpportunityById(id: string) {
       return directMatch;
     }
   } catch {
-    // Fall through to broader search snapshot below.
+    return null;
   }
 
-  const snapshot = await getSamSearchSnapshot();
-  return (
-    snapshot.records.find(
-      (record) => record.id === id || normalize(record.noticeId) === normalize(id),
-    ) ?? null
-  );
+  return null;
 }
