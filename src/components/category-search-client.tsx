@@ -12,7 +12,13 @@ import {
   type CategoryCodeRecord,
   type CategorySearchFilters,
 } from "@/lib/category-codes";
-import { readSavedCategoryCodeIds } from "@/lib/demo-category-store";
+import {
+  readSavedCategoryCodeIds,
+  readSavedNaicsCodeLists,
+  removeNaicsCodeList,
+  saveCustomCodeList,
+  type SavedNaicsCodeList,
+} from "@/lib/demo-category-store";
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -31,12 +37,21 @@ export function CategorySearchClient({
 }) {
   const [filters, setFilters] = useState(initialFilters);
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
+  const [customListName, setCustomListName] = useState("");
 
   useEffect(() => {
-    const sync = () => setSavedIds(readSavedCategoryCodeIds());
+    const sync = () => {
+      setSavedIds(readSavedCategoryCodeIds());
+      setSavedCodeLists(readSavedNaicsCodeLists());
+    };
     sync();
     window.addEventListener("bid-vault-category-codes-updated", sync);
-    return () => window.removeEventListener("bid-vault-category-codes-updated", sync);
+    window.addEventListener("bid-vault-naics-code-lists-updated", sync);
+    return () => {
+      window.removeEventListener("bid-vault-category-codes-updated", sync);
+      window.removeEventListener("bid-vault-naics-code-lists-updated", sync);
+    };
   }, []);
 
   const options = useMemo(() => buildCategoryFilterOptions(records), [records]);
@@ -49,6 +64,30 @@ export function CategorySearchClient({
     () => records.filter((record) => savedIds.includes(record.id)),
     [records, savedIds],
   );
+  const selectedCodeGroups = useMemo(() => {
+    const allCodes = savedRecords.map((record) => record.code);
+    return {
+      allCodes,
+      samCodes: savedRecords
+        .filter((record) => record.sourceName === "Bid Vault Map" && /^\d{6}$/.test(record.code))
+        .map((record) => record.code),
+      websCodes: savedRecords
+        .filter((record) => record.sourceName === "WEBS")
+        .map((record) => record.code),
+      pscCodes: savedRecords
+        .filter((record) => record.sourceName === "PSC")
+        .map((record) => record.code),
+      searchTerms: Array.from(
+        new Set(
+          savedRecords.flatMap((record) => [
+            record.title,
+            record.topLevelCategory,
+            ...record.normalizedKeywords.slice(0, 4),
+          ]),
+        ),
+      ),
+    };
+  }, [savedRecords]);
 
   return (
     <div className="space-y-8">
@@ -275,16 +314,54 @@ export function CategorySearchClient({
             </p>
             <div className="mt-5 space-y-3">
               {savedRecords.length > 0 ? (
-                savedRecords.map((record) => (
-                  <Link
-                    key={record.id}
-                    href={`/categories/${record.id}`}
-                    className="block rounded-[1.25rem] border border-emerald-400/15 bg-black/20 p-4 transition hover:border-emerald-300/30 hover:bg-black/30"
-                  >
-                    <p className="font-semibold text-white">{record.code}</p>
-                    <p className="mt-1 text-sm text-emerald-50/90">{record.title}</p>
-                  </Link>
-                ))
+                <>
+                  {savedRecords.map((record) => (
+                    <Link
+                      key={record.id}
+                      href={`/categories/${record.id}`}
+                      className="block rounded-[1.25rem] border border-emerald-400/15 bg-black/20 p-4 transition hover:border-emerald-300/30 hover:bg-black/30"
+                    >
+                      <p className="font-semibold text-white">{record.code}</p>
+                      <p className="mt-1 text-sm text-emerald-50/90">{record.title}</p>
+                    </Link>
+                  ))}
+                  <div className="rounded-[1.25rem] border border-white/10 bg-slate-950/70 p-4">
+                    <label className="block space-y-2 text-sm text-emerald-50">
+                      <span>Name this custom list</span>
+                      <input
+                        value={customListName}
+                        onChange={(event) => setCustomListName(event.target.value)}
+                        placeholder="Example: Pest and wildlife work"
+                        className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        saveCustomCodeList({
+                          name: customListName || "My contractor code list",
+                          codes: selectedCodeGroups.allCodes,
+                          samCodes: selectedCodeGroups.samCodes,
+                          websCodes: selectedCodeGroups.websCodes,
+                          pscCodes: selectedCodeGroups.pscCodes,
+                          searchTerms: selectedCodeGroups.searchTerms,
+                        });
+                        setCustomListName("");
+                      }}
+                      className={buttonStyles({
+                        variant: "primary",
+                        size: "md",
+                        fullWidth: true,
+                        className: "mt-3",
+                      })}
+                    >
+                      Save as reusable search list
+                    </button>
+                    <p className="mt-3 text-xs leading-5 text-emerald-50/75">
+                      This list can be applied in bulk to SAM Search and WEBS Search.
+                    </p>
+                  </div>
+                </>
               ) : (
                 <p className="text-sm leading-6 text-emerald-50/80">
                   Save the codes that match your trade so you can reuse them in contract search, state and local matching, and future alerts.
@@ -305,6 +382,49 @@ export function CategorySearchClient({
               <li>grounds maintenance</li>
             </ul>
           </section>
+
+          {savedCodeLists.length > 0 ? (
+            <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Reusable search lists</p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Apply a saved code list to SAM or WEBS in bulk.
+              </p>
+              <div className="mt-4 space-y-3">
+                {savedCodeLists.map((list) => {
+                  const samCodes = list.samCodes?.length ? list.samCodes : list.codes.filter((code) => /^\d{6}$/.test(code));
+                  const websCodes = list.websCodes?.length ? list.websCodes : list.codes.filter((code) => !/^\d{6}$/.test(code));
+                  const keywords = (list.searchTerms ?? []).slice(0, 4).join(", ");
+                  return (
+                    <div key={list.id} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                      <p className="font-medium text-white">{list.name}</p>
+                      <p className="mt-1 text-xs text-slate-400">{list.codes.join(", ")}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link
+                          href={`/sam-search?naics=${encodeURIComponent(samCodes.join(", "))}&keywords=${encodeURIComponent(keywords)}`}
+                          className={buttonStyles({ variant: "secondary", size: "sm" })}
+                        >
+                          Search SAM
+                        </Link>
+                        <Link
+                          href={`/state-local/washington?codes=${encodeURIComponent(websCodes.join(", "))}&keywords=${encodeURIComponent(keywords)}`}
+                          className={buttonStyles({ variant: "ghost", size: "sm" })}
+                        >
+                          Search WEBS
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => removeNaicsCodeList(list.id)}
+                          className={buttonStyles({ variant: "ghost", size: "sm" })}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
         </aside>
       </section>
     </div>

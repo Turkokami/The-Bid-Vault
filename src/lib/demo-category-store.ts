@@ -7,8 +7,21 @@ export type SavedNaicsCodeList = {
   id: string;
   name: string;
   codes: string[];
+  samCodes?: string[];
+  websCodes?: string[];
+  pscCodes?: string[];
+  searchTerms?: string[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type CustomCodeListInput = {
+  name: string;
+  codes: string[];
+  samCodes?: string[];
+  websCodes?: string[];
+  pscCodes?: string[];
+  searchTerms?: string[];
 };
 
 export function readSavedCategoryCodeIds() {
@@ -57,6 +70,12 @@ export function readSavedNaicsCodeLists() {
     return parsed.map((list) => ({
       ...list,
       codes: Array.from(new Set(list.codes.map((code) => code.trim()).filter(Boolean))),
+      samCodes: Array.from(new Set((list.samCodes ?? list.codes.filter(isLikelyNaicsCode)).map(cleanCode))),
+      websCodes: Array.from(
+        new Set((list.websCodes ?? list.codes.filter((code) => !isLikelyNaicsCode(code))).map(cleanCode)),
+      ),
+      pscCodes: Array.from(new Set((list.pscCodes ?? []).map(cleanCode))),
+      searchTerms: Array.from(new Set((list.searchTerms ?? []).map((term) => term.trim()).filter(Boolean))),
     }));
   } catch {
     return [] as SavedNaicsCodeList[];
@@ -72,13 +91,35 @@ function buildNaicsListId(name: string) {
   return `naics-list-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
-export function saveNaicsCodeList(name: string, codes: string[]) {
+function cleanCode(code: string) {
+  return code.trim();
+}
+
+function isLikelyNaicsCode(code: string) {
+  return /^\d{6}$/.test(code.trim());
+}
+
+export function saveCustomCodeList(input: CustomCodeListInput) {
   if (typeof window === "undefined") {
     return;
   }
 
-  const trimmedName = name.trim();
-  const normalizedCodes = Array.from(new Set(codes.map((code) => code.trim()).filter(Boolean)));
+  const trimmedName = input.name.trim();
+  const normalizedCodes = Array.from(new Set(input.codes.map(cleanCode).filter(Boolean)));
+  const samCodes = Array.from(
+    new Set((input.samCodes ?? normalizedCodes.filter(isLikelyNaicsCode)).map(cleanCode).filter(Boolean)),
+  );
+  const websCodes = Array.from(
+    new Set(
+      (input.websCodes ?? normalizedCodes.filter((code) => !isLikelyNaicsCode(code)))
+        .map(cleanCode)
+        .filter(Boolean),
+    ),
+  );
+  const pscCodes = Array.from(new Set((input.pscCodes ?? []).map(cleanCode).filter(Boolean)));
+  const searchTerms = Array.from(
+    new Set((input.searchTerms ?? []).map((term) => term.trim()).filter(Boolean)),
+  );
 
   if (!trimmedName || normalizedCodes.length === 0) {
     return;
@@ -91,6 +132,10 @@ export function saveNaicsCodeList(name: string, codes: string[]) {
     id: existing?.id ?? buildNaicsListId(trimmedName),
     name: trimmedName,
     codes: normalizedCodes,
+    samCodes,
+    websCodes,
+    pscCodes,
+    searchTerms,
     createdAt: existing?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -99,6 +144,15 @@ export function saveNaicsCodeList(name: string, codes: string[]) {
     next,
     ...current.filter((list) => list.name.toLowerCase() !== trimmedName.toLowerCase()),
   ]);
+}
+
+export function saveNaicsCodeList(name: string, codes: string[]) {
+  saveCustomCodeList({
+    name,
+    codes,
+    samCodes: codes,
+    searchTerms: [],
+  });
 }
 
 export function removeNaicsCodeList(id: string) {

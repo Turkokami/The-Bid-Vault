@@ -177,14 +177,16 @@ export function ContractsClient({
                   className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4"
                 >
                   <p className="font-medium text-white">{list.name}</p>
-                  <p className="mt-1 text-xs text-slate-400">{list.codes.join(", ")}</p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    SAM codes: {(list.samCodes?.length ? list.samCodes : list.codes).join(", ")}
+                  </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() =>
                         setFilters((current) => ({
                           ...current,
-                          naicsCodes: list.codes,
+                          naicsCodes: list.samCodes?.length ? list.samCodes : list.codes,
                           page: 1,
                         }))
                       }

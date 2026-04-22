@@ -1,4 +1,17 @@
-export type StateLocalSourceCode = "washington" | "oregon" | "idaho" | "california";
+export type StateLocalSourceCode =
+  | "washington"
+  | "arizona"
+  | "flagstaff"
+  | "coconino"
+  | "mohave"
+  | "yavapai"
+  | "white-pine"
+  | "nye"
+  | "oregon"
+  | "idaho"
+  | "california"
+  | "nevada"
+  | "texas";
 
 export type StateLocalOpportunityStatus = "Open" | "Closing Soon" | "Closed";
 
@@ -41,6 +54,8 @@ export type StateLocalSourceSummary = {
   sourceCode: StateLocalSourceCode;
   sourceName: string;
   stateCode: string;
+  sourceType?: "State" | "County / City" | "Regional Pack";
+  regionLabel?: string;
   status: StateLocalSourceStatus;
   cadence: string;
   description: string;

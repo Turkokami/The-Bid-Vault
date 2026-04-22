@@ -717,15 +717,35 @@ export function GovernmentDataClient({
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div>
                         <p className="font-medium text-white">{list.name}</p>
-                        <p className="mt-1 text-xs text-slate-400">{list.codes.join(", ")}</p>
+                        <p className="mt-1 text-xs text-slate-400">
+                          SAM codes: {(list.samCodes?.length ? list.samCodes : list.codes).join(", ")}
+                        </p>
+                        {list.websCodes?.length ? (
+                          <p className="mt-1 text-xs text-slate-500">
+                            Also saved for WEBS: {list.websCodes.join(", ")}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => setSearchNaics(list.codes.join(", "))}
+                          onClick={() => {
+                            const samCodes = list.samCodes?.length ? list.samCodes : list.codes;
+                            const keywords = list.searchTerms?.length
+                              ? list.searchTerms.slice(0, 4).join(", ")
+                              : searchKeywords;
+                            setSearchNaics(samCodes.join(", "));
+                            if (list.searchTerms?.length && !searchKeywords.trim()) {
+                              setSearchKeywords(keywords);
+                            }
+                            applySearch({
+                              naics: samCodes.join(", "),
+                              keywords,
+                            });
+                          }}
                           className={buttonStyles({ variant: "secondary", size: "sm" })}
                         >
-                          Apply list
+                          Apply to SAM
                         </button>
                         <button
                           type="button"

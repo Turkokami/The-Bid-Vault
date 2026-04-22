@@ -7,6 +7,11 @@ import { StateLocalFilterSidebar } from "@/components/state-local-filter-sidebar
 import { StateLocalOpportunityCard } from "@/components/state-local-opportunity-card";
 import { buttonStyles } from "@/components/ui/button";
 import {
+  readSavedNaicsCodeLists,
+  removeNaicsCodeList,
+  type SavedNaicsCodeList,
+} from "@/lib/demo-category-store";
+import {
   forceRefreshStateLocalSource,
   getMergedStateLocalSnapshot,
   readSavedStateLocalEntries,
@@ -44,6 +49,7 @@ export function StateLocalClient({
   const [syncLogs, setSyncLogs] = useState(initialSyncLogs);
   const [filters, setFilters] = useState(initialFilters);
   const [savedCount, setSavedCount] = useState(0);
+  const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
   const [refreshMessage, setRefreshMessage] = useState("");
 
   useEffect(() => {
@@ -71,6 +77,13 @@ export function StateLocalClient({
       window.removeEventListener("bid-vault-state-local-updated", sync);
       window.removeEventListener("bid-vault-state-local-saved-updated", sync);
     };
+  }, []);
+
+  useEffect(() => {
+    const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
+    syncSavedLists();
+    window.addEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
+    return () => window.removeEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
   }, []);
 
   const options = useMemo(() => buildStateLocalFilterOptions(opportunities), [opportunities]);
@@ -143,6 +156,58 @@ export function StateLocalClient({
               </button>
             </div>
           </div>
+
+          {savedCodeLists.length > 0 ? (
+            <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4">
+              <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Saved code lists</p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Apply your saved work categories to WEBS searches in one click.
+              </p>
+              <div className="mt-4 space-y-3">
+                {savedCodeLists.map((list) => {
+                  const websCodes = list.websCodes?.length ? list.websCodes : list.codes;
+                  const visibleWebsCodes = websCodes.filter((code) => options.categoryCodes.includes(code));
+                  const terms = list.searchTerms ?? [];
+                  return (
+                    <div key={list.id} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                      <p className="font-medium text-white">{list.name}</p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        WEBS codes: {websCodes.join(", ")}
+                      </p>
+                      {terms.length ? (
+                        <p className="mt-1 text-xs text-slate-500">
+                          Search words: {terms.slice(0, 5).join(", ")}
+                        </p>
+                      ) : null}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFilters((current) => ({
+                              ...current,
+                              categoryCodes: visibleWebsCodes,
+                              keywords: terms.length ? terms.slice(0, 4).join(", ") : current.keywords,
+                              page: 1,
+                            }))
+                          }
+                          className={buttonStyles({ variant: "secondary", size: "sm" })}
+                        >
+                          Apply to WEBS
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeNaicsCodeList(list.id)}
+                          className={buttonStyles({ variant: "ghost", size: "sm" })}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </StateLocalFilterSidebar>
 
         <div className="order-1 space-y-4 xl:order-2 xl:space-y-6">

@@ -3,7 +3,21 @@ import { StateLocalDetailClient } from "@/components/state-local-detail-client";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 import type { StateLocalSourceCode } from "@/lib/sources/types";
 
-const knownSources: StateLocalSourceCode[] = ["washington", "oregon", "idaho", "california"];
+const knownSources: StateLocalSourceCode[] = [
+  "washington",
+  "arizona",
+  "flagstaff",
+  "coconino",
+  "mohave",
+  "yavapai",
+  "white-pine",
+  "nye",
+  "oregon",
+  "idaho",
+  "california",
+  "nevada",
+  "texas",
+];
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

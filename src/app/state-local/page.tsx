@@ -6,6 +6,13 @@ export default async function StateLocalPage() {
   const snapshot = await getStateLocalSyncSnapshot();
   const connectedSources = snapshot.sources.filter((source) => source.status === "Connected");
   const plannedSources = snapshot.sources.filter((source) => source.status === "Planned");
+  const statewideSources = plannedSources.filter((source) => source.sourceType !== "County / City");
+  const localSources = plannedSources.filter((source) => source.sourceType === "County / City");
+  const northernArizonaSources = localSources.filter((source) => source.regionLabel === "Northern Arizona");
+  const serviceAreaSources = localSources.filter((source) =>
+    ["Northwest Arizona", "Eastern Nevada", "Southern Nevada"].includes(source.regionLabel ?? ""),
+  );
+  const featuredLocalSources = [...northernArizonaSources, ...serviceAreaSources];
 
   return (
     <div className="space-y-8">
@@ -25,6 +32,15 @@ export default async function StateLocalPage() {
           <Link href="/state-local/washington" className={buttonStyles({ variant: "primary", size: "md" })}>
             Search Washington opportunities
           </Link>
+          <a href="https://spo.az.gov/app" className={buttonStyles({ variant: "secondary", size: "md" })}>
+            Open Arizona source
+          </a>
+          <a href="https://nevadaepro.com/" className={buttonStyles({ variant: "secondary", size: "md" })}>
+            Open Nevada source
+          </a>
+          <a href="https://www.txsmartbuy.gov/esbd" className={buttonStyles({ variant: "secondary", size: "md" })}>
+            Open Texas source
+          </a>
           <Link href="/sync-center" className={buttonStyles({ variant: "secondary", size: "md" })}>
             Open sync center
           </Link>
@@ -88,9 +104,9 @@ export default async function StateLocalPage() {
           </article>
 
           <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Coming next</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">State sources coming next</p>
             <div className="mt-5 space-y-4">
-              {plannedSources.map((source) => (
+              {statewideSources.map((source) => (
                 <div
                   key={source.id}
                   className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
@@ -101,11 +117,72 @@ export default async function StateLocalPage() {
                       {source.status}
                     </span>
                   </div>
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-300/70">
+                    {source.regionLabel ?? `${source.stateCode} statewide`}
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-slate-400">{source.description}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{source.helperText}</p>
+                  <div className="mt-4">
+                    <a
+                      href={source.portalUrl}
+                      className={buttonStyles({ variant: "ghost", size: "sm" })}
+                    >
+                      Open original source
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
           </article>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-emerald-400/15 bg-emerald-400/[0.04] p-6 shadow-[0_0_30px_rgba(34,197,94,0.08)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
+              County & city coverage
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">
+              Your Arizona and Nevada service areas are now in the expansion plan.
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+              County and city contracts are spread across local portals, so we track them as
+              source cards first, then connect the best ones as live feeds. This keeps the app
+              organized while still giving us a path to deep local coverage for the counties
+              where your providers actually work.
+            </p>
+          </div>
+          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+            AZ + NV local first
+          </span>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {featuredLocalSources.map((source) => (
+            <article
+              key={source.id}
+              className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-base font-semibold text-white">{source.sourceName}</p>
+                  <p className="mt-1 text-sm text-slate-400">{source.regionLabel}</p>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                  {source.status}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-300">{source.description}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-500">{source.helperText}</p>
+              <a
+                href={source.portalUrl}
+                className={`${buttonStyles({ variant: "ghost", size: "sm" })} mt-4`}
+              >
+                Open local source
+              </a>
+            </article>
+          ))}
         </div>
       </section>
     </div>
