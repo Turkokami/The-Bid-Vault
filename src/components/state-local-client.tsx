@@ -38,11 +38,33 @@ export function StateLocalClient({
   initialSources,
   initialSyncLogs,
   initialFilters,
+  pageEyebrow = "State & local opportunities",
+  pageTitle = "State and local opportunities in a simpler view.",
+  pageDescription = "This page helps you find contract opportunities from state and local government sources.",
+  sourceLabel = "State and local sources",
+  sourceDescription = "The original government portal or feed where these opportunities were found.",
+  focusSourceCodes,
+  enableLiveRefresh = false,
+  refreshButtonLabel = "Refresh live records",
+  refreshSuccessMessage = "Live opportunities refreshed.",
+  refreshErrorMessage = "Live records could not refresh right now. Please try again.",
+  resetFilters,
 }: {
   initialOpportunities: NormalizedStateLocalOpportunity[];
   initialSources: StateLocalSourceSummary[];
   initialSyncLogs: StateLocalSourceSyncLog[];
   initialFilters: StateLocalFilters;
+  pageEyebrow?: string;
+  pageTitle?: string;
+  pageDescription?: string;
+  sourceLabel?: string;
+  sourceDescription?: string;
+  focusSourceCodes?: string[];
+  enableLiveRefresh?: boolean;
+  refreshButtonLabel?: string;
+  refreshSuccessMessage?: string;
+  refreshErrorMessage?: string;
+  resetFilters?: StateLocalFilters;
 }) {
   const [opportunities, setOpportunities] = useState(initialOpportunities);
   const [sources, setSources] = useState(initialSources);
@@ -97,6 +119,13 @@ export function StateLocalClient({
   const currentPage = Math.min(Math.max(filters.page, 1), totalPages);
   const visibleResults = results.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const latestSync = syncLogs[0];
+  const visibleSources = useMemo(
+    () =>
+      focusSourceCodes?.length
+        ? sources.filter((source) => focusSourceCodes.includes(source.sourceCode))
+        : sources,
+    [focusSourceCodes, sources],
+  );
 
   return (
     <div className="space-y-8">
@@ -118,38 +147,25 @@ export function StateLocalClient({
           <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Quick actions</p>
             <div className="mt-4 flex flex-col gap-3">
+              {enableLiveRefresh ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await forceRefreshStateLocalSource();
+                      setRefreshMessage(refreshSuccessMessage);
+                    } catch {
+                      setRefreshMessage(refreshErrorMessage);
+                    }
+                  }}
+                  className={buttonStyles({ variant: "primary", size: "md", fullWidth: true })}
+                >
+                  {refreshButtonLabel}
+                </button>
+              ) : null}
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    await forceRefreshStateLocalSource();
-                    setRefreshMessage("Washington opportunities refreshed from the live WEBS source.");
-                  } catch {
-                    setRefreshMessage("WEBS could not refresh live records right now. Please try again.");
-                  }
-                }}
-                className={buttonStyles({ variant: "primary", size: "md", fullWidth: true })}
-              >
-                Refresh live WEBS records
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setFilters({
-                    keywords: "",
-                    states: ["WA"],
-                    sources: ["WEBS"],
-                    opportunityTypes: [],
-                    entities: [],
-                    statuses: [],
-                    categoryCodes: [],
-                    registration: [],
-                    dueFrom: "",
-                    dueTo: "",
-                    sortBy: "dueDate",
-                    page: 1,
-                  })
-                }
+                onClick={() => setFilters(resetFilters ?? initialFilters)}
                 className={buttonStyles({ variant: "ghost", size: "md", fullWidth: true })}
               >
                 Clear filters
@@ -214,12 +230,12 @@ export function StateLocalClient({
           <section className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur sm:p-6 xl:rounded-[2rem]">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">State & local opportunities</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">{pageEyebrow}</p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Washington opportunities in a simpler view than WEBS.
+                  {pageTitle}
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:leading-7">
-                  This page helps you find contract opportunities from Washington and other state or local government sources.
+                  {pageDescription}
                 </p>
               </div>
 
@@ -291,9 +307,9 @@ export function StateLocalClient({
           <section className="hidden gap-4 md:grid-cols-3 xl:grid">
             <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Where this came from</p>
-              <p className="mt-3 text-lg font-semibold text-white">WEBS</p>
+              <p className="mt-3 text-lg font-semibold text-white">{sourceLabel}</p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Washington&apos;s Electronic Business Solution for many state and local opportunities.
+                {sourceDescription}
               </p>
             </article>
             <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
@@ -348,7 +364,7 @@ export function StateLocalClient({
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Connected sources</p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Washington WEBS is live first. Other state systems are staged for later connectors.
+                  Choose a location view to focus the search on the state, county, or city where your team works.
                 </p>
               </div>
               <Link href="/state-local" className={buttonStyles({ variant: "ghost", size: "sm" })}>
@@ -356,7 +372,7 @@ export function StateLocalClient({
               </Link>
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {sources.map((source) => (
+              {visibleSources.map((source) => (
                 <article key={source.id} className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>

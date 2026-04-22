@@ -104,7 +104,7 @@ function buildSamDetailHref(record: SamOpportunityRecord) {
   if (record.setAside) search.set("setAside", record.setAside);
   if (record.synopsis) search.set("summary", record.synopsis);
 
-  return `/sam-search/${encodeURIComponent(record.id)}?${search.toString()}`;
+  return `/government-data/${encodeURIComponent(record.id)}?${search.toString()}`;
 }
 
 function dedupeRecords(records: SamOpportunityRecord[]) {

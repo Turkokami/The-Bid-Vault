@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/sam-search/:id+",
+        destination: "/government-data/:id+",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -2,6 +2,55 @@ import Link from "next/link";
 import { buttonStyles } from "@/components/ui/button";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 
+const locationViews = [
+  {
+    href: "/state-local/washington",
+    label: "Washington",
+    description: "Live WEBS search for Washington state and local postings.",
+    status: "Live",
+  },
+  {
+    href: "/state-local/arizona",
+    label: "Arizona",
+    description: "Arizona statewide plus Flagstaff, Coconino, Mohave, and Yavapai.",
+    status: "Planned",
+  },
+  {
+    href: "/state-local/northern-arizona",
+    label: "Northern Arizona",
+    description: "Focused view for Flagstaff, Coconino, Yavapai, and Mohave areas.",
+    status: "Planned",
+  },
+  {
+    href: "/state-local/nevada",
+    label: "Nevada",
+    description: "Nevada statewide plus White Pine and Nye County areas.",
+    status: "Planned",
+  },
+  {
+    href: "/state-local/mohave",
+    label: "Mohave County",
+    description: "Kingman, Lake Havasu, Bullhead City, and county service areas.",
+    status: "Planned",
+  },
+  {
+    href: "/state-local/nye",
+    label: "Nye County",
+    description: "Pahrump, Tonopah, roads, facilities, utilities, and county services.",
+    status: "Planned",
+  },
+  {
+    href: "/state-local/white-pine",
+    label: "White Pine County",
+    description: "Ely-area county work, public works, facilities, and local services.",
+    status: "Planned",
+  },
+];
+
+function sourceViewHref(sourceCode: string) {
+  return sourceCode === "washington" ? "/state-local/washington" : `/state-local/${sourceCode}`;
+}
+
 export default async function StateLocalPage() {
   const snapshot = await getStateLocalSyncSnapshot();
   const connectedSources = snapshot.sources.filter((source) => source.status === "Connected");
@@ -47,6 +96,51 @@ export default async function StateLocalPage() {
         </div>
       </section>
 
+      <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
+              Choose your location
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">
+              Give customers a simple view for the area they serve.
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+              Each location gets its own focused page with the same clean search layout. Washington
+              is live now, and the Arizona/Nevada county views are ready for connector rollout.
+            </p>
+          </div>
+          <Link href="/state-local/washington" className={buttonStyles({ variant: "primary", size: "md" })}>
+            Open live Washington view
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {locationViews.map((view) => (
+            <Link
+              key={view.href}
+              href={view.href}
+              className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-lg font-semibold text-white">{view.label}</h3>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                    view.status === "Live"
+                      ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
+                      : "border-white/10 bg-slate-950/70 text-slate-300"
+                  }`}
+                >
+                  {view.status}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-400">{view.description}</p>
+              <p className="mt-4 text-sm font-semibold text-emerald-200">Open location view</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
           <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">
@@ -73,10 +167,10 @@ export default async function StateLocalPage() {
                 <p className="mt-3 text-sm leading-6 text-slate-400">{source.helperText}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link
-                    href="/state-local/washington"
+                    href={sourceViewHref(source.sourceCode)}
                     className={buttonStyles({ variant: "primary", size: "sm" })}
                   >
-                    Open Washington view
+                    Open location view
                   </Link>
                   <Link
                     href={source.portalUrl}
@@ -123,12 +217,20 @@ export default async function StateLocalPage() {
                   <p className="mt-2 text-sm leading-6 text-slate-400">{source.description}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-500">{source.helperText}</p>
                   <div className="mt-4">
-                    <a
-                      href={source.portalUrl}
-                      className={buttonStyles({ variant: "ghost", size: "sm" })}
-                    >
-                      Open original source
-                    </a>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={sourceViewHref(source.sourceCode)}
+                        className={buttonStyles({ variant: "secondary", size: "sm" })}
+                      >
+                        Open location view
+                      </Link>
+                      <a
+                        href={source.portalUrl}
+                        className={buttonStyles({ variant: "ghost", size: "sm" })}
+                      >
+                        Open original source
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -177,10 +279,16 @@ export default async function StateLocalPage() {
               <p className="mt-3 text-sm leading-6 text-slate-500">{source.helperText}</p>
               <a
                 href={source.portalUrl}
-                className={`${buttonStyles({ variant: "ghost", size: "sm" })} mt-4`}
+                className={`${buttonStyles({ variant: "ghost", size: "sm" })} mt-2`}
               >
                 Open local source
               </a>
+              <Link
+                href={sourceViewHref(source.sourceCode)}
+                className={`${buttonStyles({ variant: "secondary", size: "sm" })} mt-4`}
+              >
+                Open location view
+              </Link>
             </article>
           ))}
         </div>
