@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { buttonStyles } from "@/components/ui/button";
 import {
   categoryCodeRecords,
@@ -20,6 +20,7 @@ const suggestedSearches = [
 export function HomeCategorySearchSection() {
   const [query, setQuery] = useState("pest control");
   const [savedCount, setSavedCount] = useState(0);
+  const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
     const sync = () => setSavedCount(readSavedCategoryCodeIds().length);
@@ -29,8 +30,8 @@ export function HomeCategorySearchSection() {
   }, []);
 
   const matches = useMemo(
-    () => mapServicePhraseToSuggestedCategories(query, categoryCodeRecords).slice(0, 6),
-    [query],
+    () => mapServicePhraseToSuggestedCategories(deferredQuery, categoryCodeRecords).slice(0, 6),
+    [deferredQuery],
   );
 
   return (

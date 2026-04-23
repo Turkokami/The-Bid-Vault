@@ -19,6 +19,15 @@ export type CategorySearchFilters = {
   letter: string;
 };
 
+type IndexedCategoryCodeRecord = {
+  record: CategoryCodeRecord;
+  codeLower: string;
+  titleLower: string;
+  searchText: string;
+  keywordText: string;
+  tokenSet: Set<string>;
+};
+
 const curatedCategoryCodeRecords: CategoryCodeRecord[] = [
   {
     id: "cat-webs-910",
@@ -826,6 +835,33 @@ export const categoryCodeRecords: CategoryCodeRecord[] = mergeCategoryCodeRecord
   curatedCategoryCodeRecords,
 );
 
+function buildIndexedRecord(record: CategoryCodeRecord): IndexedCategoryCodeRecord {
+  const codeLower = record.code.toLowerCase();
+  const titleLower = record.title.toLowerCase();
+  const keywordText = record.normalizedKeywords.join(" ").toLowerCase();
+  const searchText = [
+    record.code,
+    record.title,
+    record.description,
+    record.topLevelCategory,
+    ...record.normalizedKeywords,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return {
+    record,
+    codeLower,
+    titleLower,
+    searchText,
+    keywordText,
+    tokenSet: keywordTokenSet(record),
+  };
+}
+
+const categoryCodeIndex = categoryCodeRecords.map(buildIndexedRecord);
+const categoryCodeIndexById = new Map(categoryCodeIndex.map((entry) => [entry.record.id, entry]));
+
 export function buildCategoryFilterOptions(records: CategoryCodeRecord[]) {
   const unique = (values: string[]) => Array.from(new Set(values)).sort();
   return {
@@ -853,20 +889,29 @@ function keywordTokenSet(record: CategoryCodeRecord) {
   );
 }
 
+function getIndexedRecords(records: CategoryCodeRecord[]) {
+  if (records === categoryCodeRecords) {
+    return categoryCodeIndex;
+  }
+
+  return records.map(buildIndexedRecord);
+}
+
 export function findRelatedCategoryCodes(record: CategoryCodeRecord, records: CategoryCodeRecord[]) {
   const keywordSet = new Set(record.normalizedKeywords);
-  const tokenSet = keywordTokenSet(record);
+  const tokenSet =
+    categoryCodeIndexById.get(record.id)?.tokenSet ?? keywordTokenSet(record);
 
-  return records
-    .filter((item) => item.id !== record.id)
-    .map((item) => {
+  return getIndexedRecords(records)
+    .filter((entry) => entry.record.id !== record.id)
+    .map((entry) => {
+      const item = entry.record;
       let score = 0;
-      const itemTokens = keywordTokenSet(item);
       if (item.topLevelCategory === record.topLevelCategory) score += 3;
       if (item.parentCode && item.parentCode === record.parentCode) score += 2;
       if (item.parentCode === record.code || record.parentCode === item.code) score += 2;
       score += item.normalizedKeywords.filter((keyword) => keywordSet.has(keyword)).length;
-      score += Array.from(itemTokens).filter((token) => tokenSet.has(token)).length;
+      score += Array.from(entry.tokenSet).filter((token) => tokenSet.has(token)).length;
       return { item, score };
     })
     .filter((entry) => entry.score > 0)
@@ -878,8 +923,10 @@ export function findRelatedCategoryCodes(record: CategoryCodeRecord, records: Ca
 export function searchCategoryCodes(records: CategoryCodeRecord[], filters: CategorySearchFilters) {
   const queryTerms = tokenize(filters.query);
   const exactCode = filters.exactCode.trim().toLowerCase();
+  const indexedRecords = getIndexedRecords(records);
 
-  const filtered = records.filter((record) => {
+  const filtered = indexedRecords.filter((entry) => {
+    const record = entry.record;
     if (filters.sources.length > 0 && !filters.sources.includes(record.sourceName)) {
       return false;
     }
@@ -892,7 +939,7 @@ export function searchCategoryCodes(records: CategoryCodeRecord[], filters: Cate
       return false;
     }
 
-    if (exactCode && !record.code.toLowerCase().includes(exactCode)) {
+    if (exactCode && !entry.codeLower.includes(exactCode)) {
       return false;
     }
 
@@ -900,50 +947,46 @@ export function searchCategoryCodes(records: CategoryCodeRecord[], filters: Cate
       return true;
     }
 
-    const haystack = [
-      record.code,
-      record.title,
-      record.description,
-      record.topLevelCategory,
-      ...record.normalizedKeywords,
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return queryTerms.every((term) => haystack.includes(term));
+    return queryTerms.every((term) => entry.searchText.includes(term));
   });
 
   return filtered.sort((left, right) => {
     if (!filters.query) {
-      return left.title.localeCompare(right.title);
+      return left.record.title.localeCompare(right.record.title);
     }
 
-    const score = (record: CategoryCodeRecord) => {
+    const score = (entry: IndexedCategoryCodeRecord) => {
       let total = 0;
-      const haystack = [record.title, record.description, ...record.normalizedKeywords].join(" ").toLowerCase();
       for (const term of queryTerms) {
-        if (record.title.toLowerCase().includes(term)) total += 4;
-        if (record.code.toLowerCase().includes(term)) total += 5;
-        if (record.normalizedKeywords.some((keyword) => keyword.includes(term))) total += 3;
-        if (haystack.includes(term)) total += 1;
+        if (entry.titleLower.includes(term)) total += 4;
+        if (entry.codeLower.includes(term)) total += 5;
+        if (entry.keywordText.includes(term)) total += 3;
+        if (entry.searchText.includes(term)) total += 1;
       }
       return total;
     };
 
-    return score(right) - score(left) || left.title.localeCompare(right.title);
-  });
+    return score(right) - score(left) || left.record.title.localeCompare(right.record.title);
+  }).map((entry) => entry.record);
 }
 
 export function mapServicePhraseToSuggestedCategories(query: string, records: CategoryCodeRecord[]) {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    return curatedCategoryCodeRecords.slice(0, 8);
+  }
+
   const searchResults = searchCategoryCodes(records, {
-    query,
+    query: trimmedQuery,
     exactCode: "",
     sources: [],
     families: [],
     letter: "",
   });
 
-  const relatedPool = searchResults.flatMap((record) => findRelatedCategoryCodes(record, records));
+  const relatedPool = searchResults
+    .slice(0, 3)
+    .flatMap((record) => findRelatedCategoryCodes(record, records));
   const unique = new Map<string, CategoryCodeRecord>();
   [...searchResults, ...relatedPool].forEach((record) => unique.set(record.id, record));
 

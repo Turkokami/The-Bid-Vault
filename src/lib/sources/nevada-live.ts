@@ -72,18 +72,22 @@ export async function fetchLiveNevadaOpportunities(): Promise<NormalizedStateLoc
     const hrefMatch = row.match(/<a href="([^"]*bidDetail\.sda\?docId=[^"]+)"/i);
     const docIdMatch = row.match(/<a href="[^"]*bidDetail\.sda\?docId=[^"]+">([^<]+)<\/a>/i);
 
-    if (cells.length < 11 || !hrefMatch || !docIdMatch) {
+    if (cells.length < 8 || !hrefMatch || !docIdMatch) {
       return [];
     }
 
-    const externalId = stripHtml(docIdMatch[1]);
+    const externalId = stripHtml(docIdMatch[1]) || cells[0] || "";
     const agency = cells[2] || "NevadaEPro Posting";
     const contact = cells[5] || "See original NevadaEPro posting";
     const title = cells[6] || externalId;
     const dueDateTime = cells[7] || "";
-    const categoryCode = cells[11] || "Not listed";
-    const sourceUrl = new URL(hrefMatch[1], NEVADA_ROOT_URL).toString();
+    const categoryCode = cells[11] || cells[10] || cells[9] || "Not listed";
+    const sourceUrl = new URL(decodeHtml(hrefMatch[1]), NEVADA_ROOT_URL).toString();
     const dueDate = toIsoDate(dueDateTime);
+
+    if (!externalId || !title) {
+      return [];
+    }
 
     return [
       {
@@ -99,7 +103,7 @@ export async function fetchLiveNevadaOpportunities(): Promise<NormalizedStateLoc
         categoryCode,
         postedDate: "",
         dueDate,
-        summary: `${agency} opportunity in NevadaEPro for ${title}.`,
+        summary: `${agency} opportunity in NevadaEPro for ${title}${contact ? `. Primary contact: ${contact}.` : "."}`,
         description: `${agency} opportunity in NevadaEPro for ${title}. Open the original posting to review full bid information, attachments, and vendor requirements.`,
         location: "Nevada, NV",
         sourceUrl,

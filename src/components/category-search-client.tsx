@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { CategoryCodeCard } from "@/components/category-code-card";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
@@ -39,6 +39,8 @@ export function CategorySearchClient({
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
   const [customListName, setCustomListName] = useState("");
+  const deferredQuery = useDeferredValue(filters.query);
+  const deferredExactCode = useDeferredValue(filters.exactCode);
 
   useEffect(() => {
     const sync = () => {
@@ -55,10 +57,18 @@ export function CategorySearchClient({
   }, []);
 
   const options = useMemo(() => buildCategoryFilterOptions(records), [records]);
-  const results = useMemo(() => searchCategoryCodes(records, filters), [filters, records]);
+  const effectiveFilters = useMemo(
+    () => ({
+      ...filters,
+      query: deferredQuery,
+      exactCode: deferredExactCode,
+    }),
+    [deferredExactCode, deferredQuery, filters],
+  );
+  const results = useMemo(() => searchCategoryCodes(records, effectiveFilters), [effectiveFilters, records]);
   const suggestions = useMemo(
-    () => mapServicePhraseToSuggestedCategories(filters.query, records),
-    [filters.query, records],
+    () => mapServicePhraseToSuggestedCategories(deferredQuery, records),
+    [deferredQuery, records],
   );
   const savedRecords = useMemo(
     () => records.filter((record) => savedIds.includes(record.id)),
