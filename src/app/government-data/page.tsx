@@ -31,6 +31,7 @@ type GovernmentDataPageProps = {
     industry?: string;
     status?: "all" | "available" | "closing-soon" | "needs-review";
     sort?: "due-soon" | "newest" | "agency" | "title";
+    browse?: string;
   }>;
 };
 
@@ -49,6 +50,7 @@ export default async function GovernmentDataPage({
     industry: params.industry,
     status: params.status,
     sort: params.sort,
+    browseAll: params.browse === "1",
   });
   const clientKey = [
     params.keywords ?? "",
@@ -59,6 +61,7 @@ export default async function GovernmentDataPage({
     params.industry ?? "",
     params.status ?? "",
     params.sort ?? "",
+    params.browse ?? "",
   ].join("|");
 
   return (
@@ -104,6 +107,7 @@ export default async function GovernmentDataPage({
         initialSort={params.sort}
         initialErrorMessage={snapshot.errorMessage}
         liveConfigured={snapshot.liveConfigured}
+        initialBrowseAll={params.browse === "1"}
       />
     </div>
   );

@@ -1,4 +1,3 @@
-import { fetchLiveNevadaOpportunities } from "@/lib/sources/nevada-live";
 import { fetchLiveTexasOpportunities } from "@/lib/sources/texas-live";
 import { websSourceSummary } from "@/lib/sources/webs";
 import { fetchLiveWebsRawOpportunities } from "@/lib/sources/webs-live";
@@ -129,13 +128,15 @@ const plannedSources: StateLocalSourceSummary[] = [
     sourceType: "State",
     regionLabel: "Nevada statewide",
     status: "Connected",
-    cadence: "Live public site",
+    connectionMode: "portal-assisted",
+    cadence: "Portal-assisted",
     description:
-      "Nevada's official electronic procurement portal for current solicitations, bid documents, contracts, and purchase records.",
+      "Nevada's official electronic procurement portal for current solicitations, active contracts, bid documents, and vendor registration.",
     helperText:
-      "Nevada says current solicitations are posted in NEVADAePro. Opportunities can be viewed without registering, but vendor registration may be needed to submit quotes and receive notices.",
-    portalUrl: "https://nevadaepro.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true",
-    lastSyncedAt: "Loading live records",
+      "Nevada active contracts and bids are available in the official portal, but the portal blocks automated background result loading. Use the Nevada location view to apply your saved codes and jump into the live Nevada search pages directly.",
+    portalUrl:
+      "https://nevadaepro.com/bso/view/search/external/advancedSearchContractBlanket.xhtml?view=activeContracts",
+    lastSyncedAt: "Portal-assisted mode ready",
   },
   {
     id: "source-texas",
@@ -211,6 +212,7 @@ function updateConnectedSource(
   sources: StateLocalSourceSummary[],
   sourceCode: StateLocalSourceSummary["sourceCode"],
   helperText?: string,
+  overrides?: Partial<StateLocalSourceSummary>,
 ) {
   const index = sources.findIndex((source) => source.sourceCode === sourceCode);
   if (index === -1) return;
@@ -221,6 +223,8 @@ function updateConnectedSource(
     cadence: "Live public site",
     lastSyncedAt: formatSyncTime(),
     helperText: helperText ?? sources[index].helperText,
+    connectionMode: "live",
+    ...overrides,
   };
 }
 
@@ -319,38 +323,27 @@ export async function getStateLocalSyncSnapshot(): Promise<{
     });
   }
 
-  try {
-    const nevadaOpportunities = await fetchLiveNevadaOpportunities();
-    opportunities.push(...nevadaOpportunities);
-    updateConnectedSource(sources, "nevada");
-    syncLogs.push({
-      id: `sync-nevada-live-${nevadaOpportunities.length}`,
-      sourceName: "NEVADAePro",
-      sourceCode: "nevada",
-      syncStatus: "Success",
-      lastRunAt: formatSyncTime(),
-      recordsAdded: nevadaOpportunities.length,
-      recordsUpdated: 0,
-      notes: "Live NevadaEPro opportunities were loaded directly from the public open-bids search table.",
-    });
-  } catch {
-    updateConnectedSource(
-      sources,
-      "nevada",
-      "NevadaEPro is configured as a live public source, but the latest fetch did not return records. Try refreshing later.",
-    );
-    syncLogs.push({
-      id: "sync-nevada-failed",
-      sourceName: "NEVADAePro",
-      sourceCode: "nevada",
-      syncStatus: "Failed",
-      lastRunAt: formatSyncTime(),
-      recordsAdded: 0,
-      recordsUpdated: 0,
-      errorMessage: "Live NevadaEPro records did not load.",
-      notes: "NevadaEPro is configured for live public search, but the latest fetch did not return usable records.",
-    });
-  }
+  updateConnectedSource(
+    sources,
+    "nevada",
+    "Nevada active contracts and bids are available in the official NevadaEPro portal. The public portal currently blocks automated result extraction, so this source uses a portal-assisted mode while preserving saved-code and workflow support in the app.",
+    {
+      connectionMode: "portal-assisted",
+      cadence: "Portal-assisted",
+      lastSyncedAt: formatSyncTime(),
+    },
+  );
+  syncLogs.push({
+    id: "sync-nevada-portal-assisted",
+    sourceName: "NEVADAePro",
+    sourceCode: "nevada",
+    syncStatus: "Partial",
+    lastRunAt: formatSyncTime(),
+    recordsAdded: 0,
+    recordsUpdated: 0,
+    notes:
+      "NevadaEPro is available in portal-assisted mode. Saved codes and search terms can be applied before opening the live Nevada portal, but the portal blocks background result extraction from The Bid Vault right now.",
+  });
 
   return {
     opportunities,
@@ -359,6 +352,7 @@ export async function getStateLocalSyncSnapshot(): Promise<{
       {
         ...websSourceSummary,
         status: "Connected",
+        connectionMode: "live",
         cadence: "Live public site",
         lastSyncedAt: opportunities.some((item) => item.sourceCode === "washington")
           ? formatSyncTime()

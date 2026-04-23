@@ -22,6 +22,7 @@ export type StateLocalOpportunityType =
   | "Coming Soon";
 
 export type StateLocalSourceStatus = "Connected" | "Planned";
+export type StateLocalConnectionMode = "live" | "portal-assisted" | "planned";
 
 export type NormalizedStateLocalOpportunity = {
   id: string;
@@ -57,6 +58,7 @@ export type StateLocalSourceSummary = {
   sourceType?: "State" | "County / City" | "Regional Pack";
   regionLabel?: string;
   status: StateLocalSourceStatus;
+  connectionMode?: StateLocalConnectionMode;
   cadence: string;
   description: string;
   helperText: string;

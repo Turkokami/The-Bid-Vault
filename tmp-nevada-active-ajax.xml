@@ -1,0 +1,579 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+    <base href="https://nevadaepro.com/bso/index.jsp">
+    <title>Production of Nevada - Error Page: /bso/view/search/external/advancedSearchContractBlanket.xhtml</title>
+    <script type="text/javascript" src="/bso/share/jquery/jquery-3.6.1.min.js"></script>
+    <script type="text/javascript" src="/bso/share/jquery/jquery-migrate-3.4.0.min.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&amp;display=swap" />
+
+<link rel="stylesheet" href="/bso/view/resources/css/font-awesome.min.css?v=2026-04-07_02:53" />
+
+<link rel="stylesheet" href="/bso/view/resources/css/animate.css?v=2026-04-07_02:53">
+
+<link rel="stylesheet" href="/bso/share/jquery/jquery.ui.menubar.css?v=2026-04-07_02:53" />
+<link rel="stylesheet" href="/bso/view/resources/css/perfect-scrollbar.css?v=2026-04-07_02:53" />
+<link rel="stylesheet" href="/bso/view/resources/css/jquery-ui-timepicker-addon.css?v=2026-04-07_02:53" />
+
+<link rel="stylesheet" href="/bso/view/resources/css/flatpickr.css?v=2026-04-07_02:53" />
+
+
+
+    <link rel="stylesheet" href="/bso/css/ripple-effect.css?v=2026-04-07_02:53" />
+    <link rel="stylesheet" href="/bso/css/legacy-struts-base.css?v=2026-04-07_02:53" />
+    <link rel="stylesheet" href="/bso/css/bootstrap-utilities.css?v=2026-04-07_02:53" />
+    <link rel="stylesheet" href="/bso/css/struts-adjustments.css?v=2026-04-07_02:53" />
+    <link rel="stylesheet" href="/bso/view/resources/css/core-layout.css?v=2026-04-07_02:53" />
+    <link rel="stylesheet" href="/bso/javax.faces.resource/components.css.xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.10" />
+    <link rel="stylesheet" href="/bso/css/css-main.css?v=2026-04-07_02:53" />
+
+
+
+<link rel="stylesheet" href="/bso/view/resources/css/theme.css?v=2026-04-07_02:53" />
+<link rel="stylesheet" href="/bso/view/resources/css/bso.css?v=2026-04-07_02:53" />
+<link rel="stylesheet" href="/bso/css/tooltip.css?v=2026-04-07_02:53" />
+<link rel="stylesheet" href="/bso/css/notes.css?v=2026-04-07_02:53" />
+<link rel="stylesheet" href="/bso/css/bsi.css?v=2026-04-07_02:53" />
+
+
+<script src="/bso/share/jquery/jquery-3.6.1.min.js?v=2026-04-07_02:53"></script>
+<script src="/bso/share/jquery/jquery-migrate-3.4.0.min.js?v=2026-04-07_02:53"></script>
+<script src="/bso/share/struts-adjustments.js?v=2026-04-07_02:53"></script>
+<script src="/bso/javax.faces.resource/jsf.js.xhtml?ln=javax.faces"></script>
+<script src="/bso/javax.faces.resource/core.js.xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.10"></script>
+<script src="/bso/javax.faces.resource/components.js.xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.10"></script>
+<script src="/bso/share/jquery/ui/jquery-ui-1.13.2.min.js?v=2026-04-07_02:53"></script>
+<script src="/bso/javax.faces.resource/calendar/calendar.js.xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.10"></script>
+<script src="/bso/javax.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.10"></script>
+<script src="/bso/javax.faces.resource/jsf.js.xhtml?ln=javax.faces"></script>
+<script src="/bso/view/resources/js/perfect-scrollbar.js?v=2026-04-07_02:53"></script>
+<script src="/bso/js/tags/flatpickr.js?v=2026-04-07_02:53"></script>
+<script src="/bso/js/tags/tags.js?v=2026-04-07_02:53"></script>
+<script src="/bso/view/resources/js/accessibility.js?v=2026-04-07_02:53"></script>
+
+<script>
+    var contextPath = "/bso"
+</script>
+
+
+    
+    
+
+        
+        <link rel="stylesheet" href="/bso/view/resources/css/rio-layout.css?v=2026-04-07_02:53">
+
+        
+        <style type="text/css">
+
+            .first-color {
+                color: #2213FF;
+            }
+
+            .first-color-background {
+                background-color: #2213FF;
+            }
+
+            .second-color {
+                color: #E2E5E6;
+            }
+
+            .second-color-background {
+                background-color: #E2E5E6;
+            }
+
+            .third-color {
+                color: #f0e5f0;
+            }
+
+            .third-color-background {
+                background-color: #f0e5f0;
+            }
+
+            img {
+                background: #2213FF;
+            }
+
+            .icon:hover{
+                color:#2213FF;
+            }
+
+            .link-01{
+                color: #2213FF;
+                font-weight: bold;
+            }
+
+            .link-01:hover {
+                color: #777;
+            }
+
+            .link-01:visited {
+                color: #2213FF;
+            }
+
+            .nav-01
+            {
+                color: #000000;
+                FONT-FAMILY: 'Open Sans', arial, helvetica, sans-serif;
+                FONT-SIZE: 7pt;
+                FONT-STYLE: normal;
+                FONT-WEIGHT: bold;
+                text-decoration:none;
+            }
+
+            .nav-01:hover, .nav-01:focus, .nav-01:active
+            {
+                color: #2213FF;
+                text-decoration:underline;
+            }
+
+            td.nav-01:hover{
+                text-decoration:none;
+                color:inherit;
+            }
+
+            img.grey-bottom {
+                margin: 1px;
+            }
+
+            .nav-01:hover img, .nav-01:focus img, .nav-01:active img
+            {
+                border: 1px dotted black;
+                margin: 0;
+            }
+
+            #skip a:focus {
+                background:#2213FF;
+            }
+
+            .sectionheader-02, .sectionHeader-02{
+                padding-left:10px;
+                background-color:#2213FF;
+                text-transform:capitalize;
+            }
+
+
+            
+
+            .ui-menubar-item .ui-menu-item {
+                background-color: #2213FF;
+            }
+
+            .ui-menubar-item .ui-state-focus {
+                color: #2213FF;
+                background-color: #E2E5E6;
+            }
+
+            .ui-menubar-link .ui-button-text {
+                background-color: transparent;
+            }
+
+            #menu span.ui-button-text:hover {
+                color: #2213FF;
+                background-color: #E2E5E6;
+            }
+
+            /*
+            .ui-menu-item > a.ui-corner-all:hover {
+                color: #2213FF;
+        }*/
+
+            .ui-menubar-item .ui-menu-item .ui-state-focus,
+            .ui-menubar-item .ui-menu-item .ui-state-active {
+                color: #2213FF;
+                background: #dadada;
+            }
+
+            .noWrap {
+                white-space: nowrap;
+            }
+
+            .buyspeed-login-btn {
+                background-color:  #2213FF;
+            }
+
+            .org-container,
+            .ui-fieldset-legend
+            {
+                background-color: #2213FF !important;
+            }
+
+            body .ui-button{
+                background-color: #2213FF;
+            }
+
+            body #top-menu > li > button,
+            body #quick-add > li > button,
+            body #showSecondaryNav,
+            body .search-toggle,
+            body .ui-commandlink,
+            body .ui-widget-content a
+            {
+                color: #2213FF !important;
+            }
+            body a {
+                background-color: inherit;
+            }
+
+            body a,
+            #quick-add > li > button .icon {
+                color: #2213FF;
+            }
+
+            .ui-inputswitch.ui-widget {
+                background-color: #2213FF;
+                border-color: #2213FF;
+            }
+            .server{
+                color: white;
+            }
+
+        </style>
+
+        <script>
+        // <![CDATA[
+
+        function colorChange(hex, lum) {
+
+            // validate hex string
+            hex = String(hex).replace(/[^0-9a-f]/gi, '');
+            if (hex.length < 6) {
+                hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+            }
+            lum = lum || 0;
+
+            // convert to decimal and change luminosity
+            var rgb = "#", c, i;
+            for (i = 0; i < 3; i++) {
+                c = parseInt(hex.substr(i*2,2), 16);
+                c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+                rgb += ("00"+c).substr(c.length);
+            }
+
+            return rgb;
+        }
+
+        //using javascript to create variations from the principle configurable color
+
+        var darker = colorChange('#2213FF', -.3);
+        var lighter = colorChange('#2213FF', .2);
+        var lightBack = colorChange('#2213FF', .7);
+        var moreDark = colorChange('#2213FF', -.6);
+
+        var styles = [];
+        var styleText = "";
+        styles.push("#top-menu > li > a:hover, #quick-add > li > a:hover, #top-menu li a:focus, #quick-add li a:focus, #top-menu > li > a:hover .icon, #quick-add > li > a:hover .icon, #top-menu li a:focus .icon, #quick-add li a:focus .icon{ color: " + darker + " !important}");
+        styles.push("a:hover, a:focus, a:active{color: "+ darker +" !important}");
+        styles.push("#searchBar .ui-button.ui-state-hover, body .btn-primary:hover,  body .btn-primary:focus{ background-color: " + darker + "; border-color: " + moreDark + ";}");
+        styles.push("body .btn-primary:active{ background-color: " + moreDark + "}");
+        styles.push("body .ui-button:hover, body .ui-button:focus, body .ui-button.ui-state-hover, body .ui-buttonset .ui-state-hover, input[type=\"button\"].ui-button:hover{ background-color:" + darker + " }");
+        styles.push("body .ui-button:active{ background-color:" + moreDark + " }");
+
+        for (i=0;i<=styles.length;i++) {
+            styleText += styles[i];
+        }
+
+        //append custom darker / lighter styles to the page
+        $("<style>" + styleText + "</style>").appendTo("head");
+
+        // ]]>
+        </script>
+        <script src="/bso/view/resources/js/ripple-effect.js?v=2026-04-07_02:53"></script>
+        <script src="/bso/view/resources/js/layout.js?v=2026-04-07_02:53"></script>
+
+    
+
+
+    <script Language="JavaScript1.2" SRC="default.js"></script>
+</head>
+<body>
+<div align="center">
+   
+      
+      
+      
+      
+      
+         
+      
+   
+      <!-- end determine error -->
+
+<!-- start framework -->
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="750">
+      <tr>
+         
+
+
+
+<table ROLE="PRESENTATION" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:white;">
+    <tr ROLE="PRESENTATION">
+      <td ROLE="PRESENTATION">
+        <table ROLE="PRESENTATION" cellpadding="0" cellspacing="0" border="0" width="100%">
+	        <tr ROLE="PRESENTATION">
+	            <td ROLE="PRESENTATION" nowrap>
+     		
+			<img src="/bso/external/image.sda?imageType=headerLogo"  alt="Logo" class="main-logo" border="0" style="background: transparent;" />
+            	</td>
+	        </tr>
+        </table>
+
+      </td>
+    </tr>
+    <tr ROLE="PRESENTATION">
+        <td ROLE="PRESENTATION" height=1px bgcolor="#000000"></td>
+    </tr>
+</table>
+<br>
+
+<style type="text/css">
+    body .table-01{
+        margin-left:15px;
+        margin-right:auto;
+    }
+
+    .main-logo img, img.main-logo{
+        max-height: 90px;
+    }
+
+    .main-logo img, img.main-logo {
+        max-height: 90px;
+        border: 0;
+        box-shadow: none;
+    }
+
+    td[height="1px"][bgcolor="#000000"]{
+        background-color: #fff;
+        box-shadow: 0 2px 1px rgba(0,0,0,.15);
+    }
+
+</style>
+      </tr>
+    <tr>
+        <td valign="top" colspan="2">    
+         <table role="presentation" cellpadding="4" cellspacing="0" border="0"
+          width="100%">
+            <tr valign="top">
+               <td>
+                  <!-- start user review -->    
+                  <table role="presentation" cellpadding="4" cellspacing="0" border="0"
+                  width="100%">
+                     <tr>
+                        <td class="sectionheader-01"><h1>System problem</h1></td>
+                     </tr>
+                  </table>
+                  <table role="presentation" cellpadding="2" cellspacing="1" border="0"
+                  width="80%" class="table-01">
+
+                     <tr>
+                        <td colspan="2">
+                           A system error has occurred. If the
+                           problem persists, please contact the Help Desk.
+                        </td>
+                     </tr>
+                     <tr><td colspan="2">
+						   
+                     </td></tr>
+                     <tr valign="top">
+                        <td nowrap>
+                           <b>Problem type</b>
+                           <br/>Server Error
+                        </td>
+                        <td>
+                           <b>Problem details</b>
+                            
+      							
+	                           
+	                            	<br/>
+	                           		Forbidden
+	                           
+	                           
+	                           
+	                       
+                        </td>
+                     </tr>
+                                          
+                  
+                  
+                   
+                  </table>
+                  
+                  
+                  
+
+                   <div align="center" style="padding-top: 15px">
+                       <input type="button" value="Exit"  class="basicButton-01" onclick="cancelExit();">
+                   </div>
+
+               </td>
+            </tr>
+            <tr>
+                <td class="sectionheader-01" align='center'>&nbsp&nbsp</td>
+            </tr>
+            <tr>
+           		<td class="inputs-01" align="center">
+<div role="contentinfo" class="footer-copy">
+	Copyright &copy; 2026 Periscope Holdings, Inc. - All Rights Reserved.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+
+    <!-- Additional user info to send to Google Analytics -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        
+
+        
+            window.dataLayer.push({
+                  'event': 'uxToggle',
+                  'uxChosen': 'old'
+              });
+        
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>
+        (function(w,d,s,l,i) {
+            w[l]=w[l]||[];
+            w[l].push(
+                {
+                    'gtm.start': new Date().getTime(),
+                    event:'gtm.js'
+                }
+            );
+            let f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+            j.async=true;
+            j.src= 'https://www.googletagmanager.com/gtm.js?id='+i+dl;
+            f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-WX9N98RM');
+    </script>
+    <!-- End Google Tag Manager -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe id="googletagmanagerFrame" src="https://www.googletagmanager.com/ns.html?id=GTM-WX9N98RM" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</td>
+            </tr>
+         </table>
+         </td>
+    </tr>
+</table>
+
+
+
+
+<script language="javascript">
+
+   function closeWindow(){
+   		window.close();
+   }
+
+    function cancelExit() {
+        
+            
+            
+                window.location.href = "/bso"
+            
+        
+    }
+   
+</script>
+
+</div>
+</body>
+</html>

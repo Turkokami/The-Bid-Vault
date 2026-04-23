@@ -52,6 +52,8 @@ export function StateLocalClient({
   savedCodeDescription = "Apply your saved work categories to this search in one click.",
   savedCodeApplyLabel = "Apply saved codes",
   resetFilters,
+  portalAssist,
+  emptyStateMessage = 'No results yet. Try broad words like "pest control", "roofing", or "janitorial".',
 }: {
   initialOpportunities: NormalizedStateLocalOpportunity[];
   initialSources: StateLocalSourceSummary[];
@@ -71,6 +73,18 @@ export function StateLocalClient({
   savedCodeDescription?: string;
   savedCodeApplyLabel?: string;
   resetFilters?: StateLocalFilters;
+  portalAssist?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    note?: string;
+    links: Array<{
+      href: string;
+      label: string;
+      external?: boolean;
+    }>;
+  };
+  emptyStateMessage?: string;
 }) {
   const [opportunities, setOpportunities] = useState(initialOpportunities);
   const [sources, setSources] = useState(initialSources);
@@ -132,6 +146,16 @@ export function StateLocalClient({
         : sources,
     [focusSourceCodes, sources],
   );
+
+  const renderSourceMode = (source: StateLocalSourceSummary) => {
+    if (source.connectionMode === "portal-assisted") {
+      return "Portal-assisted";
+    }
+    if (source.connectionMode === "planned" || source.status === "Planned") {
+      return "Planned";
+    }
+    return "Live";
+  };
 
   return (
     <div className="space-y-8">
@@ -310,6 +334,42 @@ export function StateLocalClient({
             ) : null}
           </section>
 
+          {portalAssist ? (
+            <section className="rounded-[2rem] border border-amber-400/20 bg-amber-400/[0.06] p-6 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+              <p className="text-xs uppercase tracking-[0.3em] text-amber-200/90">{portalAssist.eyebrow}</p>
+              <h3 className="mt-3 text-2xl font-semibold text-white">{portalAssist.title}</h3>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">{portalAssist.description}</p>
+              {portalAssist.note ? (
+                <p className="mt-3 rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm leading-6 text-slate-300">
+                  {portalAssist.note}
+                </p>
+              ) : null}
+              <div className="mt-5 flex flex-wrap gap-3">
+                {portalAssist.links.map((link) =>
+                  link.external ? (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      {link.label}
+                    </Link>
+                  ),
+                )}
+              </div>
+            </section>
+          ) : null}
+
           <section className="hidden gap-4 md:grid-cols-3 xl:grid">
             <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Where this came from</p>
@@ -338,7 +398,7 @@ export function StateLocalClient({
             ))}
             {visibleResults.length === 0 ? (
               <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/60 p-10 text-center text-sm text-slate-400">
-                No results yet. Try broad words like &quot;pest control&quot;, &quot;roofing&quot;, or &quot;janitorial&quot;.
+                {emptyStateMessage}
               </div>
             ) : null}
           </section>
@@ -385,11 +445,27 @@ export function StateLocalClient({
                       <p className="text-base font-semibold text-white">{source.sourceName}</p>
                       <p className="mt-1 text-sm text-slate-400">{source.stateCode} / {source.cadence}</p>
                     </div>
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
-                      {source.status}
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                        source.connectionMode === "portal-assisted"
+                          ? "border-amber-400/20 bg-amber-400/10 text-amber-100"
+                          : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
+                      }`}
+                    >
+                      {renderSourceMode(source)}
                     </span>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-slate-300">{source.description}</p>
+                  <div className="mt-4">
+                    <a
+                      href={source.portalUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={buttonStyles({ variant: "ghost", size: "sm" })}
+                    >
+                      Open original portal
+                    </a>
+                  </div>
                 </article>
               ))}
             </div>

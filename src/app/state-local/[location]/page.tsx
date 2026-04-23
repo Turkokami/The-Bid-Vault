@@ -15,6 +15,18 @@ type LocationView = {
   sourceNames?: string[];
   sourceLabel: string;
   sourceDescription: string;
+  emptyStateMessage?: string;
+  portalAssist?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    note?: string;
+    links: Array<{
+      href: string;
+      label: string;
+      external?: boolean;
+    }>;
+  };
 };
 
 const locationViews: LocationView[] = [
@@ -42,11 +54,38 @@ const locationViews: LocationView[] = [
     slug: "nevada",
     title: "Nevada state and county opportunities.",
     description:
-      "Use this view to focus on Nevada statewide opportunities plus the county areas your providers serve.",
+      "Use this view to focus on Nevada statewide opportunities plus the county areas your providers serve. Nevada currently works in a portal-assisted mode so your saved terms and code lists stay useful even while the official portal handles the live result table.",
     states: ["NV"],
     sourceCodes: ["nevada", "white-pine", "nye"],
     sourceLabel: "Nevada sources",
-    sourceDescription: "Nevada statewide and county bid sources staged for live monitoring.",
+    sourceDescription: "Nevada statewide and county bid sources, with portal-assisted access for the official NEVADAePro search pages.",
+    emptyStateMessage:
+      "Nevada results are opened through the live NevadaEPro portal right now. Use the quick links above to jump into Nevada's active contracts or open bids pages with your saved search terms in mind.",
+    portalAssist: {
+      eyebrow: "Portal-assisted now",
+      title: "Use NevadaEPro directly, with your Bid Vault workflow still guiding the search.",
+      description:
+        "Nevada's official portal blocks background result extraction, so this page acts like a launch pad. Use your saved codes, saved terms, and location filters here, then open the exact Nevada search page to review the live contracts in the official system.",
+      note:
+        "This keeps the Nevada page useful immediately instead of showing a blank screen. We are also scaffolding a browser-driven connector so Nevada can become a true in-app live source later.",
+      links: [
+        {
+          href: "https://nevadaepro.com/bso/view/search/external/advancedSearchContractBlanket.xhtml?view=activeContracts",
+          label: "Open Nevada active contracts",
+          external: true,
+        },
+        {
+          href: "https://nevadaepro.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true",
+          label: "Open Nevada open bids",
+          external: true,
+        },
+        {
+          href: "https://www.purchasing.nv.gov/Vendors/",
+          label: "View Nevada vendor guidance",
+          external: true,
+        },
+      ],
+    },
   },
   {
     slug: "mohave",
@@ -169,6 +208,8 @@ export default async function LocationStateLocalPage({
       sourceLabel={view.sourceLabel}
       sourceDescription={view.sourceDescription}
       focusSourceCodes={view.sourceCodes}
+      portalAssist={view.portalAssist}
+      emptyStateMessage={view.emptyStateMessage}
     />
   );
 }

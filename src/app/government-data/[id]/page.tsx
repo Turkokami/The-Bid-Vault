@@ -41,6 +41,15 @@ function pickParam(params: Record<string, string | string[] | undefined>, key: s
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
+function readReturnTo(params: Record<string, string | string[] | undefined>) {
+  const raw = pickParam(params, "returnTo");
+  if (!raw) {
+    return "/sam-search";
+  }
+
+  return raw.startsWith("/") ? raw : "/sam-search";
+}
+
 function buildFallbackRecord(id: string, params: Record<string, string | string[] | undefined>): SamOpportunityRecord | null {
   const title = pickParam(params, "title");
   const noticeId = pickParam(params, "noticeId") || id;
@@ -96,6 +105,7 @@ export default async function GovernmentDataRecordDetailPage({
   const { id } = await params;
   const queryParams = (await searchParams) ?? {};
   const lookupId = pickParam(queryParams, "noticeId") || id;
+  const returnTo = readReturnTo(queryParams);
   const liveRecord = await getSamOpportunityById(lookupId);
   const fallbackRecord = buildFallbackRecord(id, queryParams);
   const record = liveRecord ?? fallbackRecord;
@@ -109,8 +119,8 @@ export default async function GovernmentDataRecordDetailPage({
           SAM may be rate-limiting the API or the record may have moved. Go back to Search SAM and try again, or open SAM.gov directly with the notice number.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/sam-search" className={buttonStyles({ variant: "primary", size: "md" })}>
-            Back to Search SAM
+          <Link href={returnTo} className={buttonStyles({ variant: "primary", size: "md" })}>
+            Back to previous results
           </Link>
           <Link
             href={`https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(lookupId)}`}
@@ -183,6 +193,12 @@ export default async function GovernmentDataRecordDetailPage({
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
+          <Link
+            href={returnTo}
+            className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.25rem]" })}
+          >
+            Back to previous results
+          </Link>
           <Link
             href={`/foia?agency=${encodeURIComponent(record.agency)}&facility=${encodeURIComponent(record.title)}&location=${encodeURIComponent(record.location)}&industry=${encodeURIComponent(record.opportunityType)}&source=${encodeURIComponent("SAM.gov")}`}
             className={buttonStyles({ variant: "secondary", size: "lg", className: "rounded-[1.25rem]" })}

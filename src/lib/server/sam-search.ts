@@ -18,6 +18,7 @@ export type SamSearchQuery = {
   industry?: string;
   status?: SamSearchStatus;
   sort?: SamSearchSort;
+  browseAll?: boolean;
 };
 
 export type SamOpportunityRecord = ExtractedContractRecord & {
@@ -146,18 +147,77 @@ function pickString(...values: unknown[]) {
   return "";
 }
 
-function dedupeRecords(records: SamOpportunityRecord[]) {
-  const seen = new Set<string>();
+function slugifySamId(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
-  return records.filter((record) => {
-    const key = normalize(record.noticeId || record.id || record.title);
-    if (seen.has(key)) {
-      return false;
+function buildSamCompositeKey(record: Pick<
+  SamOpportunityRecord,
+  "title" | "agency" | "naicsCode" | "location" | "responseDeadline"
+>) {
+  return [
+    normalize(record.title),
+    normalize(record.agency),
+    normalize(record.naicsCode),
+    normalize(record.location),
+    normalize(record.responseDeadline),
+  ].join("|");
+}
+
+function getSamRecordAliases(record: SamOpportunityRecord) {
+  const aliases = new Set<string>();
+  if (record.noticeId) {
+    aliases.add(`notice:${normalize(record.noticeId)}`);
+  }
+  if (record.sourceUrl) {
+    aliases.add(`source:${normalize(record.sourceUrl)}`);
+  }
+  aliases.add(`composite:${buildSamCompositeKey(record)}`);
+  return aliases;
+}
+
+function scoreSamRecord(record: SamOpportunityRecord) {
+  let score = 0;
+  if (record.noticeId) score += 5;
+  if (record.sourceUrl?.startsWith("http")) score += 4;
+  if (record.fullDescription && record.fullDescription !== record.synopsis) score += 3;
+  if (record.responseDeadline) score += 2;
+  if (record.postedDate) score += 1;
+  if (record.updatedDate) score += 1;
+  if (record.office && record.office !== "See SAM posting") score += 1;
+  if (record.pscCode && record.pscCode !== "Not listed") score += 1;
+  if (record.setAside && record.setAside !== "Not listed") score += 1;
+  return score;
+}
+
+function dedupeRecords(records: SamOpportunityRecord[]) {
+  const aliasToIndex = new Map<string, number>();
+  const deduped: SamOpportunityRecord[] = [];
+
+  for (const record of records) {
+    const aliases = getSamRecordAliases(record);
+    const existingIndex = Array.from(aliases)
+      .map((alias) => aliasToIndex.get(alias))
+      .find((index): index is number => typeof index === "number");
+
+    if (existingIndex === undefined) {
+      const nextIndex = deduped.length;
+      deduped.push(record);
+      aliases.forEach((alias) => aliasToIndex.set(alias, nextIndex));
+      continue;
     }
 
-    seen.add(key);
-    return true;
-  });
+    const existing = deduped[existingIndex];
+    const preferred = scoreSamRecord(record) > scoreSamRecord(existing) ? record : existing;
+    deduped[existingIndex] = preferred;
+
+    getSamRecordAliases(preferred).forEach((alias) => aliasToIndex.set(alias, existingIndex));
+  }
+
+  return deduped;
 }
 
 function buildAvailabilityStatus(dueDate: string) {
@@ -402,9 +462,13 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
   const primaryContact = Array.isArray(record.pointOfContact)
     ? (record.pointOfContact[0] as Record<string, unknown> | undefined)
     : undefined;
+  const stableIdSeed =
+    noticeId ||
+    sourceUrl ||
+    `${title}|${agency}|${pickString(record.naicsCode, record.naics, record.classificationCode)}|${location}`;
 
   return {
-    id: noticeId.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `sam-${Date.now()}`,
+    id: slugifySamId(stableIdSeed) || "sam-record",
     sourceDocumentId: "sam-live",
     noticeId,
     title,
@@ -585,6 +649,20 @@ export async function getSamSearchSnapshot(query: SamSearchQuery = {}): Promise<
       activities: [],
       liveConfigured: false,
       errorMessage: "Search SAM is not live yet because SAM_GOV_API_KEY is not configured.",
+    };
+  }
+
+  const hasSearchIntent =
+    !!query.browseAll ||
+    !!query.keywords?.length ||
+    !!pickString(query.industry, query.naics, query.agency, query.state);
+
+  if (!hasSearchIntent) {
+    return {
+      records: [],
+      sources: [baseSource],
+      activities: [],
+      liveConfigured: true,
     };
   }
 

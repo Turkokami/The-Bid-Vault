@@ -137,6 +137,7 @@ function buildSamSearchHref(params: {
   state?: string;
   status?: SearchSamStatus;
   sort?: SearchSamSort;
+  browse?: boolean;
 }) {
   const search = new URLSearchParams();
 
@@ -148,12 +149,13 @@ function buildSamSearchHref(params: {
   if (params.state) search.set("state", params.state);
   if (params.status && params.status !== "all") search.set("status", params.status);
   if (params.sort && params.sort !== "due-soon") search.set("sort", params.sort);
+  if (params.browse) search.set("browse", "1");
 
   const query = search.toString();
   return query ? `/sam-search?${query}` : "/sam-search";
 }
 
-function buildSamDetailHref(record: SamOpportunityRecord) {
+function buildSamDetailHref(record: SamOpportunityRecord, returnTo?: string) {
   const search = new URLSearchParams({
     noticeId: record.noticeId,
     title: record.title,
@@ -172,6 +174,7 @@ function buildSamDetailHref(record: SamOpportunityRecord) {
   if (record.office) search.set("office", record.office);
   if (record.setAside) search.set("setAside", record.setAside);
   if (record.synopsis) search.set("summary", record.synopsis);
+  if (returnTo) search.set("returnTo", returnTo);
 
   return `/government-data/${encodeURIComponent(record.id)}?${search.toString()}`;
 }
@@ -180,19 +183,24 @@ function dedupeRecords(records: SamOpportunityRecord[]) {
   const seen = new Set<string>();
 
   return records.filter((record) => {
-    const key = [
-      normalize(record.title),
-      normalize(record.agency),
-      normalize(record.naicsCode),
-      normalize(record.state),
-      normalize(record.responseDeadline),
-    ].join("|");
+    const keys = [
+      record.noticeId ? `notice:${normalize(record.noticeId)}` : "",
+      record.sourceUrl ? `source:${normalize(record.sourceUrl)}` : "",
+      [
+        normalize(record.title),
+        normalize(record.agency),
+        normalize(record.naicsCode),
+        normalize(record.location),
+        normalize(record.responseDeadline),
+      ].join("|"),
+    ].filter(Boolean);
 
-    if (seen.has(key)) {
+    const matched = keys.some((key) => seen.has(key));
+    if (matched) {
       return false;
     }
 
-    seen.add(key);
+    keys.forEach((key) => seen.add(key));
     return true;
   });
 }
@@ -310,6 +318,7 @@ export function GovernmentDataClient({
   initialSort = "due-soon",
   initialErrorMessage,
   liveConfigured,
+  initialBrowseAll = false,
 }: {
   initialRecords: SamOpportunityRecord[];
   initialSources: DataSourceCoverage[];
@@ -324,6 +333,7 @@ export function GovernmentDataClient({
   initialSort?: SearchSamSort;
   initialErrorMessage?: string;
   liveConfigured: boolean;
+  initialBrowseAll?: boolean;
 }) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
@@ -342,6 +352,7 @@ export function GovernmentDataClient({
   const [searchStatus, setSearchStatus] = useState<SearchSamStatus>(initialStatus);
   const [sortBy, setSortBy] = useState<SearchSamSort>(initialSort);
   const [isLiveConfigured, setIsLiveConfigured] = useState(liveConfigured);
+  const [browseAll, setBrowseAll] = useState(initialBrowseAll ?? false);
   const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
   const [newListName, setNewListName] = useState("");
 
@@ -399,6 +410,31 @@ export function GovernmentDataClient({
     [keywordMode, searchKeywords],
   );
   const appliedNaicsCodes = useMemo(() => parseMultiValue(searchNaics), [searchNaics]);
+  const currentSearchHref = useMemo(
+    () =>
+      buildSamSearchHref({
+        keywords: searchKeywords,
+        keywordMode,
+        industry: searchIndustry,
+        naics: searchNaics,
+        agency: searchAgency,
+        state: searchState,
+        status: searchStatus,
+        sort: sortBy,
+        browse: browseAll,
+      }),
+    [
+      browseAll,
+      keywordMode,
+      searchAgency,
+      searchIndustry,
+      searchKeywords,
+      searchNaics,
+      searchState,
+      searchStatus,
+      sortBy,
+    ],
+  );
 
   const filteredResults = useMemo(
     () =>
@@ -433,6 +469,7 @@ export function GovernmentDataClient({
     state: string;
     status: SearchSamStatus;
     sort: SearchSamSort;
+    browse: boolean;
   }>) => {
     const href = buildSamSearchHref({
       keywords: next?.keywords ?? searchKeywords,
@@ -443,6 +480,7 @@ export function GovernmentDataClient({
       state: next?.state ?? searchState,
       status: next?.status ?? searchStatus,
       sort: next?.sort ?? sortBy,
+      browse: next?.browse ?? browseAll,
     });
 
     startTransition(() => {
@@ -477,6 +515,7 @@ export function GovernmentDataClient({
                 setSearchState("");
                 setSearchStatus("available");
                 setSortBy("due-soon");
+                setBrowseAll(true);
                 setErrorMessage("");
                 applySearch({
                   keywords: "",
@@ -487,6 +526,7 @@ export function GovernmentDataClient({
                   status: "available",
                   keywordMode: "all",
                   sort: "due-soon",
+                  browse: true,
                 });
               }}
               className={buttonStyles({ variant: "secondary", size: "md" })}
@@ -505,6 +545,7 @@ export function GovernmentDataClient({
                   state: searchState,
                   status: searchStatus,
                   sort: sortBy,
+                  browse: browseAll,
                 })
                   .then((snapshot) => {
                     setRecords(snapshot.records);
@@ -552,6 +593,7 @@ export function GovernmentDataClient({
         <form
           onSubmit={(event) => {
             event.preventDefault();
+            setBrowseAll(true);
             applySearch();
           }}
           className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6"
@@ -587,7 +629,7 @@ export function GovernmentDataClient({
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setKeywordMode(option.value as SamKeywordMode)}
+                  onClick={() => setKeywordMode(option.value as SamKeywordMode)}
                     className={buttonStyles({
                       variant: keywordMode === option.value ? "primary" : "ghost",
                       size: "sm",
@@ -600,7 +642,10 @@ export function GovernmentDataClient({
               <input
                 name="keywords"
                 value={searchKeywords}
-                onChange={(event) => setSearchKeywords(event.target.value)}
+                onChange={(event) => {
+                  setSearchKeywords(event.target.value);
+                  setBrowseAll(true);
+                }}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -613,7 +658,10 @@ export function GovernmentDataClient({
               <input
                 name="industry"
                 value={searchIndustry}
-                onChange={(event) => setSearchIndustry(event.target.value)}
+                onChange={(event) => {
+                  setSearchIndustry(event.target.value);
+                  setBrowseAll(true);
+                }}
                 placeholder="Try: pest control, wildlife exclusion, bird deterrent"
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
@@ -627,7 +675,10 @@ export function GovernmentDataClient({
               <input
                 name="naics"
                 value={searchNaics}
-                onChange={(event) => setSearchNaics(event.target.value)}
+                onChange={(event) => {
+                  setSearchNaics(event.target.value);
+                  setBrowseAll(true);
+                }}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -637,7 +688,10 @@ export function GovernmentDataClient({
               <input
                 name="agency"
                 value={searchAgency}
-                onChange={(event) => setSearchAgency(event.target.value)}
+                onChange={(event) => {
+                  setSearchAgency(event.target.value);
+                  setBrowseAll(true);
+                }}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -647,7 +701,10 @@ export function GovernmentDataClient({
               <input
                 name="state"
                 value={searchState}
-                onChange={(event) => setSearchState(event.target.value)}
+                onChange={(event) => {
+                  setSearchState(event.target.value);
+                  setBrowseAll(true);
+                }}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               />
             </label>
@@ -657,7 +714,10 @@ export function GovernmentDataClient({
               <select
                 name="status"
                 value={searchStatus}
-                onChange={(event) => setSearchStatus(event.target.value as SearchSamStatus)}
+                onChange={(event) => {
+                  setSearchStatus(event.target.value as SearchSamStatus);
+                  setBrowseAll(true);
+                }}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               >
                 <option value="all">All records</option>
@@ -819,6 +879,7 @@ export function GovernmentDataClient({
                 setSearchState("");
                 setSearchStatus("all");
                 setSortBy("due-soon");
+                setBrowseAll(false);
                 applySearch({
                   keywords: "",
                   industry: "",
@@ -828,6 +889,7 @@ export function GovernmentDataClient({
                   status: "all",
                   keywordMode: "all",
                   sort: "due-soon",
+                  browse: false,
                 });
               }}
               className={buttonStyles({ variant: "ghost", size: "md" })}
@@ -837,7 +899,7 @@ export function GovernmentDataClient({
           </div>
 
           <p className="mt-4 text-xs text-slate-400">
-            Tip: leave the search blank and choose Available now if you want to scroll through all active opportunities. You can also reuse your saved code lists here anytime.
+            Tip: use Browse all available contracts when you want the live federal list, or type your own search to narrow it down fast.
           </p>
         </form>
 
@@ -884,7 +946,18 @@ export function GovernmentDataClient({
           </div>
 
           <div className="mt-5 space-y-4">
-            {records.length === 0 ? (
+            {!browseAll &&
+            !searchKeywords.trim() &&
+            !searchIndustry.trim() &&
+            !searchNaics.trim() &&
+            !searchAgency.trim() &&
+            !searchState.trim() ? (
+              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
+                Start by typing what your business does, or click <span className="font-medium text-white">Browse all available contracts</span> to load live SAM results.
+              </div>
+            ) : null}
+
+            {browseAll && records.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
                 {isLiveConfigured
                   ? "No live SAM opportunities were returned right now. Try refreshing the page or broadening your filters."
@@ -895,7 +968,8 @@ export function GovernmentDataClient({
             {filteredResults.map((result) => (
               <Link
                 key={result.id}
-                href={buildSamDetailHref(result)}
+                href={buildSamDetailHref(result, currentSearchHref)}
+                scroll={false}
                 className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -932,7 +1006,9 @@ export function GovernmentDataClient({
               </Link>
             ))}
 
-            {records.length > 0 && filteredResults.length === 0 ? (
+            {(browseAll || searchKeywords.trim() || searchIndustry.trim() || searchNaics.trim() || searchAgency.trim() || searchState.trim()) &&
+            records.length > 0 &&
+            filteredResults.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
                 No results yet. Try broad terms like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;, or use Browse all available contracts.
               </div>

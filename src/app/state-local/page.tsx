@@ -25,7 +25,7 @@ const locationViews = [
     href: "/state-local/nevada",
     label: "Nevada",
     description: "Nevada statewide plus White Pine and Nye County areas.",
-    status: "Live",
+    status: "Portal-assisted",
   },
   {
     href: "/state-local/texas",
@@ -134,6 +134,8 @@ export default async function StateLocalPage() {
                   className={`rounded-full border px-3 py-1 text-xs font-medium ${
                     view.status === "Live"
                       ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
+                      : view.status === "Portal-assisted"
+                        ? "border-amber-400/20 bg-amber-400/10 text-amber-100"
                       : "border-white/10 bg-slate-950/70 text-slate-300"
                   }`}
                 >

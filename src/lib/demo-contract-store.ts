@@ -40,6 +40,7 @@ type SamSnapshotQuery = {
   state?: string;
   status?: "all" | "available" | "closing-soon" | "needs-review";
   sort?: "due-soon" | "newest" | "agency" | "title";
+  browse?: boolean;
 };
 
 function buildSamSnapshotUrl(query?: SamSnapshotQuery) {
@@ -53,6 +54,7 @@ function buildSamSnapshotUrl(query?: SamSnapshotQuery) {
   if (query?.state) params.set("state", query.state);
   if (query?.status) params.set("status", query.status);
   if (query?.sort) params.set("sort", query.sort);
+  if (query?.browse) params.set("browse", "1");
 
   const search = params.toString();
   return search ? `/api/sam-search/snapshot?${search}` : "/api/sam-search/snapshot";
