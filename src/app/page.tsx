@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { HomeCategorySearchSection } from "@/components/home-category-search-section";
 import { buttonStyles } from "@/components/ui/button";
-import { serviceTiers } from "@/lib/demo-data";
 
 const highlights = [
   "Track contracts across agencies, locations, and NAICS codes",
@@ -131,72 +130,36 @@ export default function Home() {
         </aside>
       </section>
 
-      <section className="space-y-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            Service tiers
-          </p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-            Level the service to match how much intelligence support your team needs.
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-slate-300">
-            Compare plans, then open the pricing page to start a subscription for your team.
-          </p>
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+              Service plans
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              Need more support? Compare plans on the pricing page.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              The homepage keeps things simple. When you are ready, open pricing
+              to compare service plans, see what each option includes, and start
+              a subscription.
+            </p>
           </div>
-          <Link
-            href="/pricing"
-            className={buttonStyles({ variant: "secondary", size: "lg" })}
-          >
-            View pricing and subscribe
-          </Link>
-        </div>
 
-        <div className="grid gap-5 lg:grid-cols-3">
-          {serviceTiers.map((tier) => (
-            <article
-              key={tier.id}
-              className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_0_30px_rgba(34,197,94,0.08)]"
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/pricing"
+              className={buttonStyles({ variant: "primary", size: "lg" })}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-emerald-300">{tier.name}</p>
-                  <p className="mt-1 text-sm text-slate-400">{tier.audience}</p>
-                </div>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-200">
-                  {tier.priceLabel}
-                </span>
-              </div>
-
-              <p className="mt-5 text-sm leading-7 text-slate-300">
-                {tier.description}
-              </p>
-
-              <div className="mt-5 space-y-3">
-                {tier.features.map((feature) => (
-                  <div
-                    key={feature}
-                    className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-200"
-                  >
-                    {feature}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <Link
-                  href="/pricing"
-                  className={buttonStyles({
-                    variant: tier.id === "tier-growth" ? "primary" : "secondary",
-                    size: "md",
-                    fullWidth: true,
-                  })}
-                >
-                  See {tier.name} pricing
-                </Link>
-              </div>
-            </article>
-          ))}
+              View service plans
+            </Link>
+            <Link
+              href="/dashboard"
+              className={buttonStyles({ variant: "secondary", size: "lg" })}
+            >
+              Keep exploring first
+            </Link>
+          </div>
         </div>
       </section>
       <HomeCategorySearchSection />
