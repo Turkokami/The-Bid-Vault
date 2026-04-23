@@ -43,6 +43,73 @@ function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
+const stateNameToCode = new Map<string, string>([
+  ["alabama", "AL"],
+  ["alaska", "AK"],
+  ["arizona", "AZ"],
+  ["arkansas", "AR"],
+  ["california", "CA"],
+  ["colorado", "CO"],
+  ["connecticut", "CT"],
+  ["delaware", "DE"],
+  ["district of columbia", "DC"],
+  ["florida", "FL"],
+  ["georgia", "GA"],
+  ["hawaii", "HI"],
+  ["idaho", "ID"],
+  ["illinois", "IL"],
+  ["indiana", "IN"],
+  ["iowa", "IA"],
+  ["kansas", "KS"],
+  ["kentucky", "KY"],
+  ["louisiana", "LA"],
+  ["maine", "ME"],
+  ["maryland", "MD"],
+  ["massachusetts", "MA"],
+  ["michigan", "MI"],
+  ["minnesota", "MN"],
+  ["mississippi", "MS"],
+  ["missouri", "MO"],
+  ["montana", "MT"],
+  ["nebraska", "NE"],
+  ["nevada", "NV"],
+  ["new hampshire", "NH"],
+  ["new jersey", "NJ"],
+  ["new mexico", "NM"],
+  ["new york", "NY"],
+  ["north carolina", "NC"],
+  ["north dakota", "ND"],
+  ["ohio", "OH"],
+  ["oklahoma", "OK"],
+  ["oregon", "OR"],
+  ["pennsylvania", "PA"],
+  ["rhode island", "RI"],
+  ["south carolina", "SC"],
+  ["south dakota", "SD"],
+  ["tennessee", "TN"],
+  ["texas", "TX"],
+  ["utah", "UT"],
+  ["vermont", "VT"],
+  ["virginia", "VA"],
+  ["washington", "WA"],
+  ["west virginia", "WV"],
+  ["wisconsin", "WI"],
+  ["wyoming", "WY"],
+]);
+
+function normalizeSamState(value?: string) {
+  const input = pickString(value).trim();
+  if (!input) {
+    return "";
+  }
+
+  if (/^[a-z]{2}$/i.test(input)) {
+    return input.toUpperCase();
+  }
+
+  return stateNameToCode.get(input.toLowerCase()) ?? input;
+}
+
 function formatSamApiDate(date: Date) {
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
@@ -186,6 +253,38 @@ function getResponseArray(payload: unknown): Record<string, unknown>[] {
   }
 
   return [];
+}
+
+function readSamApiError(payload: unknown, rawText: string) {
+  const text = rawText.trim();
+  const loweredText = text.toLowerCase();
+
+  if (loweredText.includes("api_key_invalid") || loweredText.includes("invalid api key")) {
+    return "The current SAM.gov API key was rejected. Update SAM_GOV_API_KEY with a valid key to load live federal opportunities.";
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return "";
+  }
+
+  const record = payload as Record<string, unknown>;
+  const nestedError = record.error as Record<string, unknown> | undefined;
+  const messages = [
+    typeof record.message === "string" ? record.message : "",
+    typeof record.errorMessage === "string" ? record.errorMessage : "",
+    typeof nestedError?.message === "string" ? nestedError.message : "",
+    typeof nestedError?.code === "string" ? nestedError.code : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const loweredMessage = messages.toLowerCase();
+
+  if (loweredMessage.includes("api_key_invalid") || loweredMessage.includes("invalid api key")) {
+    return "The current SAM.gov API key was rejected. Update SAM_GOV_API_KEY with a valid key to load live federal opportunities.";
+  }
+
+  return "";
 }
 
 function matchesKeywords(
@@ -396,7 +495,7 @@ async function fetchSamRecords(options?: {
     }
 
     if (options?.state) {
-      url.searchParams.set("state", options.state);
+      url.searchParams.set("state", normalizeSamState(options.state));
     }
 
     const response = await fetch(url.toString(), {
@@ -407,19 +506,40 @@ async function fetchSamRecords(options?: {
       },
     });
 
+    const rawText = await response.text();
+    let payload: unknown = {};
+
+    try {
+      payload = rawText ? JSON.parse(rawText) : {};
+    } catch {
+      payload = rawText;
+    }
+
+    const samApiError = readSamApiError(payload, rawText);
+    if (samApiError) {
+      throw new Error(samApiError);
+    }
+
     if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error(
+          "SAM.gov is rate limiting requests right now. Your API key is configured, but the service needs a short cooldown before trying again.",
+        );
+      }
+
       throw new Error(`SAM API request failed with ${response.status}`);
     }
 
-    const payload = (await response.json()) as Record<string, unknown>;
+    const payloadRecord =
+      payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
     const pageRecords = getResponseArray(payload).map(mapSamRecord);
     fetched.push(...pageRecords);
 
     const nextTotal =
-      typeof payload.totalRecords === "number"
-        ? payload.totalRecords
-        : typeof payload.totalrecords === "number"
-          ? payload.totalrecords
+      typeof payloadRecord.totalRecords === "number"
+        ? payloadRecord.totalRecords
+        : typeof payloadRecord.totalrecords === "number"
+          ? payloadRecord.totalrecords
           : offset + pageRecords.length;
 
     totalRecords = nextTotal;

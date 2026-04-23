@@ -50,6 +50,16 @@ export default async function GovernmentDataPage({
     status: params.status,
     sort: params.sort,
   });
+  const clientKey = [
+    params.keywords ?? "",
+    keywordMode,
+    params.naics ?? "",
+    params.agency ?? "",
+    params.state ?? "",
+    params.industry ?? "",
+    params.status ?? "",
+    params.sort ?? "",
+  ].join("|");
 
   return (
     <div className="space-y-8">
@@ -80,6 +90,7 @@ export default async function GovernmentDataPage({
       </section>
 
       <GovernmentDataClient
+        key={clientKey}
         initialRecords={snapshot.records}
         initialSources={snapshot.sources}
         initialActivities={snapshot.activities}

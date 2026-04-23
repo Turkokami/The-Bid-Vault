@@ -19,8 +19,6 @@ import type {
 import { industryRecommendations } from "@/lib/demo-data";
 import {
   forceRefreshGovernmentData,
-  getMergedGovDataForQuery,
-  getMergedSyncState,
 } from "@/lib/demo-contract-store";
 import type { SamKeywordMode, SamOpportunityRecord } from "@/lib/server/sam-search";
 
@@ -29,6 +27,77 @@ type SearchSamSort = "due-soon" | "newest" | "agency" | "title";
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
+}
+
+const stateNameToCode = new Map<string, string>([
+  ["alabama", "al"],
+  ["alaska", "ak"],
+  ["arizona", "az"],
+  ["arkansas", "ar"],
+  ["california", "ca"],
+  ["colorado", "co"],
+  ["connecticut", "ct"],
+  ["delaware", "de"],
+  ["district of columbia", "dc"],
+  ["florida", "fl"],
+  ["georgia", "ga"],
+  ["hawaii", "hi"],
+  ["idaho", "id"],
+  ["illinois", "il"],
+  ["indiana", "in"],
+  ["iowa", "ia"],
+  ["kansas", "ks"],
+  ["kentucky", "ky"],
+  ["louisiana", "la"],
+  ["maine", "me"],
+  ["maryland", "md"],
+  ["massachusetts", "ma"],
+  ["michigan", "mi"],
+  ["minnesota", "mn"],
+  ["mississippi", "ms"],
+  ["missouri", "mo"],
+  ["montana", "mt"],
+  ["nebraska", "ne"],
+  ["nevada", "nv"],
+  ["new hampshire", "nh"],
+  ["new jersey", "nj"],
+  ["new mexico", "nm"],
+  ["new york", "ny"],
+  ["north carolina", "nc"],
+  ["north dakota", "nd"],
+  ["ohio", "oh"],
+  ["oklahoma", "ok"],
+  ["oregon", "or"],
+  ["pennsylvania", "pa"],
+  ["rhode island", "ri"],
+  ["south carolina", "sc"],
+  ["south dakota", "sd"],
+  ["tennessee", "tn"],
+  ["texas", "tx"],
+  ["utah", "ut"],
+  ["vermont", "vt"],
+  ["virginia", "va"],
+  ["washington", "wa"],
+  ["west virginia", "wv"],
+  ["wisconsin", "wi"],
+  ["wyoming", "wy"],
+]);
+
+const stateCodeToName = new Map(
+  Array.from(stateNameToCode.entries()).map(([name, code]) => [code, name]),
+);
+
+function normalizeStateInput(value?: string) {
+  const input = normalize(value ?? "");
+  if (!input) {
+    return "";
+  }
+
+  if (input.length === 2) {
+    return input;
+  }
+
+  return stateNameToCode.get(input) ?? input;
 }
 
 function parseMultiValue(value?: string) {
@@ -138,11 +207,24 @@ function filterRecords(
   status: SearchSamStatus = "all",
 ) {
   const naicsCodes = parseMultiValue(naics);
+  const normalizedState = normalizeStateInput(state);
+  const stateText = normalize(state ?? "");
 
   return records.filter((record) => {
     const matchesNaics = naicsCodes.length > 0 ? naicsCodes.includes(record.naicsCode) : true;
-    const matchesAgency = agency ? record.agency === agency : true;
-    const matchesState = state ? record.state === state : true;
+    const matchesAgency = agency
+      ? normalize(record.agency).includes(normalize(agency))
+      : true;
+    const recordState = normalize(record.state);
+    const recordLocation = normalize(record.location);
+    const recordStateName = stateCodeToName.get(recordState) ?? "";
+    const matchesState = state
+      ? recordState === normalizedState ||
+        recordLocation.includes(stateText) ||
+        recordLocation.includes(normalizedState) ||
+        (recordStateName ? recordLocation.includes(recordStateName) : false) ||
+        (recordStateName ? recordStateName.includes(stateText) : false)
+      : true;
     const matchesStatus =
       status === "all"
         ? true
@@ -264,60 +346,14 @@ export function GovernmentDataClient({
   const [newListName, setNewListName] = useState("");
 
   useEffect(() => {
-    const syncGovData = async () => {
-      try {
-        const next = await getMergedGovDataForQuery({
-          keywords: searchKeywords,
-          keywordMode,
-          industry: searchIndustry,
-          naics: searchNaics,
-          agency: searchAgency,
-          state: searchState,
-          status: searchStatus,
-          sort: sortBy,
-        });
-        setRecords(next.records);
-      } catch {
-        setErrorMessage("We could not load live SAM records right now.");
-      }
-    };
-
-    const syncSourceState = async () => {
-      try {
-        const next = await getMergedSyncState({
-          keywords: searchKeywords,
-          keywordMode,
-          industry: searchIndustry,
-          naics: searchNaics,
-          agency: searchAgency,
-          state: searchState,
-          status: searchStatus,
-          sort: sortBy,
-        });
-        setSources(next.sources);
-        setActivities(next.activities);
-        setLastForcedRefreshAt(next.lastForcedRefreshAt);
-        setErrorMessage(next.errorMessage ?? "");
-        setIsLiveConfigured(next.liveConfigured);
-      } catch {
-        setErrorMessage("We could not load live SAM source status right now.");
-      }
-    };
-
-    syncGovData();
-    syncSourceState();
     const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
     syncSavedLists();
-    window.addEventListener("bid-vault-gov-data-updated", syncGovData);
-    window.addEventListener("bid-vault-sync-updated", syncSourceState);
     window.addEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
 
     return () => {
-      window.removeEventListener("bid-vault-gov-data-updated", syncGovData);
-      window.removeEventListener("bid-vault-sync-updated", syncSourceState);
       window.removeEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
     };
-  }, [keywordMode, searchAgency, searchIndustry, searchKeywords, searchNaics, searchState, searchStatus, sortBy]);
+  }, []);
 
   const industryMatches = useMemo(() => {
     const query = normalize(searchIndustry);
@@ -477,7 +513,11 @@ export function GovernmentDataClient({
                     setLastForcedRefreshAt(snapshot.activities[0]?.ranAt);
                     setErrorMessage(snapshot.errorMessage ?? "");
                     setIsLiveConfigured(snapshot.liveConfigured);
-                    setStatusMessage("Live SAM records refreshed.");
+                    setStatusMessage(
+                      snapshot.errorMessage
+                        ? "SAM refresh finished with a warning."
+                        : "Live SAM records refreshed.",
+                    );
                   })
                   .catch(() => {
                     setErrorMessage("We could not refresh live SAM records right now.");
