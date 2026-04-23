@@ -35,6 +35,8 @@ export default async function WashingtonStateLocalPage({
       refreshButtonLabel="Refresh live WEBS records"
       refreshSuccessMessage="Washington opportunities refreshed from the live WEBS source."
       refreshErrorMessage="WEBS could not refresh live records right now. Please try again."
+      savedCodeDescription="Apply your saved work categories to WEBS in one click."
+      savedCodeApplyLabel="Apply to WEBS"
       initialFilters={{
         keywords: params.keywords ?? "",
         states: ["WA"],

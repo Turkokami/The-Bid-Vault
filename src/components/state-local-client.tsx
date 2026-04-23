@@ -48,6 +48,9 @@ export function StateLocalClient({
   refreshButtonLabel = "Refresh live records",
   refreshSuccessMessage = "Live opportunities refreshed.",
   refreshErrorMessage = "Live records could not refresh right now. Please try again.",
+  savedCodeHeading = "Saved code lists",
+  savedCodeDescription = "Apply your saved work categories to this search in one click.",
+  savedCodeApplyLabel = "Apply saved codes",
   resetFilters,
 }: {
   initialOpportunities: NormalizedStateLocalOpportunity[];
@@ -64,6 +67,9 @@ export function StateLocalClient({
   refreshButtonLabel?: string;
   refreshSuccessMessage?: string;
   refreshErrorMessage?: string;
+  savedCodeHeading?: string;
+  savedCodeDescription?: string;
+  savedCodeApplyLabel?: string;
   resetFilters?: StateLocalFilters;
 }) {
   const [opportunities, setOpportunities] = useState(initialOpportunities);
@@ -175,9 +181,9 @@ export function StateLocalClient({
 
           {savedCodeLists.length > 0 ? (
             <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Saved code lists</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">{savedCodeHeading}</p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Apply your saved work categories to WEBS searches in one click.
+                {savedCodeDescription}
               </p>
               <div className="mt-4 space-y-3">
                 {savedCodeLists.map((list) => {
@@ -208,7 +214,7 @@ export function StateLocalClient({
                           }
                           className={buttonStyles({ variant: "secondary", size: "sm" })}
                         >
-                          Apply to WEBS
+                          {savedCodeApplyLabel}
                         </button>
                         <button
                           type="button"

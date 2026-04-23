@@ -25,7 +25,13 @@ const locationViews = [
     href: "/state-local/nevada",
     label: "Nevada",
     description: "Nevada statewide plus White Pine and Nye County areas.",
-    status: "Planned",
+    status: "Live",
+  },
+  {
+    href: "/state-local/texas",
+    label: "Texas",
+    description: "Live Texas ESBD and TxSmartBuy opportunity search.",
+    status: "Live",
   },
   {
     href: "/state-local/mohave",

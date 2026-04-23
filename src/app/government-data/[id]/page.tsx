@@ -12,18 +12,28 @@ import { getContractsIndex } from "@/lib/server/contracts";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function buildFederalSourceUrl(record: {
+function buildSafeFederalSourceUrl(record: {
   noticeId?: string;
   sourceUrl?: string;
   title: string;
   agency: string;
 }) {
-  if (record.sourceUrl) {
-    const oppId = record.sourceUrl.match(/\/opp\/([^/?#]+)\/view/i)?.[1];
-    return oppId ? `https://sam.gov/opp/${encodeURIComponent(oppId)}/view` : record.sourceUrl;
+  const fallback = `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(record.noticeId ?? record.title)}`;
+
+  if (!record.sourceUrl) {
+    return fallback;
   }
 
-  return `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(record.noticeId ?? record.title)}`;
+  const oppId = record.sourceUrl.match(/\/opp\/([^/?#]+)\/view/i)?.[1];
+  if (oppId) {
+    return `https://sam.gov/opp/${encodeURIComponent(oppId)}/view`;
+  }
+
+  if (/^https?:\/\//i.test(record.sourceUrl)) {
+    return record.sourceUrl;
+  }
+
+  return fallback;
 }
 
 function pickParam(params: Record<string, string | string[] | undefined>, key: string) {
@@ -113,7 +123,27 @@ export default async function GovernmentDataRecordDetailPage({
     );
   }
 
-  const [{ contracts }, snapshot] = await Promise.all([getContractsIndex(), getSamSearchSnapshot()]);
+  let contracts: Awaited<ReturnType<typeof getContractsIndex>>["contracts"] = [];
+  let snapshot: Awaited<ReturnType<typeof getSamSearchSnapshot>> = {
+    records: [],
+    sources: [],
+    activities: [],
+    liveConfigured: false,
+  };
+
+  try {
+    const [contractsIndex, searchSnapshot] = await Promise.all([
+      getContractsIndex(),
+      getSamSearchSnapshot(),
+    ]);
+    contracts = contractsIndex.contracts;
+    snapshot = searchSnapshot;
+  } catch {
+    contracts = [];
+  }
+
+  const keyTerms = Array.isArray(record.keyTerms) ? record.keyTerms : [];
+  const sourceHref = buildSafeFederalSourceUrl(record);
 
   const relatedContracts = contracts.filter((contract) => {
     const sharedNaics = contract.naicsCode === record.naicsCode;
@@ -160,7 +190,7 @@ export default async function GovernmentDataRecordDetailPage({
             Start a FOIA request
           </Link>
           <Link
-            href={`/sam-search?keywords=${encodeURIComponent(record.keyTerms.join(", "))}`}
+            href={`/sam-search?keywords=${encodeURIComponent(keyTerms.join(", "))}`}
             className={buttonStyles({ variant: "ghost", size: "lg", className: "rounded-[1.25rem]" })}
           >
             Find similar opportunities
@@ -218,7 +248,7 @@ export default async function GovernmentDataRecordDetailPage({
           <div className="mt-6">
             <p className="text-sm text-slate-500">Search words found in this record</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {record.keyTerms.map((term) => (
+              {keyTerms.map((term) => (
                 <span
                   key={term}
                   className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100"
@@ -240,7 +270,7 @@ export default async function GovernmentDataRecordDetailPage({
               See previous winning bids in this market
             </Link>
             <Link
-              href={`/contracts?keywords=${encodeURIComponent(record.keyTerms.join(", "))}&naics=${encodeURIComponent(record.naicsCode)}`}
+              href={`/contracts?keywords=${encodeURIComponent(keyTerms.join(", "))}&naics=${encodeURIComponent(record.naicsCode)}`}
               className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
               Compare with saved contracts
@@ -251,12 +281,14 @@ export default async function GovernmentDataRecordDetailPage({
             >
               Find nearby opportunities from the same agency
             </Link>
-            <Link
-              href={buildFederalSourceUrl(record)}
+            <a
+              href={sourceHref}
+              target="_blank"
+              rel="noreferrer"
               className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
             >
               Open original SAM posting
-            </Link>
+            </a>
           </div>
           {!snapshot.liveConfigured ? (
             <p className="mt-4 text-sm leading-6 text-amber-100">
