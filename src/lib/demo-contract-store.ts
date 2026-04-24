@@ -11,6 +11,7 @@ import type { SamOpportunityRecord } from "@/lib/server/sam-search";
 
 const CONTRACTS_KEY = "bid-vault-demo-contracts";
 const PLANNING_KEY = "bid-vault-demo-planning";
+const SAM_SNAPSHOT_CACHE_PREFIX = "bid-vault-sam-snapshot:";
 
 export type DemoContractDraft = Omit<
   DemoContract,
@@ -60,6 +61,39 @@ function buildSamSnapshotUrl(query?: SamSnapshotQuery) {
   return search ? `/api/sam-search/snapshot?${search}` : "/api/sam-search/snapshot";
 }
 
+function getSamSnapshotCacheKey(query?: SamSnapshotQuery) {
+  return `${SAM_SNAPSHOT_CACHE_PREFIX}${buildSamSnapshotUrl(query)}`;
+}
+
+export function readCachedSamSnapshot(query?: SamSnapshotQuery): SamSnapshot | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(getSamSnapshotCacheKey(query));
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw) as SamSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedSamSnapshot(snapshot: SamSnapshot, query?: SamSnapshotQuery) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(getSamSnapshotCacheKey(query), JSON.stringify(snapshot));
+}
+
+export function cacheSamSnapshot(snapshot: SamSnapshot, query?: SamSnapshotQuery) {
+  writeCachedSamSnapshot(snapshot, query);
+}
+
 async function fetchSamSnapshot(query?: SamSnapshotQuery): Promise<SamSnapshot> {
   const response = await fetch(buildSamSnapshotUrl(query), {
     cache: "no-store",
@@ -69,7 +103,13 @@ async function fetchSamSnapshot(query?: SamSnapshotQuery): Promise<SamSnapshot> 
     throw new Error("Unable to load live SAM records.");
   }
 
-  return (await response.json()) as SamSnapshot;
+  const snapshot = (await response.json()) as SamSnapshot;
+
+  if (snapshot.records.length > 0 && !snapshot.errorMessage) {
+    writeCachedSamSnapshot(snapshot, query);
+  }
+
+  return snapshot;
 }
 
 export function readDemoContracts() {

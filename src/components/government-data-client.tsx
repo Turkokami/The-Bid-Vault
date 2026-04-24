@@ -18,7 +18,9 @@ import type {
 } from "@/lib/demo-data";
 import { industryRecommendations } from "@/lib/demo-data";
 import {
+  cacheSamSnapshot,
   forceRefreshGovernmentData,
+  readCachedSamSnapshot,
 } from "@/lib/demo-contract-store";
 import type { SamKeywordMode, SamOpportunityRecord } from "@/lib/server/sam-search";
 
@@ -365,6 +367,94 @@ export function GovernmentDataClient({
       window.removeEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
     };
   }, []);
+
+  useEffect(() => {
+    if (records.length === 0 || errorMessage) {
+      return;
+    }
+
+    cacheSamSnapshot(
+      {
+        records,
+        sources,
+        activities,
+        liveConfigured: isLiveConfigured,
+      },
+      {
+        keywords: searchKeywords,
+        keywordMode,
+        industry: searchIndustry,
+        naics: searchNaics,
+        agency: searchAgency,
+        state: searchState,
+        status: searchStatus,
+        sort: sortBy,
+        browse: browseAll,
+      },
+    );
+  }, [
+    activities,
+    browseAll,
+    errorMessage,
+    isLiveConfigured,
+    keywordMode,
+    records,
+    searchAgency,
+    searchIndustry,
+    searchKeywords,
+    searchNaics,
+    searchState,
+    searchStatus,
+    sortBy,
+    sources,
+  ]);
+
+  useEffect(() => {
+    if (records.length > 0) {
+      return;
+    }
+
+    if (!errorMessage || !/rate limiting|429/i.test(errorMessage)) {
+      return;
+    }
+
+    const cached = readCachedSamSnapshot({
+      keywords: searchKeywords,
+      keywordMode,
+      industry: searchIndustry,
+      naics: searchNaics,
+      agency: searchAgency,
+      state: searchState,
+      status: searchStatus,
+      sort: sortBy,
+      browse: browseAll,
+    });
+
+    if (!cached || cached.records.length === 0) {
+      return;
+    }
+
+    const fallbackTimer = window.setTimeout(() => {
+      setRecords(cached.records);
+      setSources(cached.sources);
+      setActivities(cached.activities);
+      setStatusMessage("Showing your last successful SAM results while SAM.gov cools down.");
+    }, 0);
+
+    return () => window.clearTimeout(fallbackTimer);
+  }, [
+    browseAll,
+    errorMessage,
+    keywordMode,
+    records.length,
+    searchAgency,
+    searchIndustry,
+    searchKeywords,
+    searchNaics,
+    searchState,
+    searchStatus,
+    sortBy,
+  ]);
 
   const industryMatches = useMemo(() => {
     const query = normalize(searchIndustry);
