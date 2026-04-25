@@ -183,7 +183,30 @@ export default async function LocationStateLocalPage({
 }) {
   const { location } = await params;
   const query = (await searchParams) ?? {};
-  const snapshot = await getStateLocalSyncSnapshot();
+  const snapshot = await getStateLocalSyncSnapshot().catch(() => ({
+    opportunities: [],
+    syncLogs: [
+      {
+        id: `state-local-${location}-fallback`,
+        sourceName: "State & Local Sources",
+        sourceCode: "washington" as const,
+        syncStatus: "Failed" as const,
+        lastRunAt: new Date().toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZoneName: "short",
+        }),
+        recordsAdded: 0,
+        recordsUpdated: 0,
+        errorMessage: "This location view could not load live source data right now.",
+        notes:
+          "The live source had a temporary loading problem. The page is still available and direct portal links should still work.",
+      },
+    ],
+    sources: [],
+  }));
   const view = locationViews.find((item) => item.slug === location);
 
   if (!view) {

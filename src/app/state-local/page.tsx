@@ -58,7 +58,11 @@ function sourceViewHref(sourceCode: string) {
 }
 
 export default async function StateLocalPage() {
-  const snapshot = await getStateLocalSyncSnapshot();
+  const snapshot = await getStateLocalSyncSnapshot().catch(() => ({
+    opportunities: [],
+    syncLogs: [],
+    sources: [],
+  }));
   const connectedSources = snapshot.sources.filter((source) => source.status === "Connected");
   const plannedSources = snapshot.sources.filter((source) => source.status === "Planned");
   const statewideSources = plannedSources.filter((source) => source.sourceType !== "County / City");

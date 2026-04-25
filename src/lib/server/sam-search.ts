@@ -523,8 +523,8 @@ async function fetchSamRecords(options?: {
   const postedTo = formatSamApiDate(now);
   const postedFrom = formatSamApiDate(new Date(now.getTime() - 1000 * 60 * 60 * 24 * 364));
   const baseUrl = "https://api.sam.gov/opportunities/v2/search";
-  const limit = options?.searchPhrase ? 1000 : 250;
-  const maxPages = options?.searchPhrase ? 3 : 4;
+  const limit = options?.searchPhrase ? 100 : 50;
+  const maxPages = options?.searchPhrase ? 1 : 1;
   const fetched: SamOpportunityRecord[] = [];
   let totalRecords = Number.POSITIVE_INFINITY;
   let offset = 0;
@@ -681,16 +681,7 @@ export async function getSamSearchSnapshot(query: SamSearchQuery = {}): Promise<
       state: query.state,
     });
 
-    const fallbackRecords =
-      searchPhrase && primaryRecords.length < 25
-        ? await fetchSamRecords({
-            naics: query.naics,
-            agency: query.agency,
-            state: query.state,
-          })
-        : [];
-
-    const rawRecords = dedupeRecords([...primaryRecords, ...fallbackRecords]);
+    const rawRecords = dedupeRecords(primaryRecords);
     const records = sortRecords(
       filterRecords(rawRecords, { ...query, keywords: searchKeywords }),
       query.sort,

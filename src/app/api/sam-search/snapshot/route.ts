@@ -31,6 +31,7 @@ export async function GET(request: Request) {
         | "agency"
         | "title"
         | null) ?? "due-soon",
+    browseAll: searchParams.get("browse") === "1",
   });
   return NextResponse.json(snapshot);
 }

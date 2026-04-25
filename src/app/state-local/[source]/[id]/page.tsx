@@ -33,7 +33,11 @@ export default async function StateLocalOpportunityDetailPage({
     notFound();
   }
 
-  const snapshot = await getStateLocalSyncSnapshot();
+  const snapshot = await getStateLocalSyncSnapshot().catch(() => ({
+    opportunities: [],
+    syncLogs: [],
+    sources: [],
+  }));
 
   return (
     <StateLocalDetailClient
