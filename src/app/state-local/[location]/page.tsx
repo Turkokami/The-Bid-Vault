@@ -1,10 +1,17 @@
 import { notFound } from "next/navigation";
 import { StateLocalClient } from "@/components/state-local-client";
+import {
+  getStateDirectoryEntry,
+} from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 import type { StateLocalFilters } from "@/lib/state-local-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+function pickSearchValue(value?: string | string[]) {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
 
 type LocationView = {
   slug: string;
@@ -30,6 +37,16 @@ type LocationView = {
 };
 
 const locationViews: LocationView[] = [
+  {
+    slug: "washington",
+    title: "Washington state and local opportunities.",
+    description:
+      "Search Washington statewide and local opportunities in a cleaner view powered by live WEBS coverage.",
+    states: ["WA"],
+    sourceCodes: ["washington"],
+    sourceLabel: "Washington sources",
+    sourceDescription: "Washington statewide coverage with live WEBS results.",
+  },
   {
     slug: "arizona",
     title: "Arizona state and local opportunities.",
@@ -149,6 +166,58 @@ const locationViews: LocationView[] = [
   },
 ];
 
+function buildStateLocationView(location: string, allSourceCodes: string[]): LocationView | null {
+  const state = getStateDirectoryEntry(location);
+  if (!state) {
+    return null;
+  }
+
+  const stateLocalSourceCodes = allSourceCodes.filter((code) => code !== state.slug);
+  const localCodesForState = stateLocalSourceCodes.filter((code) => {
+    const localState = getStateDirectoryEntry(code);
+    return localState?.stateCode === state.stateCode;
+  });
+
+  const sourceCodes = [state.slug, ...localCodesForState];
+  const portalAssist =
+    state.connectionMode === "portal-assisted"
+      ? {
+          eyebrow: "Portal-assisted now",
+          title: `Use ${state.portalName} directly, with The Bid Vault guiding the workflow.`,
+          description:
+            `${state.name}'s official source works best as a live portal handoff today. Use your saved terms, saved code lists, and local coverage plan here, then open the official state portal to review the live postings directly.`,
+          note:
+            "This keeps the page useful right now instead of pretending the portal can always be scraped in the background.",
+          links: [
+            {
+              href: state.portalUrl,
+              label: `Open ${state.name} portal`,
+              external: true,
+            },
+            {
+              href: "/categories",
+              label: "Review saved work categories",
+            },
+          ],
+        }
+      : undefined;
+
+  return {
+    slug: state.slug,
+    title: `${state.name} state and local opportunities.`,
+    description: `Use this page to focus on ${state.name} statewide opportunities, then branch into county and city sources as those local connectors are added.`,
+    states: [state.stateCode],
+    sourceCodes,
+    sourceLabel: `${state.name} sources`,
+    sourceDescription: `${state.portalName} plus county and city coverage for ${state.name}.`,
+    emptyStateMessage:
+      state.connectionMode === "live"
+        ? `No ${state.name} results are showing right now. Try refreshing the page or opening the official ${state.name} portal directly.`
+        : `This ${state.name} page is ready as a statewide launch point. Open the official ${state.name} portal while county and city connectors are built out.`,
+    portalAssist,
+  };
+}
+
 function buildFilters(view: LocationView, keywords = "", codes = ""): StateLocalFilters {
   const requestedCategoryCodes = codes
     .split(",")
@@ -177,8 +246,8 @@ export default async function LocationStateLocalPage({
 }: {
   params: Promise<{ location: string }>;
   searchParams?: Promise<{
-    keywords?: string;
-    codes?: string;
+    keywords?: string | string[];
+    codes?: string | string[];
   }>;
 }) {
   const { location } = await params;
@@ -207,7 +276,10 @@ export default async function LocationStateLocalPage({
     ],
     sources: [],
   }));
-  const view = locationViews.find((item) => item.slug === location);
+  const allSourceCodes = snapshot.sources.map((source) => source.sourceCode);
+  const view =
+    locationViews.find((item) => item.slug === location) ??
+    buildStateLocationView(location, allSourceCodes);
 
   if (!view) {
     notFound();
@@ -216,7 +288,11 @@ export default async function LocationStateLocalPage({
   const focusSources = snapshot.sources.filter((source) => view.sourceCodes.includes(source.sourceCode));
   const sourceNames = focusSources.map((source) => source.sourceName);
   const viewWithSources = { ...view, sourceNames };
-  const initialFilters = buildFilters(viewWithSources, query.keywords ?? "", query.codes ?? "");
+  const initialFilters = buildFilters(
+    viewWithSources,
+    pickSearchValue(query.keywords),
+    pickSearchValue(query.codes),
+  );
 
   return (
     <StateLocalClient

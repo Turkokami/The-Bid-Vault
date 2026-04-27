@@ -1,4 +1,5 @@
 import { fetchLiveTexasOpportunities } from "@/lib/sources/texas-live";
+import { stateDirectory } from "@/lib/sources/state-registry";
 import { websSourceSummary } from "@/lib/sources/webs";
 import { fetchLiveWebsRawOpportunities } from "@/lib/sources/webs-live";
 import type {
@@ -7,23 +8,10 @@ import type {
   StateLocalSourceSyncLog,
 } from "@/lib/sources/types";
 
-const plannedSources: StateLocalSourceSummary[] = [
-  {
-    id: "source-arizona",
-    sourceCode: "arizona",
-    sourceName: "Arizona Procurement Portal",
-    stateCode: "AZ",
-    sourceType: "State",
-    regionLabel: "Arizona statewide",
-    status: "Planned",
-    cadence: "Planned",
-    description:
-      "Arizona's statewide purchasing portal for agency solicitations, vendor registration, and public procurement notices.",
-    helperText:
-      "This is the state-level Arizona source. We will use it for Arizona agency opportunities, then layer county and city sources on top for deeper local coverage.",
-    portalUrl: "https://spo.az.gov/app",
-    lastSyncedAt: "Not connected yet",
-  },
+let cachedWebsOpportunities: NormalizedStateLocalOpportunity[] = [];
+let cachedTexasOpportunities: NormalizedStateLocalOpportunity[] = [];
+
+const localAndRegionalSources: StateLocalSourceSummary[] = [
   {
     id: "source-flagstaff",
     sourceCode: "flagstaff",
@@ -120,83 +108,33 @@ const plannedSources: StateLocalSourceSummary[] = [
     portalUrl: "https://www.nyecountynv.gov/Bids.aspx?CatID=showStatus&Status=open&showAllBids=&txtSort=BidNumberAsc",
     lastSyncedAt: "Not connected yet",
   },
-  {
-    id: "source-nevada",
-    sourceCode: "nevada",
-    sourceName: "NEVADAePro",
-    stateCode: "NV",
-    sourceType: "State",
-    regionLabel: "Nevada statewide",
-    status: "Connected",
-    connectionMode: "portal-assisted",
-    cadence: "Portal-assisted",
-    description:
-      "Nevada's official electronic procurement portal for current solicitations, active contracts, bid documents, and vendor registration.",
-    helperText:
-      "Nevada active contracts and bids are available in the official portal, but the portal blocks automated background result loading. Use the Nevada location view to apply your saved codes and jump into the live Nevada search pages directly.",
-    portalUrl:
-      "https://nevadaepro.com/bso/view/search/external/advancedSearchContractBlanket.xhtml?view=activeContracts",
-    lastSyncedAt: "Portal-assisted mode ready",
-  },
-  {
-    id: "source-texas",
-    sourceCode: "texas",
-    sourceName: "Texas ESBD / TxSmartBuy",
-    stateCode: "TX",
-    sourceType: "State",
-    regionLabel: "Texas statewide",
-    status: "Connected",
-    cadence: "Live public site",
-    description:
-      "Texas' Electronic State Business Daily and TxSmartBuy ecosystem for state bid opportunities, awards, agencies, and NIGP class/item search.",
-    helperText:
-      "Texas ESBD is public for searching solicitations. State opportunities over $25,000 are commonly posted there, and searches can use agency, dates, and NIGP class/item codes.",
-    portalUrl: "https://www.txsmartbuy.gov/esbd",
-    lastSyncedAt: "Loading live records",
-  },
-  {
-    id: "source-oregon",
-    sourceCode: "oregon",
-    sourceName: "OregonBuys",
-    stateCode: "OR",
-    sourceType: "State",
-    regionLabel: "Oregon statewide",
-    status: "Planned",
-    cadence: "Planned",
-    description: "Planned Oregon state and local opportunity coverage.",
-    helperText: "Future Oregon connector placeholder for state and local solicitations.",
-    portalUrl: "https://oregonbuys.gov/",
-    lastSyncedAt: "Not connected yet",
-  },
-  {
-    id: "source-idaho",
-    sourceCode: "idaho",
-    sourceName: "Idaho eProcurement",
-    stateCode: "ID",
-    sourceType: "State",
-    regionLabel: "Idaho statewide",
-    status: "Planned",
-    cadence: "Planned",
-    description: "Planned Idaho state and local procurement coverage.",
-    helperText: "Future Idaho connector placeholder for state and local opportunities.",
-    portalUrl: "https://purchasing.idaho.gov/",
-    lastSyncedAt: "Not connected yet",
-  },
-  {
-    id: "source-california",
-    sourceCode: "california",
-    sourceName: "Cal eProcure",
-    stateCode: "CA",
-    sourceType: "State",
-    regionLabel: "California statewide",
-    status: "Planned",
-    cadence: "Planned",
-    description: "Planned California state and local procurement coverage.",
-    helperText: "Future California connector placeholder for broader west coast coverage.",
-    portalUrl: "https://caleprocure.ca.gov/",
-    lastSyncedAt: "Not connected yet",
-  },
 ];
+
+const statewideSources: StateLocalSourceSummary[] = stateDirectory.map((state) => ({
+  id: `source-${state.slug}`,
+  sourceCode: state.slug,
+  sourceName: state.portalName,
+  stateCode: state.stateCode,
+  sourceType: "State",
+  regionLabel: `${state.name} statewide`,
+  status: state.status,
+  connectionMode: state.connectionMode,
+  cadence:
+    state.connectionMode === "live"
+      ? "Live public site"
+      : state.connectionMode === "portal-assisted"
+        ? "Portal-assisted"
+        : "Planned",
+  description: state.description,
+  helperText: state.helperText,
+  portalUrl: state.portalUrl,
+  lastSyncedAt:
+    state.connectionMode === "live"
+      ? "Loading live records"
+      : state.connectionMode === "portal-assisted"
+        ? "Portal-assisted mode ready"
+        : "Not connected yet",
+}));
 
 function formatSyncTime() {
   return new Date().toLocaleString("en-US", {
@@ -235,12 +173,11 @@ export async function getStateLocalSyncSnapshot(): Promise<{
 }> {
   const opportunities: NormalizedStateLocalOpportunity[] = [];
   const syncLogs: StateLocalSourceSyncLog[] = [];
-  const sources = [...plannedSources];
+  const sources = [...statewideSources, ...localAndRegionalSources];
 
   try {
     const raws = await fetchLiveWebsRawOpportunities();
-    opportunities.push(
-      ...raws.map((record) => ({
+    const mappedWebsOpportunities = raws.map((record) => ({
         id: `washington-${record.solicitationNumber.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
         externalId: record.solicitationNumber,
         sourceName: "WEBS",
@@ -264,8 +201,9 @@ export async function getStateLocalSyncSnapshot(): Promise<{
         contactPhone: record.contactPhone,
         createdAt: record.postedDate,
         updatedAt: record.updatedAt,
-      })),
-    );
+      }));
+    opportunities.push(...mappedWebsOpportunities);
+    cachedWebsOpportunities = mappedWebsOpportunities;
     syncLogs.push({
       id: `sync-webs-live-${raws.length}`,
       sourceName: "WEBS",
@@ -277,22 +215,38 @@ export async function getStateLocalSyncSnapshot(): Promise<{
       notes: "Live WEBS postings were loaded directly from Washington's public bid portal.",
     });
   } catch {
-    syncLogs.push({
-      id: "sync-webs-failed",
-      sourceName: "WEBS",
-      sourceCode: "washington",
-      syncStatus: "Failed",
-      lastRunAt: formatSyncTime(),
-      recordsAdded: 0,
-      recordsUpdated: 0,
-      errorMessage: "Live WEBS records did not load.",
-      notes: "WEBS is connected as a live public source, but the latest fetch did not return records.",
-    });
+    if (cachedWebsOpportunities.length > 0) {
+      opportunities.push(...cachedWebsOpportunities);
+      syncLogs.push({
+        id: "sync-webs-cached",
+        sourceName: "WEBS",
+        sourceCode: "washington",
+        syncStatus: "Partial",
+        lastRunAt: formatSyncTime(),
+        recordsAdded: cachedWebsOpportunities.length,
+        recordsUpdated: 0,
+        notes:
+          "WEBS live refresh did not return new records, so the app is showing the last successful Washington results instead.",
+      });
+    } else {
+      syncLogs.push({
+        id: "sync-webs-failed",
+        sourceName: "WEBS",
+        sourceCode: "washington",
+        syncStatus: "Failed",
+        lastRunAt: formatSyncTime(),
+        recordsAdded: 0,
+        recordsUpdated: 0,
+        errorMessage: "Live WEBS records did not load.",
+        notes: "WEBS is connected as a live public source, but the latest fetch did not return records.",
+      });
+    }
   }
 
   try {
     const texasOpportunities = await fetchLiveTexasOpportunities();
     opportunities.push(...texasOpportunities);
+    cachedTexasOpportunities = texasOpportunities;
     updateConnectedSource(sources, "texas");
     syncLogs.push({
       id: `sync-texas-live-${texasOpportunities.length}`,
@@ -305,22 +259,42 @@ export async function getStateLocalSyncSnapshot(): Promise<{
       notes: "Live Texas ESBD opportunities were loaded directly from the public ESBD search page.",
     });
   } catch {
-    updateConnectedSource(
-      sources,
-      "texas",
-      "Texas ESBD is configured as a live public source, but the latest fetch did not return records. Try refreshing later.",
-    );
-    syncLogs.push({
-      id: "sync-texas-failed",
-      sourceName: "Texas ESBD / TxSmartBuy",
-      sourceCode: "texas",
-      syncStatus: "Failed",
-      lastRunAt: formatSyncTime(),
-      recordsAdded: 0,
-      recordsUpdated: 0,
-      errorMessage: "Live Texas ESBD records did not load.",
-      notes: "Texas ESBD is configured for live public search, but the latest fetch did not return usable records.",
-    });
+    if (cachedTexasOpportunities.length > 0) {
+      opportunities.push(...cachedTexasOpportunities);
+      updateConnectedSource(
+        sources,
+        "texas",
+        "Texas ESBD live refresh did not return new records, so the app is showing the last successful Texas results instead.",
+      );
+      syncLogs.push({
+        id: "sync-texas-cached",
+        sourceName: "Texas ESBD / TxSmartBuy",
+        sourceCode: "texas",
+        syncStatus: "Partial",
+        lastRunAt: formatSyncTime(),
+        recordsAdded: cachedTexasOpportunities.length,
+        recordsUpdated: 0,
+        notes:
+          "Texas ESBD live refresh did not return new rows, so the app is using the last successful Texas result set.",
+      });
+    } else {
+      updateConnectedSource(
+        sources,
+        "texas",
+        "Texas ESBD is configured as a live public source, but the latest fetch did not return records. Try refreshing later.",
+      );
+      syncLogs.push({
+        id: "sync-texas-failed",
+        sourceName: "Texas ESBD / TxSmartBuy",
+        sourceCode: "texas",
+        syncStatus: "Failed",
+        lastRunAt: formatSyncTime(),
+        recordsAdded: 0,
+        recordsUpdated: 0,
+        errorMessage: "Live Texas ESBD records did not load.",
+        notes: "Texas ESBD is configured for live public search, but the latest fetch did not return usable records.",
+      });
+    }
   }
 
   updateConnectedSource(
@@ -361,7 +335,7 @@ export async function getStateLocalSyncSnapshot(): Promise<{
           ? websSourceSummary.helperText
           : "WEBS is connected as a live public source, but the latest fetch did not return records. We are no longer showing placeholder postings here.",
       },
-      ...sources,
+      ...sources.filter((source) => source.sourceCode !== "washington"),
     ],
   };
 }

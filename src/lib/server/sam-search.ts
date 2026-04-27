@@ -40,8 +40,53 @@ type SamSearchSnapshot = {
   errorMessage?: string;
 };
 
+type SamSnapshotCacheEntry = {
+  cachedAt: number;
+  snapshot: SamSearchSnapshot;
+};
+
+const SAM_SNAPSHOT_CACHE_TTL_MS = 1000 * 60 * 15;
+const samSnapshotCache = new Map<string, SamSnapshotCacheEntry>();
+
 function normalize(value: string) {
   return value.trim().toLowerCase();
+}
+
+function buildSnapshotCacheKey(query: SamSearchQuery) {
+  return JSON.stringify({
+    keywords: (query.keywords ?? []).map((keyword) => normalize(keyword)).sort(),
+    keywordMode: query.keywordMode ?? "all",
+    naics: normalize(query.naics ?? ""),
+    agency: normalize(query.agency ?? ""),
+    state: normalizeSamState(query.state ?? ""),
+    industry: normalize(query.industry ?? ""),
+    status: query.status ?? "all",
+    sort: query.sort ?? "due-soon",
+    browseAll: !!query.browseAll,
+  });
+}
+
+function readCachedSnapshot(query: SamSearchQuery) {
+  const cacheKey = buildSnapshotCacheKey(query);
+  const entry = samSnapshotCache.get(cacheKey);
+
+  if (!entry) {
+    return null;
+  }
+
+  if (Date.now() - entry.cachedAt > SAM_SNAPSHOT_CACHE_TTL_MS) {
+    samSnapshotCache.delete(cacheKey);
+    return null;
+  }
+
+  return entry.snapshot;
+}
+
+function writeCachedSnapshot(query: SamSearchQuery, snapshot: SamSearchSnapshot) {
+  samSnapshotCache.set(buildSnapshotCacheKey(query), {
+    cachedAt: Date.now(),
+    snapshot,
+  });
 }
 
 const stateNameToCode = new Map<string, string>([
@@ -686,8 +731,7 @@ export async function getSamSearchSnapshot(query: SamSearchQuery = {}): Promise<
       filterRecords(rawRecords, { ...query, keywords: searchKeywords }),
       query.sort,
     );
-
-    return {
+    const snapshot: SamSearchSnapshot = {
       records,
       sources: [baseSource],
       activities: [
@@ -706,14 +750,31 @@ export async function getSamSearchSnapshot(query: SamSearchQuery = {}): Promise<
       ],
       liveConfigured: true,
     };
+
+    if (records.length > 0) {
+      writeCachedSnapshot(query, snapshot);
+    }
+
+    return snapshot;
   } catch (error) {
+    const cachedSnapshot = readCachedSnapshot(query);
+    const errorMessage =
+      error instanceof Error ? error.message : "Search SAM could not load live records.";
+
+    if (cachedSnapshot && /rate limiting|429/i.test(errorMessage)) {
+      return {
+        ...cachedSnapshot,
+        errorMessage:
+          "SAM.gov is rate limiting requests right now. Showing the last successful live results for this search while the service cools down.",
+      };
+    }
+
     return {
       records: [],
       sources: [{ ...baseSource, status: "Needs Setup" }],
       activities: [],
       liveConfigured: true,
-      errorMessage:
-        error instanceof Error ? error.message : "Search SAM could not load live records.",
+      errorMessage,
     };
   }
 }
@@ -735,7 +796,11 @@ export async function getSamOpportunityById(id: string) {
       return directMatch;
     }
   } catch {
-    return null;
+    const cachedMatch = Array.from(samSnapshotCache.values())
+      .flatMap((entry) => entry.snapshot.records)
+      .find((record) => normalize(record.noticeId) === normalize(id) || record.id === id);
+
+    return cachedMatch ?? null;
   }
 
   return null;

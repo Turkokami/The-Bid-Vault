@@ -1,60 +1,11 @@
 import Link from "next/link";
+import { StateLocationPicker } from "@/components/state-location-picker";
 import { buttonStyles } from "@/components/ui/button";
+import { getStatePortalHref, stateDirectory } from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 
-const locationViews = [
-  {
-    href: "/state-local/washington",
-    label: "Washington",
-    description: "Live WEBS search for Washington state and local postings.",
-    status: "Live",
-  },
-  {
-    href: "/state-local/arizona",
-    label: "Arizona",
-    description: "Arizona statewide plus Flagstaff, Coconino, Mohave, and Yavapai.",
-    status: "Planned",
-  },
-  {
-    href: "/state-local/northern-arizona",
-    label: "Northern Arizona",
-    description: "Focused view for Flagstaff, Coconino, Yavapai, and Mohave areas.",
-    status: "Planned",
-  },
-  {
-    href: "/state-local/nevada",
-    label: "Nevada",
-    description: "Nevada statewide plus White Pine and Nye County areas.",
-    status: "Portal-assisted",
-  },
-  {
-    href: "/state-local/texas",
-    label: "Texas",
-    description: "Live Texas ESBD and TxSmartBuy opportunity search.",
-    status: "Live",
-  },
-  {
-    href: "/state-local/mohave",
-    label: "Mohave County",
-    description: "Kingman, Lake Havasu, Bullhead City, and county service areas.",
-    status: "Planned",
-  },
-  {
-    href: "/state-local/nye",
-    label: "Nye County",
-    description: "Pahrump, Tonopah, roads, facilities, utilities, and county services.",
-    status: "Planned",
-  },
-  {
-    href: "/state-local/white-pine",
-    label: "White Pine County",
-    description: "Ely-area county work, public works, facilities, and local services.",
-    status: "Planned",
-  },
-];
-
 function sourceViewHref(sourceCode: string) {
-  return sourceCode === "washington" ? "/state-local/washington" : `/state-local/${sourceCode}`;
+  return getStatePortalHref(sourceCode);
 }
 
 export default async function StateLocalPage() {
@@ -65,7 +16,6 @@ export default async function StateLocalPage() {
   }));
   const connectedSources = snapshot.sources.filter((source) => source.status === "Connected");
   const plannedSources = snapshot.sources.filter((source) => source.status === "Planned");
-  const statewideSources = plannedSources.filter((source) => source.sourceType !== "County / City");
   const localSources = plannedSources.filter((source) => source.sourceType === "County / City");
   const northernArizonaSources = localSources.filter((source) => source.regionLabel === "Northern Arizona");
   const serviceAreaSources = localSources.filter((source) =>
@@ -110,46 +60,20 @@ export default async function StateLocalPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
-              Choose your location
+              Select your state
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-white">
-              Give customers a simple view for the area they serve.
+              Open a dedicated state page without bloating the main menu.
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-              Each location gets its own focused page with the same clean search layout. Washington
-              is live now, and the Arizona/Nevada county views are ready for connector rollout.
+              Every state now has its own page, with room for a statewide portal layer and a county
+              or city rollout layer underneath. Live states stay strongest first, while the rest of
+              the country gets a clean state-by-state framework we can keep expanding.
             </p>
           </div>
-          <Link href="/state-local/washington" className={buttonStyles({ variant: "primary", size: "md" })}>
-            Open live Washington view
-          </Link>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {locationViews.map((view) => (
-            <Link
-              key={view.href}
-              href={view.href}
-              className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold text-white">{view.label}</h3>
-                <span
-                  className={`rounded-full border px-3 py-1 text-xs font-medium ${
-                    view.status === "Live"
-                      ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-                      : view.status === "Portal-assisted"
-                        ? "border-amber-400/20 bg-amber-400/10 text-amber-100"
-                      : "border-white/10 bg-slate-950/70 text-slate-300"
-                  }`}
-                >
-                  {view.status}
-                </span>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-slate-400">{view.description}</p>
-              <p className="mt-4 text-sm font-semibold text-emerald-200">Open location view</p>
-            </Link>
-          ))}
+          <div className="w-full max-w-xl">
+            <StateLocationPicker states={stateDirectory} />
+          </div>
         </div>
       </section>
 
@@ -210,34 +134,44 @@ export default async function StateLocalPage() {
           </article>
 
           <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">State sources coming next</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">All state pages now available</p>
             <div className="mt-5 space-y-4">
-              {statewideSources.map((source) => (
+              {stateDirectory.map((state) => (
                 <div
-                  key={source.id}
+                  key={state.slug}
                   className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-base font-semibold text-white">{source.sourceName}</p>
-                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-xs text-slate-300">
-                      {source.status}
+                    <p className="text-base font-semibold text-white">{state.name}</p>
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs ${
+                        state.connectionMode === "live"
+                          ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
+                          : state.connectionMode === "portal-assisted"
+                            ? "border-amber-400/20 bg-amber-400/10 text-amber-100"
+                            : "border-white/10 bg-slate-950/70 text-slate-300"
+                      }`}
+                    >
+                      {state.connectionMode === "live"
+                        ? "Live"
+                        : state.connectionMode === "portal-assisted"
+                          ? "Portal-assisted"
+                          : "Planned"}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-300/70">
-                    {source.regionLabel ?? `${source.stateCode} statewide`}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{source.description}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{source.helperText}</p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-300/70">{state.stateCode} statewide</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">{state.description}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{state.helperText}</p>
                   <div className="mt-4">
                     <div className="flex flex-wrap gap-2">
                       <Link
-                        href={sourceViewHref(source.sourceCode)}
+                        href={`/state-local/${state.slug}`}
                         className={buttonStyles({ variant: "secondary", size: "sm" })}
                       >
-                        Open location view
+                        Open state page
                       </Link>
                       <a
-                        href={source.portalUrl}
+                        href={state.portalUrl}
                         className={buttonStyles({ variant: "ghost", size: "sm" })}
                       >
                         Open original source
@@ -268,7 +202,7 @@ export default async function StateLocalPage() {
             </p>
           </div>
           <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
-            AZ + NV local first
+            County rollout layer
           </span>
         </div>
 

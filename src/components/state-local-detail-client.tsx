@@ -27,6 +27,40 @@ function getDirectSourceUrl(opportunity: NormalizedStateLocalOpportunity) {
   return opportunity.sourceUrl;
 }
 
+function buildSourceListHref(sourceCode: string) {
+  const locationMap: Record<string, string> = {
+    washington: "/state-local/washington",
+    arizona: "/state-local/arizona",
+    flagstaff: "/state-local/coconino",
+    coconino: "/state-local/coconino",
+    mohave: "/state-local/mohave",
+    yavapai: "/state-local/yavapai",
+    nevada: "/state-local/nevada",
+    "white-pine": "/state-local/white-pine",
+    nye: "/state-local/nye",
+    texas: "/state-local/texas",
+  };
+
+  return locationMap[sourceCode] ?? "/state-local";
+}
+
+function buildSourceListLabel(sourceName: string, sourceCode: string) {
+  const labels: Record<string, string> = {
+    washington: "Back to Washington list",
+    arizona: "Back to Arizona list",
+    flagstaff: "Back to Flagstaff list",
+    coconino: "Back to Coconino list",
+    mohave: "Back to Mohave County list",
+    yavapai: "Back to Yavapai County list",
+    nevada: "Back to Nevada list",
+    "white-pine": "Back to White Pine County list",
+    nye: "Back to Nye County list",
+    texas: "Back to Texas list",
+  };
+
+  return labels[sourceCode] ?? `Back to ${sourceName} list`;
+}
+
 export function StateLocalDetailClient({
   sourceCode,
   opportunityId,
@@ -87,7 +121,6 @@ export function StateLocalDetailClient({
   }, [opportunities, opportunity]);
 
   const directSourceUrl = opportunity ? getDirectSourceUrl(opportunity) : "";
-
   if (!opportunity) {
     return (
       <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/60 p-10 text-center text-sm text-slate-400">
@@ -95,6 +128,9 @@ export function StateLocalDetailClient({
       </div>
     );
   }
+
+  const backToListHref = buildSourceListHref(sourceCode);
+  const backToListLabel = buildSourceListLabel(source?.sourceName ?? opportunity.sourceName, sourceCode);
 
   return (
     <div className="space-y-8">
@@ -224,7 +260,7 @@ export function StateLocalDetailClient({
               <p className="mt-2 text-sm leading-6 text-slate-300">{source?.helperText}</p>
               {!directSourceUrl ? (
                 <div className="mt-4 rounded-[1.25rem] border border-amber-400/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
-                  We could not confirm a direct WEBS detail-page link for this record yet. We only show true source-detail links here, not the general bid list.
+                  We could not confirm a direct source-detail link for this record yet. We only show true posting-detail links here, not the general bid list.
                 </div>
               ) : null}
               <div className="mt-5 flex flex-wrap gap-3">
@@ -235,12 +271,17 @@ export function StateLocalDetailClient({
                   Start a FOIA request
                 </Link>
                 {directSourceUrl ? (
-                  <Link href={directSourceUrl} className={buttonStyles({ variant: "primary", size: "md" })}>
+                  <a
+                    href={directSourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={buttonStyles({ variant: "primary", size: "md" })}
+                  >
                     Open original posting
-                  </Link>
+                  </a>
                 ) : null}
-                <Link href="/state-local/washington" className={buttonStyles({ variant: "ghost", size: "md" })}>
-                  Back to Washington list
+                <Link href={backToListHref} className={buttonStyles({ variant: "ghost", size: "md" })}>
+                  {backToListLabel}
                 </Link>
               </div>
             </article>

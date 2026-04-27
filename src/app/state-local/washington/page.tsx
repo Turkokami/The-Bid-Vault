@@ -4,6 +4,10 @@ import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function pickSearchValue(value?: string | string[]) {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
+
 export default async function WashingtonStateLocalPage({
   searchParams,
 }: {
@@ -53,7 +57,7 @@ export default async function WashingtonStateLocalPage({
     ],
   }));
   const availableCategoryCodes = new Set(snapshot.opportunities.map((opportunity) => opportunity.categoryCode));
-  const requestedCategoryCodes = (params.codes ?? "")
+  const requestedCategoryCodes = pickSearchValue(params.codes)
     .split(",")
     .map((code) => code.trim())
     .filter((code) => code && availableCategoryCodes.has(code));
@@ -76,7 +80,7 @@ export default async function WashingtonStateLocalPage({
       savedCodeDescription="Apply your saved work categories to WEBS in one click."
       savedCodeApplyLabel="Apply to WEBS"
       initialFilters={{
-        keywords: params.keywords ?? "",
+        keywords: pickSearchValue(params.keywords),
         states: ["WA"],
         sources: ["WEBS"],
         opportunityTypes: [],

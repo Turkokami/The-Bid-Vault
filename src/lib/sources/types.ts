@@ -1,17 +1,4 @@
-export type StateLocalSourceCode =
-  | "washington"
-  | "arizona"
-  | "flagstaff"
-  | "coconino"
-  | "mohave"
-  | "yavapai"
-  | "white-pine"
-  | "nye"
-  | "oregon"
-  | "idaho"
-  | "california"
-  | "nevada"
-  | "texas";
+export type StateLocalSourceCode = string;
 
 export type StateLocalOpportunityStatus = "Open" | "Closing Soon" | "Closed";
 

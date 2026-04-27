@@ -93,6 +93,11 @@ export function StateLocalClient({
   const [savedCount, setSavedCount] = useState(0);
   const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
   const [refreshMessage, setRefreshMessage] = useState("");
+  const searchLabel = focusSourceCodes?.includes("washington") ? "Search WEBS" : "Search opportunities";
+  const refreshFailureMessage =
+    focusSourceCodes?.includes("washington")
+      ? "WEBS could not load live records right now. The page is still available, so you can try refreshing again."
+      : "Live source records could not load right now. The page is still available, so you can try refreshing again.";
 
   useEffect(() => {
     const sync = async () => {
@@ -103,9 +108,7 @@ export function StateLocalClient({
         setSyncLogs(snapshot.syncLogs);
         setRefreshMessage("");
       } catch {
-        setRefreshMessage(
-          "WEBS could not load live records right now. The page is still available, so you can try refreshing again.",
-        );
+        setRefreshMessage(refreshFailureMessage);
       } finally {
         setSavedCount(readSavedStateLocalEntries().length);
       }
@@ -119,7 +122,7 @@ export function StateLocalClient({
       window.removeEventListener("bid-vault-state-local-updated", sync);
       window.removeEventListener("bid-vault-state-local-saved-updated", sync);
     };
-  }, []);
+  }, [refreshFailureMessage]);
 
   useEffect(() => {
     const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
@@ -306,7 +309,7 @@ export function StateLocalClient({
 
             <div className="mt-5 space-y-3 rounded-[1.25rem] border border-emerald-400/15 bg-slate-950/60 p-3 xl:hidden">
               <label className="block text-sm font-medium text-white" htmlFor="mobile-webs-search">
-                Search WEBS
+                {searchLabel}
               </label>
               <input
                 id="mobile-webs-search"
