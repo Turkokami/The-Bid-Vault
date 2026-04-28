@@ -30,28 +30,22 @@ export default async function StateLocalPage() {
           State & local opportunities
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-          Find state and local opportunities without digging through crowded portals.
+          Search by state first, then drill into county and city opportunities.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-          This page helps you find contract opportunities from Washington and other state or local
-          government sources. We start with Washington WEBS, then expand the same cleaner search
-          experience to more state systems over time.
+          We are turning The Bid Vault into a cleaner local search layer for every state. Start
+          with the state where your team works, open that state page, then review statewide portals
+          and county-level options in one place.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/state-local/washington" className={buttonStyles({ variant: "primary", size: "md" })}>
-            Search Washington opportunities
+            Open Washington view
           </Link>
-          <a href="https://spo.az.gov/app" className={buttonStyles({ variant: "secondary", size: "md" })}>
-            Open Arizona source
-          </a>
-          <a href="https://nevadaepro.com/" className={buttonStyles({ variant: "secondary", size: "md" })}>
-            Open Nevada source
-          </a>
-          <a href="https://www.txsmartbuy.gov/esbd" className={buttonStyles({ variant: "secondary", size: "md" })}>
-            Open Texas source
-          </a>
-          <Link href="/sync-center" className={buttonStyles({ variant: "secondary", size: "md" })}>
-            Open sync center
+          <Link href="/state-local/nevada" className={buttonStyles({ variant: "secondary", size: "md" })}>
+            Open Nevada view
+          </Link>
+          <Link href="/state-local/texas" className={buttonStyles({ variant: "secondary", size: "md" })}>
+            Open Texas view
           </Link>
         </div>
       </section>
@@ -60,18 +54,18 @@ export default async function StateLocalPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
-              Select your state
+              Find your state
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-white">
-              Open a dedicated state page without bloating the main menu.
+              A simple state search works better than a giant menu.
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-              Every state now has its own page, with room for a statewide portal layer and a county
-              or city rollout layer underneath. Live states stay strongest first, while the rest of
-              the country gets a clean state-by-state framework we can keep expanding.
+              Search for your state, select it, and open its dedicated page. That page becomes the
+              home for statewide sources first, then county and city options underneath so local
+              coverage grows without cluttering the app.
             </p>
           </div>
-          <div className="w-full max-w-xl">
+          <div className="w-full">
             <StateLocationPicker states={stateDirectory} />
           </div>
         </div>
@@ -124,59 +118,48 @@ export default async function StateLocalPage() {
           <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Why this matters</p>
             <h2 className="mt-3 text-2xl font-semibold text-white">
-              Use one simple search for more than just federal work.
+              Make local searching feel obvious instead of overwhelming.
             </h2>
             <ul className="mt-5 space-y-3 text-sm leading-7 text-slate-300">
-              <li>Search current state and local opportunities in a cleaner view.</li>
-              <li>See when outside registration may be required before bidding.</li>
-              <li>Save opportunities and plan reminders before due dates sneak up.</li>
+              <li>Choose one state first so the screen stays focused.</li>
+              <li>Use the state page as the home for statewide and county sources.</li>
+              <li>Keep growing local coverage without stuffing the main navigation.</li>
             </ul>
           </article>
 
           <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">All state pages now available</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Live states to start with</p>
             <div className="mt-5 space-y-4">
-              {stateDirectory.map((state) => (
+              {connectedSources.slice(0, 3).map((source) => (
                 <div
-                  key={state.slug}
+                  key={source.id}
                   className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-base font-semibold text-white">{state.name}</p>
-                    <span
-                      className={`rounded-full border px-3 py-1 text-xs ${
-                        state.connectionMode === "live"
-                          ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-                          : state.connectionMode === "portal-assisted"
-                            ? "border-amber-400/20 bg-amber-400/10 text-amber-100"
-                            : "border-white/10 bg-slate-950/70 text-slate-300"
-                      }`}
-                    >
-                      {state.connectionMode === "live"
-                        ? "Live"
-                        : state.connectionMode === "portal-assisted"
-                          ? "Portal-assisted"
-                          : "Planned"}
+                    <div>
+                      <p className="text-base font-semibold text-white">{source.sourceName}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-300/70">
+                        {source.stateCode} / {source.cadence}
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-100">
+                      {source.connectionMode === "portal-assisted" ? "Portal-assisted" : "Live"}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-300/70">{state.stateCode} statewide</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{state.description}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{state.helperText}</p>
-                  <div className="mt-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/state-local/${state.slug}`}
-                        className={buttonStyles({ variant: "secondary", size: "sm" })}
-                      >
-                        Open state page
-                      </Link>
-                      <a
-                        href={state.portalUrl}
-                        className={buttonStyles({ variant: "ghost", size: "sm" })}
-                      >
-                        Open original source
-                      </a>
-                    </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-400">{source.helperText}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link
+                      href={sourceViewHref(source.sourceCode)}
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      Open state page
+                    </Link>
+                    <a
+                      href={source.portalUrl}
+                      className={buttonStyles({ variant: "ghost", size: "sm" })}
+                    >
+                      Open original source
+                    </a>
                   </div>
                 </div>
               ))}

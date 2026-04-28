@@ -5,6 +5,7 @@ import {
 } from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 import type { StateLocalFilters } from "@/lib/state-local-search";
+import type { StateLocalSourceSummary } from "@/lib/sources/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -240,6 +241,22 @@ function buildFilters(view: LocationView, keywords = "", codes = ""): StateLocal
   };
 }
 
+function getStateNavigatorData(
+  stateName: string,
+  stateCode: string,
+  focusSources: StateLocalSourceSummary[],
+) {
+  const statewideSources = focusSources.filter((source) => source.sourceType !== "County / City");
+  const localSources = focusSources.filter((source) => source.sourceType === "County / City");
+
+  return {
+    stateName,
+    stateCode,
+    statewideSources,
+    localSources,
+  };
+}
+
 export default async function LocationStateLocalPage({
   params,
   searchParams,
@@ -288,6 +305,10 @@ export default async function LocationStateLocalPage({
   const focusSources = snapshot.sources.filter((source) => view.sourceCodes.includes(source.sourceCode));
   const sourceNames = focusSources.map((source) => source.sourceName);
   const viewWithSources = { ...view, sourceNames };
+  const stateEntry = getStateDirectoryEntry(location);
+  const stateNavigator = stateEntry
+    ? getStateNavigatorData(stateEntry.name, stateEntry.stateCode, focusSources)
+    : undefined;
   const initialFilters = buildFilters(
     viewWithSources,
     pickSearchValue(query.keywords),
@@ -309,6 +330,8 @@ export default async function LocationStateLocalPage({
       focusSourceCodes={view.sourceCodes}
       portalAssist={view.portalAssist}
       emptyStateMessage={view.emptyStateMessage}
+      stateNavigator={stateNavigator}
+      showSourceHubSection={false}
     />
   );
 }

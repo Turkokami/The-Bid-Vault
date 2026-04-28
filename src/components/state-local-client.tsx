@@ -54,6 +54,8 @@ export function StateLocalClient({
   resetFilters,
   portalAssist,
   emptyStateMessage = 'No results yet. Try broad words like "pest control", "roofing", or "janitorial".',
+  stateNavigator,
+  showSourceHubSection = true,
 }: {
   initialOpportunities: NormalizedStateLocalOpportunity[];
   initialSources: StateLocalSourceSummary[];
@@ -85,6 +87,13 @@ export function StateLocalClient({
     }>;
   };
   emptyStateMessage?: string;
+  stateNavigator?: {
+    stateName: string;
+    stateCode: string;
+    statewideSources: StateLocalSourceSummary[];
+    localSources: StateLocalSourceSummary[];
+  };
+  showSourceHubSection?: boolean;
 }) {
   const [opportunities, setOpportunities] = useState(initialOpportunities);
   const [sources, setSources] = useState(initialSources);
@@ -160,8 +169,113 @@ export function StateLocalClient({
     return "Live";
   };
 
+  const buildSourceLocationHref = (sourceCode: string) => `/state-local/${sourceCode}`;
+
   return (
     <div className="space-y-8">
+      {stateNavigator ? (
+        <section className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
+                {stateNavigator.stateName} search setup
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">
+                Start with statewide sources, then open county or city options if you need to go deeper.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+                We keep each state page focused on the sources that matter most for that state. Open a statewide portal first, then drill into county and city sources only when they help the search.
+              </p>
+            </div>
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+              {stateNavigator.stateCode} focus
+            </span>
+          </div>
+
+          <div className="mt-6 grid gap-5 lg:grid-cols-2">
+            <article className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Statewide sources</p>
+              <div className="mt-4 space-y-3">
+                {stateNavigator.statewideSources.map((source) => (
+                  <div key={source.id} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-base font-semibold text-white">{source.sourceName}</p>
+                        <p className="mt-1 text-sm text-slate-400">{source.cadence}</p>
+                      </div>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                          source.connectionMode === "portal-assisted"
+                            ? "border-amber-400/20 bg-amber-400/10 text-amber-100"
+                            : source.connectionMode === "live"
+                              ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
+                              : "border-white/10 bg-slate-950/70 text-slate-300"
+                        }`}
+                      >
+                        {renderSourceMode(source)}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-300">{source.helperText}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <a
+                        href={source.portalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={buttonStyles({ variant: "secondary", size: "sm" })}
+                      >
+                        Open statewide source
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">County and city options</p>
+              {stateNavigator.localSources.length > 0 ? (
+                <div className="mt-4 space-y-3">
+                  {stateNavigator.localSources.map((source) => (
+                    <div key={source.id} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-base font-semibold text-white">{source.sourceName}</p>
+                          <p className="mt-1 text-sm text-slate-400">{source.regionLabel ?? source.stateCode}</p>
+                        </div>
+                        <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-xs font-medium text-slate-300">
+                          {source.status}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-300">{source.helperText}</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Link
+                          href={buildSourceLocationHref(source.sourceCode)}
+                          className={buttonStyles({ variant: "primary", size: "sm" })}
+                        >
+                          Open local view
+                        </Link>
+                        <a
+                          href={source.portalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={buttonStyles({ variant: "ghost", size: "sm" })}
+                        >
+                          Open local source
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 rounded-[1.25rem] border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-400">
+                  This state page is ready for county and city rollout. As we connect local sources here, they will show up under this section instead of cluttering the statewide search view.
+                </div>
+              )}
+            </article>
+          </div>
+        </section>
+      ) : null}
+
       <section className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
         <StateLocalFilterSidebar
           {...filters}
@@ -428,7 +542,8 @@ export function StateLocalClient({
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+          {showSourceHubSection ? (
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Connected sources</p>
@@ -472,7 +587,8 @@ export function StateLocalClient({
                 </article>
               ))}
             </div>
-          </section>
+            </section>
+          ) : null}
         </div>
       </section>
     </div>
