@@ -54,19 +54,20 @@ export default async function StateLocalPage() {
         </div>
       </section>
 
+      <UsStateTileMap states={stateDirectory} />
+
       <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
-              Find your state
+              State search below the map
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-white">
-              A simple state search works better than a giant menu.
+              Search for your state if you prefer typing over clicking the map.
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-              Search for your state, select it, and open its dedicated page. That page becomes the
-              home for statewide sources first, then county and city options underneath so local
-              coverage grows without cluttering the app.
+              The map stays as the fastest way in. The state picker below helps if you want to type
+              your state name, narrow by region, then open the same dedicated statewide page.
             </p>
           </div>
           <div className="w-full">
@@ -75,7 +76,31 @@ export default async function StateLocalPage() {
         </div>
       </section>
 
-      <UsStateTileMap states={stateDirectory} />
+      <section className="rounded-[2rem] border border-emerald-400/15 bg-emerald-400/[0.04] p-6 shadow-[0_0_30px_rgba(34,197,94,0.08)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
+              Contract alerts
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">
+              Save your industry and state so we can prepare contract alerts by email or text.
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-300">
+              Set up one simple alert rule for the work you do, the state you care about, and how
+              you want to be contacted. This keeps the workflow focused on finding contracts now,
+              while we prepare delivery for SAM and state or local matches.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/alerts" className={buttonStyles({ variant: "primary", size: "md" })}>
+              Set up alerts
+            </Link>
+            <Link href="/my-codes" className={buttonStyles({ variant: "secondary", size: "md" })}>
+              Review saved codes
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">

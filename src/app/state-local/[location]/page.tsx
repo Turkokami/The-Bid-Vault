@@ -38,6 +38,15 @@ type LocationView = {
       external?: boolean;
     }>;
   };
+  livePortalView?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    href: string;
+    openLabel: string;
+    embedSrc?: string;
+    note?: string;
+  };
 };
 
 const locationViews: LocationView[] = [
@@ -205,6 +214,17 @@ const locationViews: LocationView[] = [
         },
       ],
     },
+    livePortalView: {
+      eyebrow: "North Carolina live portal",
+      title: "Review the live North Carolina eVP solicitations without leaving this state page.",
+      description:
+        "This embedded portal view keeps the statewide North Carolina search visible inside The Bid Vault while still using the official eVP source for the live posting list.",
+      href: "https://evp.nc.gov/solicitations/?status=0",
+      embedSrc: "https://evp.nc.gov/solicitations/?status=0",
+      openLabel: "Open NC statewide solicitations",
+      note:
+        "If the eVP site limits the embedded view in your browser, use the button above to open the same live statewide listing in a new tab.",
+    },
   },
   {
     slug: "mecklenburg",
@@ -293,6 +313,20 @@ function buildStateLocationView(location: string, allSourceCodes: string[]): Loc
           ],
         }
       : undefined;
+  const livePortalView =
+    state.slug === "north-carolina"
+      ? {
+          eyebrow: "North Carolina live portal",
+          title: "Review the live North Carolina eVP solicitations without leaving this state page.",
+          description:
+            "This embedded portal view keeps the statewide North Carolina search visible inside The Bid Vault while still using the official eVP source for the live posting list.",
+          href: "https://evp.nc.gov/solicitations/?status=0",
+          embedSrc: "https://evp.nc.gov/solicitations/?status=0",
+          openLabel: "Open NC statewide solicitations",
+          note:
+            "If the eVP site limits the embedded view in your browser, use the button above to open the same live statewide listing in a new tab.",
+        }
+      : undefined;
 
   return {
     slug: state.slug,
@@ -307,6 +341,7 @@ function buildStateLocationView(location: string, allSourceCodes: string[]): Loc
         ? `No ${state.name} results are showing right now. Try refreshing the page or opening the official ${state.name} portal directly.`
         : `This ${state.name} page is ready as a statewide launch point. Open the official ${state.name} portal while county and city connectors are built out.`,
     portalAssist,
+    livePortalView,
   };
 }
 
@@ -434,6 +469,7 @@ export default async function LocationStateLocalPage({
       sourceDescription={view.sourceDescription}
       focusSourceCodes={view.sourceCodes}
       portalAssist={view.portalAssist}
+      livePortalView={view.livePortalView}
       emptyStateMessage={view.emptyStateMessage}
       stateNavigator={stateNavigator}
       showSourceHubSection={false}

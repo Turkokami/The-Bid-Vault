@@ -381,7 +381,7 @@ export const stateDirectory: StateDirectoryEntry[] = [
     stateCode: "NC",
     name: "North Carolina",
     portalName: "North Carolina eVP",
-    portalUrl: "https://evp.nc.gov/",
+    portalUrl: "https://evp.nc.gov/solicitations/?status=0",
     status: "Connected",
     connectionMode: "portal-assisted",
     description: "North Carolina statewide procurement and sourcing opportunities through the official eVP portal.",

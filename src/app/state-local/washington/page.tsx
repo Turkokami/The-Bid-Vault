@@ -77,6 +77,17 @@ export default async function WashingtonStateLocalPage({
       refreshButtonLabel="Refresh live WEBS records"
       refreshSuccessMessage="Washington opportunities refreshed from the live WEBS source."
       refreshErrorMessage="WEBS could not refresh live records right now. Please try again."
+      livePortalView={{
+        eyebrow: "WEBS live portal",
+        title: "Keep the official Washington WEBS bid calendar visible right on the Washington page.",
+        description:
+          "If the in-app live source has a temporary hiccup, you can still review the official WEBS posting list here and keep working without losing your place.",
+        href: "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx",
+        embedSrc: "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx",
+        openLabel: "Open WEBS bid calendar",
+        note:
+          "WEBS can be inconsistent about background requests. This gives you a direct live portal fallback without forcing you out of the Washington workflow.",
+      }}
       savedCodeDescription="Apply your saved work categories to WEBS in one click."
       savedCodeApplyLabel="Apply to WEBS"
       initialFilters={{

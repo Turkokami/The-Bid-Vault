@@ -53,6 +53,7 @@ export function StateLocalClient({
   savedCodeApplyLabel = "Apply saved codes",
   resetFilters,
   portalAssist,
+  livePortalView,
   emptyStateMessage = 'No results yet. Try broad words like "pest control", "roofing", or "janitorial".',
   stateNavigator,
   showSourceHubSection = true,
@@ -85,6 +86,15 @@ export function StateLocalClient({
       label: string;
       external?: boolean;
     }>;
+  };
+  livePortalView?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    href: string;
+    openLabel: string;
+    embedSrc?: string;
+    note?: string;
   };
   emptyStateMessage?: string;
   stateNavigator?: {
@@ -291,6 +301,58 @@ export function StateLocalClient({
                 </div>
               )}
             </article>
+          </div>
+        </section>
+      ) : null}
+
+      {livePortalView ? (
+        <section className="rounded-[1.75rem] border border-emerald-400/15 bg-emerald-400/[0.04] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.16)] sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-3xl">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
+                {livePortalView.eyebrow}
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">
+                {livePortalView.title}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-300">
+                {livePortalView.description}
+              </p>
+              {livePortalView.note ? (
+                <p className="mt-3 text-sm leading-6 text-slate-400">
+                  {livePortalView.note}
+                </p>
+              ) : null}
+            </div>
+            <a
+              href={livePortalView.href}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonStyles({ variant: "primary", size: "md" })}
+            >
+              {livePortalView.openLabel}
+            </a>
+          </div>
+
+          <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/80">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+              <p className="text-sm font-medium text-white">Live portal view</p>
+              <a
+                href={livePortalView.href}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonStyles({ variant: "ghost", size: "sm" })}
+              >
+                Open in new tab
+              </a>
+            </div>
+            <iframe
+              title={livePortalView.title}
+              src={livePortalView.embedSrc ?? livePortalView.href}
+              loading="lazy"
+              className="h-[760px] w-full bg-white"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
         </section>
       ) : null}

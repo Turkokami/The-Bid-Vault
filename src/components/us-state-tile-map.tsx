@@ -1,146 +1,230 @@
 "use client";
 
-import Link from "next/link";
-import { buttonStyles } from "@/components/ui/button";
-import type { StateDirectoryEntry } from "@/lib/sources/state-registry";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { geoAlbersUsa, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import statesTopology from "us-atlas/states-10m.json";
+import { type StateDirectoryEntry } from "@/lib/sources/state-registry";
 
-type StateTile = {
-  slug: string;
-  code: string;
-  col: number;
-  row: number;
+const fipsToStateCode: Record<string, string> = {
+  "01": "AL",
+  "02": "AK",
+  "04": "AZ",
+  "05": "AR",
+  "06": "CA",
+  "08": "CO",
+  "09": "CT",
+  "10": "DE",
+  "11": "DC",
+  "12": "FL",
+  "13": "GA",
+  "15": "HI",
+  "16": "ID",
+  "17": "IL",
+  "18": "IN",
+  "19": "IA",
+  "20": "KS",
+  "21": "KY",
+  "22": "LA",
+  "23": "ME",
+  "24": "MD",
+  "25": "MA",
+  "26": "MI",
+  "27": "MN",
+  "28": "MS",
+  "29": "MO",
+  "30": "MT",
+  "31": "NE",
+  "32": "NV",
+  "33": "NH",
+  "34": "NJ",
+  "35": "NM",
+  "36": "NY",
+  "37": "NC",
+  "38": "ND",
+  "39": "OH",
+  "40": "OK",
+  "41": "OR",
+  "42": "PA",
+  "44": "RI",
+  "45": "SC",
+  "46": "SD",
+  "47": "TN",
+  "48": "TX",
+  "49": "UT",
+  "50": "VT",
+  "51": "VA",
+  "53": "WA",
+  "54": "WV",
+  "55": "WI",
+  "56": "WY",
 };
 
-const tiles: StateTile[] = [
-  { slug: "alaska", code: "AK", col: 1, row: 7 },
-  { slug: "hawaii", code: "HI", col: 2, row: 7 },
-  { slug: "washington", code: "WA", col: 1, row: 1 },
-  { slug: "oregon", code: "OR", col: 1, row: 2 },
-  { slug: "california", code: "CA", col: 1, row: 3 },
-  { slug: "idaho", code: "ID", col: 2, row: 1 },
-  { slug: "nevada", code: "NV", col: 2, row: 2 },
-  { slug: "arizona", code: "AZ", col: 2, row: 3 },
-  { slug: "utah", code: "UT", col: 3, row: 2 },
-  { slug: "montana", code: "MT", col: 3, row: 1 },
-  { slug: "wyoming", code: "WY", col: 4, row: 1 },
-  { slug: "colorado", code: "CO", col: 4, row: 2 },
-  { slug: "new-mexico", code: "NM", col: 4, row: 3 },
-  { slug: "north-dakota", code: "ND", col: 5, row: 1 },
-  { slug: "south-dakota", code: "SD", col: 5, row: 2 },
-  { slug: "nebraska", code: "NE", col: 5, row: 3 },
-  { slug: "kansas", code: "KS", col: 5, row: 4 },
-  { slug: "oklahoma", code: "OK", col: 5, row: 5 },
-  { slug: "texas", code: "TX", col: 5, row: 6 },
-  { slug: "minnesota", code: "MN", col: 6, row: 1 },
-  { slug: "iowa", code: "IA", col: 6, row: 2 },
-  { slug: "missouri", code: "MO", col: 6, row: 3 },
-  { slug: "arkansas", code: "AR", col: 6, row: 4 },
-  { slug: "louisiana", code: "LA", col: 6, row: 5 },
-  { slug: "wisconsin", code: "WI", col: 7, row: 1 },
-  { slug: "illinois", code: "IL", col: 7, row: 2 },
-  { slug: "kentucky", code: "KY", col: 7, row: 3 },
-  { slug: "tennessee", code: "TN", col: 7, row: 4 },
-  { slug: "mississippi", code: "MS", col: 7, row: 5 },
-  { slug: "michigan", code: "MI", col: 8, row: 1 },
-  { slug: "indiana", code: "IN", col: 8, row: 2 },
-  { slug: "ohio", code: "OH", col: 9, row: 2 },
-  { slug: "west-virginia", code: "WV", col: 9, row: 3 },
-  { slug: "virginia", code: "VA", col: 10, row: 3 },
-  { slug: "north-carolina", code: "NC", col: 10, row: 4 },
-  { slug: "south-carolina", code: "SC", col: 10, row: 5 },
-  { slug: "georgia", code: "GA", col: 10, row: 6 },
-  { slug: "florida", code: "FL", col: 11, row: 7 },
-  { slug: "alabama", code: "AL", col: 9, row: 6 },
-  { slug: "pennsylvania", code: "PA", col: 10, row: 2 },
-  { slug: "new-york", code: "NY", col: 11, row: 1 },
-  { slug: "maryland", code: "MD", col: 10, row: 3 },
-  { slug: "district-of-columbia", code: "DC", col: 11, row: 3 },
-  { slug: "delaware", code: "DE", col: 11, row: 4 },
-  { slug: "new-jersey", code: "NJ", col: 11, row: 2 },
-  { slug: "connecticut", code: "CT", col: 12, row: 2 },
-  { slug: "rhode-island", code: "RI", col: 12, row: 3 },
-  { slug: "massachusetts", code: "MA", col: 12, row: 1 },
-  { slug: "vermont", code: "VT", col: 12, row: 0 },
-  { slug: "new-hampshire", code: "NH", col: 13, row: 0 },
-  { slug: "maine", code: "ME", col: 13, row: 1 },
-];
+function getStateClasses(state: StateDirectoryEntry, isActive: boolean) {
+  if (isActive) {
+    return "fill-emerald-300 stroke-white stroke-[1.6] drop-shadow-[0_0_16px_rgba(110,231,183,0.5)]";
+  }
 
-function getModeClass(state: StateDirectoryEntry) {
   if (state.connectionMode === "live") {
-    return "border-emerald-400/30 bg-emerald-400/15 text-emerald-50";
+    return "fill-emerald-500/90 stroke-slate-950 stroke-[1.1] hover:fill-emerald-400";
   }
 
   if (state.connectionMode === "portal-assisted") {
-    return "border-amber-400/30 bg-amber-400/15 text-amber-50";
+    return "fill-amber-400/90 stroke-slate-950 stroke-[1.1] hover:fill-amber-300";
   }
 
-  return "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:bg-white/[0.06]";
+  return "fill-slate-700 stroke-slate-950 stroke-[1.1] hover:fill-slate-600";
 }
 
 export function UsStateTileMap({
   states,
+  initialSelectedStateCode = "WA",
 }: {
   states: StateDirectoryEntry[];
+  initialSelectedStateCode?: string;
 }) {
-  const stateMap = new Map(states.map((state) => [state.slug, state]));
-  const renderedTiles = tiles.filter((tile) => stateMap.has(tile.slug));
+  const router = useRouter();
+  const [activeStateCode, setActiveStateCode] = useState(initialSelectedStateCode);
+
+  const statesByCode = useMemo(
+    () => new Map(states.map((state) => [state.stateCode, state])),
+    [states],
+  );
+
+  const projection = useMemo(
+    () => geoAlbersUsa().translate([487.5, 305]).scale(1250),
+    [],
+  );
+  const path = useMemo(() => geoPath(projection), [projection]);
+
+  const stateFeatures = useMemo(() => {
+    const topo = statesTopology as {
+      objects: { states: unknown };
+    };
+
+    const collection = feature(topo as never, topo.objects.states as never) as {
+      features: Array<{ id?: string | number; properties?: Record<string, unknown> } & Record<string, unknown>>;
+    };
+
+    return collection.features
+      .map((item) => {
+        const id = String(item.id ?? "").padStart(2, "0");
+        const stateCode = fipsToStateCode[id];
+        if (!stateCode) return null;
+        const state = statesByCode.get(stateCode);
+        if (!state) return null;
+
+        return {
+          feature: item,
+          state,
+          stateCode,
+          slug: state.slug,
+          label: state.name,
+        };
+      })
+      .filter(Boolean) as Array<{
+      feature: Record<string, unknown>;
+      state: StateDirectoryEntry;
+      stateCode: string;
+      slug: string;
+      label: string;
+    }>;
+  }, [statesByCode]);
+
+  const activeState = states.find((state) => state.stateCode === activeStateCode) ?? states[0];
 
   return (
-    <section className="rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+    <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.28)]">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
-            Interactive map
+          <p className="text-xs uppercase tracking-[0.32em] text-emerald-300/80">
+            Choose your state on the map
           </p>
           <h2 className="mt-3 text-2xl font-semibold text-white">
-            Click a state on the map to open its contract search page.
+            Click the state outline where you work and jump straight into that contract search page.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
-            This keeps the nationwide view visual and simple. Live states stand out first, and every state tile opens its own dedicated state page with statewide and local search options.
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+            The map keeps the page simple. Click your state first, then use that state page for statewide portals, county options, and local opportunity searching.
           </p>
         </div>
-        <Link href="/state-local/washington" className={buttonStyles({ variant: "ghost", size: "sm" })}>
-          Open strongest live example
-        </Link>
-      </div>
-
-      <div className="mt-6 overflow-x-auto">
-        <div
-          className="grid min-w-[900px] gap-2"
-          style={{ gridTemplateColumns: "repeat(13, minmax(0, 1fr))" }}
-        >
-          {renderedTiles.map((tile) => {
-            const state = stateMap.get(tile.slug);
-            if (!state) return null;
-
-            return (
-              <Link
-                key={tile.slug}
-                href={`/state-local/${tile.slug}`}
-                className={`flex h-14 items-center justify-center rounded-2xl border text-xs font-semibold uppercase tracking-[0.18em] transition ${getModeClass(state)}`}
-                style={{
-                  gridColumn: tile.col,
-                  gridRow: tile.row + 1,
-                }}
-                title={`${state.name} - ${state.connectionMode === "planned" ? "planned portal page" : "available now"}`}
-              >
-                {tile.code}
-              </Link>
-            );
-          })}
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+          <div className="flex flex-wrap gap-4">
+            <span className="inline-flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-emerald-500" />
+              Live now
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-amber-400" />
+              Portal-assisted
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-slate-600" />
+              Portal ready
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-3 text-xs">
-        <span className="rounded-full border border-emerald-400/30 bg-emerald-400/15 px-3 py-1 text-emerald-100">
-          Live now
-        </span>
-        <span className="rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-amber-100">
-          Portal-assisted
-        </span>
-        <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-slate-300">
-          Portal page ready
-        </span>
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.10),_transparent_32%),linear-gradient(180deg,rgba(4,10,18,0.98)_0%,rgba(7,16,29,0.96)_100%)] p-3">
+          <svg viewBox="0 0 975 610" className="h-auto w-full" role="img" aria-label="United States state map">
+            <rect x="0" y="0" width="975" height="610" rx="28" className="fill-transparent" />
+            {stateFeatures.map(({ feature: geoFeature, state, stateCode, slug, label }) => {
+              const d = path(geoFeature as never);
+              if (!d) return null;
+              const isActive = activeStateCode === stateCode;
+
+              return (
+                <path
+                  key={slug}
+                  d={d}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${label} state page`}
+                  className={`cursor-pointer transition-[fill,stroke,filter] duration-200 ${getStateClasses(state, isActive)}`}
+                  onMouseEnter={() => setActiveStateCode(stateCode)}
+                  onFocus={() => setActiveStateCode(stateCode)}
+                  onClick={() => router.push(`/state-local/${slug}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      router.push(`/state-local/${slug}`);
+                    }
+                  }}
+                />
+              );
+            })}
+          </svg>
+        </div>
+
+        <aside className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5">
+          <p className="text-xs uppercase tracking-[0.28em] text-emerald-300/80">
+            Selected state
+          </p>
+          <h3 className="mt-3 text-2xl font-semibold text-white">{activeState.name}</h3>
+          <p className="mt-2 text-sm uppercase tracking-[0.2em] text-emerald-300/70">
+            {activeState.stateCode} / {activeState.portalName}
+          </p>
+          <p className="mt-4 text-sm leading-7 text-slate-300">{activeState.helperText}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => router.push(`/state-local/${activeState.slug}`)}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-emerald-300/30 bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_10px_28px_rgba(34,197,94,0.28)] transition hover:-translate-y-0.5 hover:bg-emerald-400"
+            >
+              Open {activeState.name}
+            </button>
+            <a
+              href={activeState.portalUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-emerald-400/25 hover:bg-emerald-400/[0.08]"
+            >
+              Open portal
+            </a>
+          </div>
+        </aside>
       </div>
     </section>
   );

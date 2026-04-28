@@ -361,7 +361,7 @@ export async function getStateLocalSyncSnapshot(): Promise<{
       connectionMode: "portal-assisted",
       cadence: "Portal-assisted",
       lastSyncedAt: formatSyncTime(),
-      portalUrl: "https://evp.nc.gov/",
+      portalUrl: "https://evp.nc.gov/solicitations/?status=0",
     },
   );
   syncLogs.push({
