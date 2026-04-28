@@ -92,6 +92,10 @@ export function StateLocalClient({
     stateCode: string;
     statewideSources: StateLocalSourceSummary[];
     localSources: StateLocalSourceSummary[];
+    countySearchLinks: Array<{
+      href: string;
+      label: string;
+    }>;
   };
   showSourceHubSection?: boolean;
 }) {
@@ -267,8 +271,23 @@ export function StateLocalClient({
                   ))}
                 </div>
               ) : (
-                <div className="mt-4 rounded-[1.25rem] border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-400">
-                  This state page is ready for county and city rollout. As we connect local sources here, they will show up under this section instead of cluttering the statewide search view.
+                <div className="mt-4 space-y-3">
+                  <div className="rounded-[1.25rem] border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-400">
+                    This state page is ready for county and city rollout. Until we connect curated local sources here, use these quick county-level search links to jump straight into local contract hunting for this state.
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {stateNavigator.countySearchLinks.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={buttonStyles({ variant: "secondary", size: "sm" })}
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
             </article>

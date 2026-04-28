@@ -20,6 +20,7 @@ import { industryRecommendations } from "@/lib/demo-data";
 import {
   cacheSamSnapshot,
   forceRefreshGovernmentData,
+  readAnyCachedSamSnapshot,
   readCachedSamSnapshot,
 } from "@/lib/demo-contract-store";
 import type { SamKeywordMode, SamOpportunityRecord } from "@/lib/server/sam-search";
@@ -179,6 +180,26 @@ function buildSamDetailHref(record: SamOpportunityRecord, returnTo?: string) {
   if (returnTo) search.set("returnTo", returnTo);
 
   return `/government-data/${encodeURIComponent(record.id)}?${search.toString()}`;
+}
+
+function buildDirectSamSearchUrl(params: {
+  keywords?: string;
+  agency?: string;
+  state?: string;
+  naics?: string;
+}) {
+  const search = new URLSearchParams();
+  const keywordQuery = [params.keywords, params.agency, params.state, params.naics]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  if (keywordQuery) {
+    search.set("keywords", keywordQuery);
+  }
+
+  search.set("index", "opp");
+  return `https://sam.gov/search/?${search.toString()}`;
 }
 
 function dedupeRecords(records: SamOpportunityRecord[]) {
@@ -431,7 +452,21 @@ export function GovernmentDataClient({
     });
 
     if (!cached || cached.records.length === 0) {
-      return;
+      const anyCached = readAnyCachedSamSnapshot();
+      if (!anyCached || anyCached.records.length === 0) {
+        return;
+      }
+
+      const fallbackTimer = window.setTimeout(() => {
+        setRecords(anyCached.records);
+        setSources(anyCached.sources);
+        setActivities(anyCached.activities);
+        setStatusMessage(
+          "SAM.gov is cooling down, so you are seeing the last successful federal result set while the service resets.",
+        );
+      }, 0);
+
+      return () => window.clearTimeout(fallbackTimer);
     }
 
     const fallbackTimer = window.setTimeout(() => {
@@ -524,6 +559,16 @@ export function GovernmentDataClient({
       searchStatus,
       sortBy,
     ],
+  );
+  const directSamSearchUrl = useMemo(
+    () =>
+      buildDirectSamSearchUrl({
+        keywords: searchKeywords || searchIndustry,
+        agency: searchAgency,
+        state: searchState,
+        naics: searchNaics,
+      }),
+    [searchAgency, searchIndustry, searchKeywords, searchNaics, searchState],
   );
 
   const filteredResults = useMemo(
@@ -674,7 +719,17 @@ export function GovernmentDataClient({
         ) : null}
         {errorMessage ? (
           <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            {errorMessage}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span>{errorMessage}</span>
+              <a
+                href={directSamSearchUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonStyles({ variant: "ghost", size: "sm" })}
+              >
+                Open this search on SAM.gov
+              </a>
+            </div>
           </div>
         ) : null}
       </section>
@@ -1049,9 +1104,23 @@ export function GovernmentDataClient({
 
             {browseAll && records.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
-                {isLiveConfigured
-                  ? "No live SAM opportunities were returned right now. Try refreshing the page or broadening your filters."
-                  : "Search SAM needs a live SAM.gov API key before it can load real federal opportunities."}
+                <div className="space-y-3">
+                  <p>
+                    {isLiveConfigured
+                      ? "No live SAM opportunities were returned right now. Try refreshing the page, broadening your filters, or opening the same search directly on SAM.gov."
+                      : "Search SAM needs a live SAM.gov API key before it can load real federal opportunities."}
+                  </p>
+                  {isLiveConfigured ? (
+                    <a
+                      href={directSamSearchUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      Open this search on SAM.gov
+                    </a>
+                  ) : null}
+                </div>
               </div>
             ) : null}
 

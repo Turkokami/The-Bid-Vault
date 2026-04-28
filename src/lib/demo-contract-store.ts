@@ -82,6 +82,37 @@ export function readCachedSamSnapshot(query?: SamSnapshotQuery): SamSnapshot | n
   }
 }
 
+export function readAnyCachedSamSnapshot(): SamSnapshot | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const snapshots: SamSnapshot[] = [];
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (!key || !key.startsWith(SAM_SNAPSHOT_CACHE_PREFIX)) {
+      continue;
+    }
+
+    const raw = window.localStorage.getItem(key);
+    if (!raw) {
+      continue;
+    }
+
+    try {
+      const snapshot = JSON.parse(raw) as SamSnapshot;
+      if (snapshot.records?.length) {
+        snapshots.push(snapshot);
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return snapshots[0] ?? null;
+}
+
 function writeCachedSamSnapshot(snapshot: SamSnapshot, query?: SamSnapshotQuery) {
   if (typeof window === "undefined") {
     return;

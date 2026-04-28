@@ -380,12 +380,13 @@ export const stateDirectory: StateDirectoryEntry[] = [
     slug: "north-carolina",
     stateCode: "NC",
     name: "North Carolina",
-    portalName: "North Carolina Procurement",
-    portalUrl: "https://ncadmin.nc.gov/government-agencies/procurement",
-    status: "Planned",
-    connectionMode: "planned",
-    description: "North Carolina statewide procurement and sourcing opportunities.",
-    helperText: "North Carolina statewide coverage will expand into county, city, and school procurement sources.",
+    portalName: "North Carolina eVP",
+    portalUrl: "https://evp.nc.gov/",
+    status: "Connected",
+    connectionMode: "portal-assisted",
+    description: "North Carolina statewide procurement and sourcing opportunities through the official eVP portal.",
+    helperText:
+      "North Carolina now has a stronger statewide portal page in The Bid Vault, with county and city source options layered underneath it.",
   },
   {
     slug: "north-dakota",
@@ -587,4 +588,20 @@ export function getStateDirectoryEntry(slugOrStateCode: string) {
 
 export function getStatePortalHref(sourceCode: string) {
   return sourceCode === "washington" ? "/state-local/washington" : `/state-local/${sourceCode}`;
+}
+
+function buildBingSearchUrl(query: string) {
+  return `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+}
+
+export function getCountyContractsSearchUrl(stateName: string) {
+  return buildBingSearchUrl(`${stateName} county bid opportunities procurement site:.gov`);
+}
+
+export function getCityContractsSearchUrl(stateName: string) {
+  return buildBingSearchUrl(`${stateName} city bid opportunities procurement site:.gov`);
+}
+
+export function getLocalGovernmentContractsSearchUrl(stateName: string) {
+  return buildBingSearchUrl(`${stateName} local government bids procurement site:.gov`);
 }

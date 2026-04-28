@@ -3,7 +3,12 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buttonStyles } from "@/components/ui/button";
-import type { StateDirectoryEntry } from "@/lib/sources/state-registry";
+import {
+  getCityContractsSearchUrl,
+  getCountyContractsSearchUrl,
+  getLocalGovernmentContractsSearchUrl,
+  type StateDirectoryEntry,
+} from "@/lib/sources/state-registry";
 
 const regionMap: Record<string, string> = {
   WA: "West",
@@ -72,7 +77,7 @@ function getModeLabel(state: StateDirectoryEntry) {
     return "Portal-assisted";
   }
 
-  return "Planned";
+  return "Portal ready";
 }
 
 function getModeClass(state: StateDirectoryEntry) {
@@ -118,7 +123,26 @@ export function StateLocationPicker({
     });
   }, [query, region, states]);
 
-  const visibleStates = filteredStates.slice(0, 12);
+  const visibleStates = filteredStates.slice(0, 10);
+  const liveStates = filteredStates.filter(
+    (state) => state.connectionMode === "live" || state.connectionMode === "portal-assisted",
+  );
+  const countySearchLinks = selectedState
+    ? [
+        {
+          href: getCountyContractsSearchUrl(selectedState.name),
+          label: `Search county bids in ${selectedState.name}`,
+        },
+        {
+          href: getCityContractsSearchUrl(selectedState.name),
+          label: `Search city bids in ${selectedState.name}`,
+        },
+        {
+          href: getLocalGovernmentContractsSearchUrl(selectedState.name),
+          label: `Search local government bids in ${selectedState.name}`,
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-4 rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
@@ -190,7 +214,54 @@ export function StateLocationPicker({
             </a>
           ) : null}
         </div>
+        {selectedState ? (
+          <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-slate-950/40 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+              Quick local search links
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              If this state does not have a fully connected county network yet, these links still get you into local contract hunting fast.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {countySearchLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={buttonStyles({ variant: "ghost", size: "sm" })}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
+
+      {liveStates.length > 0 ? (
+        <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Working now</p>
+          <p className="mt-2 text-sm leading-6 text-slate-200">
+            These states already have the strongest usable experience today.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {liveStates.slice(0, 4).map((state) => (
+              <button
+                key={state.slug}
+                type="button"
+                onClick={() => setSelected(state.slug)}
+                className={buttonStyles({
+                  variant: selected === state.slug ? "primary" : "secondary",
+                  size: "sm",
+                })}
+              >
+                {state.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
@@ -224,6 +295,33 @@ export function StateLocationPicker({
                 </span>
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-400">{state.description}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                {state.connectionMode === "planned"
+                  ? "The page is ready as a clean statewide launch point, with county and city search links underneath."
+                  : state.helperText}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelected(state.slug);
+                    router.push(`/state-local/${state.slug}`);
+                  }}
+                  className={buttonStyles({ variant: "secondary", size: "sm" })}
+                >
+                  Open state page
+                </button>
+                <a
+                  href={state.portalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className={buttonStyles({ variant: "ghost", size: "sm" })}
+                >
+                  Open portal
+                </a>
+              </div>
             </button>
           ))}
         </div>

@@ -39,6 +39,9 @@ function buildSourceListHref(sourceCode: string) {
     "white-pine": "/state-local/white-pine",
     nye: "/state-local/nye",
     texas: "/state-local/texas",
+    "north-carolina": "/state-local/north-carolina",
+    mecklenburg: "/state-local/mecklenburg",
+    guilford: "/state-local/guilford",
   };
 
   return locationMap[sourceCode] ?? "/state-local";
@@ -56,6 +59,9 @@ function buildSourceListLabel(sourceName: string, sourceCode: string) {
     "white-pine": "Back to White Pine County list",
     nye: "Back to Nye County list",
     texas: "Back to Texas list",
+    "north-carolina": "Back to North Carolina list",
+    mecklenburg: "Back to Mecklenburg County list",
+    guilford: "Back to Guilford County list",
   };
 
   return labels[sourceCode] ?? `Back to ${sourceName} list`;

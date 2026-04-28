@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StateLocationPicker } from "@/components/state-location-picker";
+import { UsStateTileMap } from "@/components/us-state-tile-map";
 import { buttonStyles } from "@/components/ui/button";
 import { getStatePortalHref, stateDirectory } from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
@@ -15,13 +16,13 @@ export default async function StateLocalPage() {
     sources: [],
   }));
   const connectedSources = snapshot.sources.filter((source) => source.status === "Connected");
-  const plannedSources = snapshot.sources.filter((source) => source.status === "Planned");
-  const localSources = plannedSources.filter((source) => source.sourceType === "County / City");
+  const localSources = snapshot.sources.filter((source) => source.sourceType === "County / City");
   const northernArizonaSources = localSources.filter((source) => source.regionLabel === "Northern Arizona");
   const serviceAreaSources = localSources.filter((source) =>
     ["Northwest Arizona", "Eastern Nevada", "Southern Nevada"].includes(source.regionLabel ?? ""),
   );
-  const featuredLocalSources = [...northernArizonaSources, ...serviceAreaSources];
+  const northCarolinaCountySources = localSources.filter((source) => source.stateCode === "NC");
+  const featuredLocalSources = [...northernArizonaSources, ...serviceAreaSources, ...northCarolinaCountySources];
 
   return (
     <div className="space-y-8">
@@ -40,6 +41,9 @@ export default async function StateLocalPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/state-local/washington" className={buttonStyles({ variant: "primary", size: "md" })}>
             Open Washington view
+          </Link>
+          <Link href="/state-local/north-carolina" className={buttonStyles({ variant: "secondary", size: "md" })}>
+            Open North Carolina view
           </Link>
           <Link href="/state-local/nevada" className={buttonStyles({ variant: "secondary", size: "md" })}>
             Open Nevada view
@@ -70,6 +74,8 @@ export default async function StateLocalPage() {
           </div>
         </div>
       </section>
+
+      <UsStateTileMap states={stateDirectory} />
 
       <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
@@ -102,12 +108,14 @@ export default async function StateLocalPage() {
                   >
                     Open location view
                   </Link>
-                  <Link
+                  <a
                     href={source.portalUrl}
+                    target="_blank"
+                    rel="noreferrer"
                     className={buttonStyles({ variant: "ghost", size: "sm" })}
                   >
                     View original portal
-                  </Link>
+                  </a>
                 </div>
               </div>
             ))}
@@ -175,7 +183,7 @@ export default async function StateLocalPage() {
               County & city coverage
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-white">
-              Your Arizona and Nevada service areas are now in the expansion plan.
+              Your Arizona, Nevada, and North Carolina local service areas are now in the rollout.
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
               County and city contracts are spread across local portals, so we track them as

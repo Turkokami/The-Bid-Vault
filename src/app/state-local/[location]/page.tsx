@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { StateLocalClient } from "@/components/state-local-client";
 import {
+  getCityContractsSearchUrl,
+  getCountyContractsSearchUrl,
   getStateDirectoryEntry,
+  getLocalGovernmentContractsSearchUrl,
 } from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 import type { StateLocalFilters } from "@/lib/state-local-search";
@@ -165,6 +168,94 @@ const locationViews: LocationView[] = [
     sourceLabel: "Texas ESBD / TxSmartBuy",
     sourceDescription: "Texas state procurement sources staged for live monitoring.",
   },
+  {
+    slug: "north-carolina",
+    title: "North Carolina state and county opportunities.",
+    description:
+      "Use this view to focus on North Carolina statewide opportunities through eVP, then branch into Mecklenburg County and Guilford County local source options.",
+    states: ["NC"],
+    sourceCodes: ["north-carolina", "mecklenburg", "guilford"],
+    sourceLabel: "North Carolina sources",
+    sourceDescription:
+      "North Carolina eVP statewide coverage plus county purchasing options for major local service areas.",
+    emptyStateMessage:
+      "North Carolina uses a portal-assisted workflow right now. Use the official eVP actions above to review the live statewide solicitations, then open Mecklenburg or Guilford if you need county-level procurement pages.",
+    portalAssist: {
+      eyebrow: "Portal-assisted now",
+      title: "Use North Carolina eVP directly, with The Bid Vault organizing the workflow first.",
+      description:
+        "North Carolina's official eVP site is the statewide system for public solicitations, vendor search, and bidding guidance. This page keeps your saved terms, code lists, and county options together, then hands you into eVP for the live postings.",
+      note:
+        "This gives you a stronger North Carolina page immediately, without pretending the statewide portal can always be extracted cleanly in the background.",
+      links: [
+        {
+          href: "https://evp.nc.gov/",
+          label: "Open North Carolina eVP",
+          external: true,
+        },
+        {
+          href: "https://evp.nc.gov/solicitations/",
+          label: "Open eVP solicitations",
+          external: true,
+        },
+        {
+          href: "https://ncadmin.nc.gov/government-agencies/procurement",
+          label: "View NC procurement guidance",
+          external: true,
+        },
+      ],
+    },
+  },
+  {
+    slug: "mecklenburg",
+    title: "Mecklenburg County opportunities.",
+    description:
+      "Focus on Mecklenburg County procurement opportunities around Charlotte, county departments, and major local public service work.",
+    states: ["NC"],
+    sourceCodes: ["mecklenburg"],
+    sourceLabel: "Mecklenburg County",
+    sourceDescription: "Mecklenburg County procurement guidance and portal-assisted county source coverage.",
+    emptyStateMessage:
+      "Use the official Mecklenburg County procurement page to review the county's live opportunities and vendor workflow.",
+    portalAssist: {
+      eyebrow: "County portal-assisted",
+      title: "Use Mecklenburg County's official procurement portal and vendor guidance.",
+      description:
+        "Mecklenburg County runs procurement through its Financial Services procurement team and MeckProcure vendor workflow. This page helps you keep the county in your search plan while sending you to the live county portal for the current postings.",
+      links: [
+        {
+          href: "https://fin.mecknc.gov/procurement",
+          label: "Open Mecklenburg procurement",
+          external: true,
+        },
+      ],
+    },
+  },
+  {
+    slug: "guilford",
+    title: "Guilford County opportunities.",
+    description:
+      "Focus on Guilford County purchasing opportunities around Greensboro, High Point, county facilities, and local service contracts.",
+    states: ["NC"],
+    sourceCodes: ["guilford"],
+    sourceLabel: "Guilford County",
+    sourceDescription: "Guilford County purchasing guidance and portal-assisted county source coverage.",
+    emptyStateMessage:
+      "Use Guilford County's official purchasing page to review its bid and RFP notices and vendor resources.",
+    portalAssist: {
+      eyebrow: "County portal-assisted",
+      title: "Use Guilford County's official purchasing page for the live county notices.",
+      description:
+        "Guilford County publishes bid and request-for-proposal notices through its purchasing division and vendor self-service resources. This page keeps Guilford in your local workflow while handing you into the county's live system.",
+      links: [
+        {
+          href: "https://www.guilfordcountync.gov/government/departments-and-agencies/finance/purchasing",
+          label: "Open Guilford purchasing",
+          external: true,
+        },
+      ],
+    },
+  },
 ];
 
 function buildStateLocationView(location: string, allSourceCodes: string[]): LocationView | null {
@@ -254,6 +345,20 @@ function getStateNavigatorData(
     stateCode,
     statewideSources,
     localSources,
+    countySearchLinks: [
+      {
+        href: getCountyContractsSearchUrl(stateName),
+        label: `Search county bids in ${stateName}`,
+      },
+      {
+        href: getCityContractsSearchUrl(stateName),
+        label: `Search city bids in ${stateName}`,
+      },
+      {
+        href: getLocalGovernmentContractsSearchUrl(stateName),
+        label: `Search local government bids in ${stateName}`,
+      },
+    ],
   };
 }
 

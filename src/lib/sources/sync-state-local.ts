@@ -108,6 +108,40 @@ const localAndRegionalSources: StateLocalSourceSummary[] = [
     portalUrl: "https://www.nyecountynv.gov/Bids.aspx?CatID=showStatus&Status=open&showAllBids=&txtSort=BidNumberAsc",
     lastSyncedAt: "Not connected yet",
   },
+  {
+    id: "source-mecklenburg",
+    sourceCode: "mecklenburg",
+    sourceName: "Mecklenburg County Procurement",
+    stateCode: "NC",
+    sourceType: "County / City",
+    regionLabel: "Charlotte region",
+    status: "Connected",
+    connectionMode: "portal-assisted",
+    cadence: "Portal-assisted",
+    description:
+      "Mecklenburg County procurement coverage through the county's official Financial Services procurement page and MeckProcure vendor workflow.",
+    helperText:
+      "Use this page to review Mecklenburg County procurement guidance and jump into the county's vendor portal for current opportunities around Charlotte and nearby service areas.",
+    portalUrl: "https://fin.mecknc.gov/procurement",
+    lastSyncedAt: "Portal-assisted mode ready",
+  },
+  {
+    id: "source-guilford",
+    sourceCode: "guilford",
+    sourceName: "Guilford County Purchasing",
+    stateCode: "NC",
+    sourceType: "County / City",
+    regionLabel: "Piedmont Triad",
+    status: "Connected",
+    connectionMode: "portal-assisted",
+    cadence: "Portal-assisted",
+    description:
+      "Guilford County purchasing coverage through the county's official purchasing page and vendor self-service resources.",
+    helperText:
+      "Guilford County publishes bids and RFP notices through its purchasing division. This page keeps that county visible for contractors serving Greensboro, High Point, and nearby public agencies.",
+    portalUrl: "https://www.guilfordcountync.gov/government/departments-and-agencies/finance/purchasing",
+    lastSyncedAt: "Portal-assisted mode ready",
+  },
 ];
 
 const statewideSources: StateLocalSourceSummary[] = stateDirectory.map((state) => ({
@@ -317,6 +351,29 @@ export async function getStateLocalSyncSnapshot(): Promise<{
     recordsUpdated: 0,
     notes:
       "NevadaEPro is available in portal-assisted mode. Saved codes and search terms can be applied before opening the live Nevada portal, but the portal blocks background result extraction from The Bid Vault right now.",
+  });
+
+  updateConnectedSource(
+    sources,
+    "north-carolina",
+    "North Carolina eVP is available now as a portal-assisted source. You can use saved codes and search planning in The Bid Vault, then open eVP directly to review the live statewide solicitations.",
+    {
+      connectionMode: "portal-assisted",
+      cadence: "Portal-assisted",
+      lastSyncedAt: formatSyncTime(),
+      portalUrl: "https://evp.nc.gov/",
+    },
+  );
+  syncLogs.push({
+    id: "sync-north-carolina-portal-assisted",
+    sourceName: "North Carolina eVP",
+    sourceCode: "north-carolina",
+    syncStatus: "Partial",
+    lastRunAt: formatSyncTime(),
+    recordsAdded: 0,
+    recordsUpdated: 0,
+    notes:
+      "North Carolina eVP is available in portal-assisted mode. The Bid Vault keeps your statewide and county workflow organized, then hands you into the live eVP portal for the official postings.",
   });
 
   return {
