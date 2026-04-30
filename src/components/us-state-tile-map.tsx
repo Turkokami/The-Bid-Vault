@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { geoAlbersUsa, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import statesTopology from "us-atlas/states-10m.json";
-import { type StateDirectoryEntry } from "@/lib/sources/state-registry";
+import {
+  getCityContractsSearchUrl,
+  getCountyContractsSearchUrl,
+  getLocalDirectoryEntries,
+  getLocalGovernmentContractsSearchUrl,
+  type StateDirectoryEntry,
+} from "@/lib/sources/state-registry";
 
 const fipsToStateCode: Record<string, string> = {
   "01": "AL",
@@ -133,6 +139,25 @@ export function UsStateTileMap({
   }, [statesByCode]);
 
   const activeState = states.find((state) => state.stateCode === activeStateCode) ?? states[0];
+  const countySearchLinks = activeState
+    ? [
+        {
+          href: getCountyContractsSearchUrl(activeState.name),
+          label: `Search county bids in ${activeState.name}`,
+        },
+        {
+          href: getCityContractsSearchUrl(activeState.name),
+          label: `Search city bids in ${activeState.name}`,
+        },
+        {
+          href: getLocalGovernmentContractsSearchUrl(activeState.name),
+          label: `Search local government bids in ${activeState.name}`,
+        },
+      ]
+    : [];
+  const localDirectoryEntries = activeState
+    ? getLocalDirectoryEntries(activeState.stateCode, activeState.name).slice(0, 4)
+    : [];
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.28)]">
@@ -223,6 +248,38 @@ export function UsStateTileMap({
             >
               Open portal
             </a>
+          </div>
+          <div className="mt-5 rounded-[1.25rem] border border-white/10 bg-slate-950/40 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+              County and city quick links
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Use these when you want to branch from the statewide page into county, city, or local government contract hunting.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {localDirectoryEntries.map((entry) => (
+                <a
+                  key={entry.slug}
+                  href={entry.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-emerald-400/25 hover:bg-emerald-400/[0.08]"
+                >
+                  {entry.label}
+                </a>
+              ))}
+              {countySearchLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-emerald-400/25 hover:bg-emerald-400/[0.08]"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
         </aside>
       </div>

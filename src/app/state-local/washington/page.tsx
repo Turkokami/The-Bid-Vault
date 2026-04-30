@@ -1,5 +1,6 @@
 import { StateLocalClient } from "@/components/state-local-client";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
+import { getLocalDirectoryEntries } from "@/lib/sources/state-registry";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -56,6 +57,7 @@ export default async function WashingtonStateLocalPage({
       },
     ],
   }));
+  const focusSources = snapshot.sources.filter((source) => source.sourceCode === "washington");
   const availableCategoryCodes = new Set(snapshot.opportunities.map((opportunity) => opportunity.categoryCode));
   const requestedCategoryCodes = pickSearchValue(params.codes)
     .split(",")
@@ -73,20 +75,56 @@ export default async function WashingtonStateLocalPage({
       sourceLabel="WEBS"
       sourceDescription="Washington's Electronic Business Solution for many state and local opportunities."
       focusSourceCodes={["washington"]}
+      stateNavigator={{
+        stateName: "Washington",
+        stateCode: "WA",
+        statewideSources: focusSources,
+        localSources: [],
+        localDirectoryEntries: getLocalDirectoryEntries("WA", "Washington"),
+        countySearchLinks: [
+          {
+            href: "https://www.bing.com/search?q=Washington%20county%20bid%20opportunities%20procurement%20site%3A.gov",
+            label: "Search county bids in Washington",
+          },
+          {
+            href: "https://www.bing.com/search?q=Washington%20city%20bid%20opportunities%20procurement%20site%3A.gov",
+            label: "Search city bids in Washington",
+          },
+          {
+            href: "https://www.bing.com/search?q=Washington%20local%20government%20bids%20procurement%20site%3A.gov",
+            label: "Search local government bids in Washington",
+          },
+        ],
+      }}
       enableLiveRefresh
       refreshButtonLabel="Refresh live WEBS records"
       refreshSuccessMessage="Washington opportunities refreshed from the live WEBS source."
       refreshErrorMessage="WEBS could not refresh live records right now. Please try again."
+      portalAssist={{
+        eyebrow: "Portal backup ready",
+        title: "Use the official WEBS bid calendar any time the live in-app feed has a hiccup.",
+        description:
+          "Washington remains one of the strongest state integrations in The Bid Vault, but WEBS can still be inconsistent about background requests. When that happens, this page keeps your filters and workflow in place while pointing you straight to the official calendar.",
+        links: [
+          {
+            href: "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx",
+            label: "Open WEBS bid calendar",
+            external: true,
+          },
+        ],
+      }}
       livePortalView={{
         eyebrow: "WEBS live portal",
-        title: "Keep the official Washington WEBS bid calendar visible right on the Washington page.",
+        title: "Open the official Washington WEBS bid calendar directly from this state page.",
         description:
-          "If the in-app live source has a temporary hiccup, you can still review the official WEBS posting list here and keep working without losing your place.",
+          "If the in-app live source has a temporary hiccup, you can still review the official WEBS posting list and keep working without losing your place.",
         href: "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx",
-        embedSrc: "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx",
         openLabel: "Open WEBS bid calendar",
         note:
-          "WEBS can be inconsistent about background requests. This gives you a direct live portal fallback without forcing you out of the Washington workflow.",
+          "WEBS can be inconsistent about background requests and browser embedding. This keeps the Washington page stable while still giving you the live official source in one click.",
+        allowEmbed: false,
+        blockedMessage:
+          "WEBS works better here as a direct live portal handoff. Open the official bid calendar in a new tab when you want the raw Washington source view.",
       }}
       savedCodeDescription="Apply your saved work categories to WEBS in one click."
       savedCodeApplyLabel="Apply to WEBS"

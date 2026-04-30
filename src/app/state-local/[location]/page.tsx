@@ -5,6 +5,7 @@ import {
   getCountyContractsSearchUrl,
   getStateDirectoryEntry,
   getLocalGovernmentContractsSearchUrl,
+  getLocalDirectoryEntries,
 } from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 import type { StateLocalFilters } from "@/lib/state-local-search";
@@ -46,7 +47,15 @@ type LocationView = {
     openLabel: string;
     embedSrc?: string;
     note?: string;
+    allowEmbed?: boolean;
+    blockedMessage?: string;
   };
+};
+
+type StateLocalSnapshotData = {
+  opportunities: Awaited<ReturnType<typeof getStateLocalSyncSnapshot>>["opportunities"];
+  syncLogs: Awaited<ReturnType<typeof getStateLocalSyncSnapshot>>["syncLogs"];
+  sources: Awaited<ReturnType<typeof getStateLocalSyncSnapshot>>["sources"];
 };
 
 const locationViews: LocationView[] = [
@@ -224,6 +233,9 @@ const locationViews: LocationView[] = [
       openLabel: "Open NC statewide solicitations",
       note:
         "If the eVP site limits the embedded view in your browser, use the button above to open the same live statewide listing in a new tab.",
+      allowEmbed: false,
+      blockedMessage:
+        "North Carolina eVP blocks embedded viewing in the browser, so the cleanest path is to open the live statewide solicitations page directly in a new tab.",
     },
   },
   {
@@ -325,6 +337,9 @@ function buildStateLocationView(location: string, allSourceCodes: string[]): Loc
           openLabel: "Open NC statewide solicitations",
           note:
             "If the eVP site limits the embedded view in your browser, use the button above to open the same live statewide listing in a new tab.",
+          allowEmbed: false,
+          blockedMessage:
+            "North Carolina eVP blocks embedded viewing in the browser, so the cleanest path is to open the live statewide solicitations page directly in a new tab.",
         }
       : undefined;
 
@@ -367,6 +382,46 @@ function buildFilters(view: LocationView, keywords = "", codes = ""): StateLocal
   };
 }
 
+function buildFallbackSnapshot(location: string): StateLocalSnapshotData {
+  return {
+    opportunities: [],
+    syncLogs: [
+      {
+        id: `state-local-${location}-fallback`,
+        sourceName: "State & Local Sources",
+        sourceCode: "washington",
+        syncStatus: "Failed",
+        lastRunAt: new Date().toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZoneName: "short",
+        }),
+        recordsAdded: 0,
+        recordsUpdated: 0,
+        errorMessage: "This location view could not load live source data right now.",
+        notes:
+          "The live source had a temporary loading problem. The page is still available and direct portal links should still work.",
+      },
+    ],
+    sources: [],
+  };
+}
+
+function buildFallbackView(location: string, allSourceCodes: string[]): LocationView {
+  const stateEntry = getStateDirectoryEntry(location);
+  const dynamicView =
+    stateEntry ? buildStateLocationView(location, allSourceCodes) : null;
+
+  return (
+    dynamicView ??
+    locationViews.find((item) => item.slug === location) ??
+    locationViews.find((item) => item.slug === "north-carolina") ??
+    locationViews[0]
+  );
+}
+
 function getStateNavigatorData(
   stateName: string,
   stateCode: string,
@@ -380,6 +435,7 @@ function getStateNavigatorData(
     stateCode,
     statewideSources,
     localSources,
+    localDirectoryEntries: getLocalDirectoryEntries(stateCode, stateName),
     countySearchLinks: [
       {
         href: getCountyContractsSearchUrl(stateName),
@@ -409,30 +465,7 @@ export default async function LocationStateLocalPage({
 }) {
   const { location } = await params;
   const query = (await searchParams) ?? {};
-  const snapshot = await getStateLocalSyncSnapshot().catch(() => ({
-    opportunities: [],
-    syncLogs: [
-      {
-        id: `state-local-${location}-fallback`,
-        sourceName: "State & Local Sources",
-        sourceCode: "washington" as const,
-        syncStatus: "Failed" as const,
-        lastRunAt: new Date().toLocaleString("en-US", {
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          timeZoneName: "short",
-        }),
-        recordsAdded: 0,
-        recordsUpdated: 0,
-        errorMessage: "This location view could not load live source data right now.",
-        notes:
-          "The live source had a temporary loading problem. The page is still available and direct portal links should still work.",
-      },
-    ],
-    sources: [],
-  }));
+  const snapshot = await getStateLocalSyncSnapshot().catch(() => buildFallbackSnapshot(location));
   const allSourceCodes = snapshot.sources.map((source) => source.sourceCode);
   const view =
     locationViews.find((item) => item.slug === location) ??
@@ -449,6 +482,7 @@ export default async function LocationStateLocalPage({
   const stateNavigator = stateEntry
     ? getStateNavigatorData(stateEntry.name, stateEntry.stateCode, focusSources)
     : undefined;
+  const fallbackView = buildFallbackView(location, allSourceCodes);
   const initialFilters = buildFilters(
     viewWithSources,
     pickSearchValue(query.keywords),
@@ -463,14 +497,17 @@ export default async function LocationStateLocalPage({
       initialFilters={initialFilters}
       resetFilters={buildFilters(viewWithSources)}
       pageEyebrow="Location view"
-      pageTitle={view.title}
-      pageDescription={view.description}
-      sourceLabel={view.sourceLabel}
-      sourceDescription={view.sourceDescription}
-      focusSourceCodes={view.sourceCodes}
-      portalAssist={view.portalAssist}
-      livePortalView={view.livePortalView}
-      emptyStateMessage={view.emptyStateMessage}
+      pageTitle={view.title || "This state page is still available while the live source cools down."}
+      pageDescription={
+        view.description ||
+        "Use the direct portal actions below, then return here to keep your state and local workflow organized."
+      }
+      sourceLabel={view.sourceLabel || fallbackView.sourceLabel}
+      sourceDescription={view.sourceDescription || fallbackView.sourceDescription}
+      focusSourceCodes={view.sourceCodes || fallbackView.sourceCodes}
+      portalAssist={view.portalAssist ?? fallbackView.portalAssist}
+      livePortalView={view.livePortalView ?? fallbackView.livePortalView}
+      emptyStateMessage={view.emptyStateMessage ?? "This state view is temporarily using direct-source mode."}
       stateNavigator={stateNavigator}
       showSourceHubSection={false}
     />

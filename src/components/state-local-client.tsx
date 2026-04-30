@@ -16,6 +16,7 @@ import {
   getMergedStateLocalSnapshot,
   readSavedStateLocalEntries,
 } from "@/lib/demo-state-local-store";
+import type { LocalDirectoryEntry } from "@/lib/sources/state-registry";
 import {
   buildStateLocalFilterOptions,
   filterStateLocalOpportunities,
@@ -95,6 +96,8 @@ export function StateLocalClient({
     openLabel: string;
     embedSrc?: string;
     note?: string;
+    allowEmbed?: boolean;
+    blockedMessage?: string;
   };
   emptyStateMessage?: string;
   stateNavigator?: {
@@ -102,6 +105,7 @@ export function StateLocalClient({
     stateCode: string;
     statewideSources: StateLocalSourceSummary[];
     localSources: StateLocalSourceSummary[];
+    localDirectoryEntries: LocalDirectoryEntry[];
     countySearchLinks: Array<{
       href: string;
       label: string;
@@ -247,8 +251,36 @@ export function StateLocalClient({
 
             <article className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">County and city options</p>
-              {stateNavigator.localSources.length > 0 ? (
-                <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-4">
+                {stateNavigator.localDirectoryEntries.length > 0 ? (
+                  <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                    <p className="text-sm font-medium text-white">
+                      Popular local starting points in {stateNavigator.stateName}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">
+                      These are the fastest local launch points for county and city contract hunting in this state.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {stateNavigator.localDirectoryEntries.map((entry) => (
+                        <a
+                          key={entry.slug}
+                          href={entry.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={buttonStyles({
+                            variant: entry.sourceType === "portal" ? "secondary" : "ghost",
+                            size: "sm",
+                          })}
+                        >
+                          {entry.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {stateNavigator.localSources.length > 0 ? (
+                  <div className="space-y-3">
                   {stateNavigator.localSources.map((source) => (
                     <div key={source.id} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
                       <div className="flex items-center justify-between gap-3">
@@ -279,27 +311,26 @@ export function StateLocalClient({
                       </div>
                     </div>
                   ))}
-                </div>
-              ) : (
-                <div className="mt-4 space-y-3">
+                  </div>
+                ) : (
                   <div className="rounded-[1.25rem] border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-400">
                     This state page is ready for county and city rollout. Until we connect curated local sources here, use these quick county-level search links to jump straight into local contract hunting for this state.
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {stateNavigator.countySearchLinks.map((link) => (
-                      <a
-                        key={link.href}
-                        href={link.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={buttonStyles({ variant: "secondary", size: "sm" })}
-                      >
-                        {link.label}
-                      </a>
-                    ))}
-                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {stateNavigator.countySearchLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
                 </div>
-              )}
+              </div>
             </article>
           </div>
         </section>
@@ -334,26 +365,46 @@ export function StateLocalClient({
             </a>
           </div>
 
-          <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/80">
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
-              <p className="text-sm font-medium text-white">Live portal view</p>
-              <a
-                href={livePortalView.href}
-                target="_blank"
-                rel="noreferrer"
-                className={buttonStyles({ variant: "ghost", size: "sm" })}
-              >
-                Open in new tab
-              </a>
+          {livePortalView.allowEmbed === false ? (
+            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-6">
+              <p className="text-sm font-medium text-white">Live portal access</p>
+              <p className="mt-3 text-sm leading-7 text-slate-300">
+                {livePortalView.blockedMessage ??
+                  "This source blocks embedded viewing, so open the official portal in a new tab to review the live contract list."}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <a
+                  href={livePortalView.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={buttonStyles({ variant: "primary", size: "sm" })}
+                >
+                  {livePortalView.openLabel}
+                </a>
+              </div>
             </div>
-            <iframe
-              title={livePortalView.title}
-              src={livePortalView.embedSrc ?? livePortalView.href}
-              loading="lazy"
-              className="h-[760px] w-full bg-white"
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
-          </div>
+          ) : (
+            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/80">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+                <p className="text-sm font-medium text-white">Live portal view</p>
+                <a
+                  href={livePortalView.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={buttonStyles({ variant: "ghost", size: "sm" })}
+                >
+                  Open in new tab
+                </a>
+              </div>
+              <iframe
+                title={livePortalView.title}
+                src={livePortalView.embedSrc ?? livePortalView.href}
+                loading="lazy"
+                className="h-[760px] w-full bg-white"
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          )}
         </section>
       ) : null}
 

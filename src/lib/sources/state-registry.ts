@@ -12,6 +12,14 @@ export type StateDirectoryEntry = {
   helperText: string;
 };
 
+export type LocalDirectoryEntry = {
+  slug: string;
+  label: string;
+  level: "County" | "City" | "Parish" | "Borough" | "Metro";
+  href: string;
+  sourceType: "portal" | "search";
+};
+
 export const stateDirectory: StateDirectoryEntry[] = [
   {
     slug: "alabama",
@@ -594,6 +602,333 @@ function buildBingSearchUrl(query: string) {
   return `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
 }
 
+function slugifyDirectoryLabel(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function buildLocalAreaSearchUrl(stateName: string, areaLabel: string) {
+  return buildBingSearchUrl(`${areaLabel} ${stateName} bid opportunities procurement site:.gov`);
+}
+
+const majorLocalAreasByStateCode: Record<string, Array<{ label: string; level: LocalDirectoryEntry["level"] }>> = {
+  AL: [
+    { label: "Jefferson County", level: "County" },
+    { label: "Mobile County", level: "County" },
+    { label: "Huntsville city", level: "City" },
+  ],
+  AK: [
+    { label: "Anchorage Municipality", level: "Metro" },
+    { label: "Fairbanks North Star Borough", level: "Borough" },
+    { label: "Juneau city and borough", level: "Borough" },
+  ],
+  AZ: [
+    { label: "Maricopa County", level: "County" },
+    { label: "Pima County", level: "County" },
+    { label: "Mohave County", level: "County" },
+  ],
+  AR: [
+    { label: "Pulaski County", level: "County" },
+    { label: "Washington County", level: "County" },
+    { label: "Benton County", level: "County" },
+  ],
+  CA: [
+    { label: "Los Angeles County", level: "County" },
+    { label: "San Diego County", level: "County" },
+    { label: "Orange County", level: "County" },
+  ],
+  CO: [
+    { label: "Denver city and county", level: "Metro" },
+    { label: "El Paso County", level: "County" },
+    { label: "Jefferson County", level: "County" },
+  ],
+  CT: [
+    { label: "Hartford city", level: "City" },
+    { label: "New Haven city", level: "City" },
+    { label: "Bridgeport city", level: "City" },
+  ],
+  DE: [
+    { label: "New Castle County", level: "County" },
+    { label: "Sussex County", level: "County" },
+    { label: "Kent County", level: "County" },
+  ],
+  DC: [
+    { label: "District agencies", level: "Metro" },
+    { label: "DC Public Schools", level: "Metro" },
+    { label: "DC Housing Authority", level: "Metro" },
+  ],
+  FL: [
+    { label: "Miami-Dade County", level: "County" },
+    { label: "Orange County", level: "County" },
+    { label: "Hillsborough County", level: "County" },
+  ],
+  GA: [
+    { label: "Fulton County", level: "County" },
+    { label: "Cobb County", level: "County" },
+    { label: "DeKalb County", level: "County" },
+  ],
+  HI: [
+    { label: "Honolulu County", level: "County" },
+    { label: "Maui County", level: "County" },
+    { label: "Hawaii County", level: "County" },
+  ],
+  ID: [
+    { label: "Ada County", level: "County" },
+    { label: "Canyon County", level: "County" },
+    { label: "Kootenai County", level: "County" },
+  ],
+  IL: [
+    { label: "Cook County", level: "County" },
+    { label: "DuPage County", level: "County" },
+    { label: "Lake County", level: "County" },
+  ],
+  IN: [
+    { label: "Marion County", level: "County" },
+    { label: "Lake County", level: "County" },
+    { label: "Allen County", level: "County" },
+  ],
+  IA: [
+    { label: "Polk County", level: "County" },
+    { label: "Linn County", level: "County" },
+    { label: "Scott County", level: "County" },
+  ],
+  KS: [
+    { label: "Johnson County", level: "County" },
+    { label: "Sedgwick County", level: "County" },
+    { label: "Shawnee County", level: "County" },
+  ],
+  KY: [
+    { label: "Jefferson County", level: "County" },
+    { label: "Fayette County", level: "County" },
+    { label: "Boone County", level: "County" },
+  ],
+  LA: [
+    { label: "Orleans Parish", level: "Parish" },
+    { label: "East Baton Rouge Parish", level: "Parish" },
+    { label: "Jefferson Parish", level: "Parish" },
+  ],
+  ME: [
+    { label: "Cumberland County", level: "County" },
+    { label: "York County", level: "County" },
+    { label: "Penobscot County", level: "County" },
+  ],
+  MD: [
+    { label: "Montgomery County", level: "County" },
+    { label: "Prince George's County", level: "County" },
+    { label: "Baltimore County", level: "County" },
+  ],
+  MA: [
+    { label: "Middlesex County", level: "County" },
+    { label: "Suffolk County", level: "County" },
+    { label: "Worcester County", level: "County" },
+  ],
+  MI: [
+    { label: "Wayne County", level: "County" },
+    { label: "Oakland County", level: "County" },
+    { label: "Macomb County", level: "County" },
+  ],
+  MN: [
+    { label: "Hennepin County", level: "County" },
+    { label: "Ramsey County", level: "County" },
+    { label: "Dakota County", level: "County" },
+  ],
+  MS: [
+    { label: "Hinds County", level: "County" },
+    { label: "Harrison County", level: "County" },
+    { label: "DeSoto County", level: "County" },
+  ],
+  MO: [
+    { label: "St. Louis County", level: "County" },
+    { label: "Jackson County", level: "County" },
+    { label: "Greene County", level: "County" },
+  ],
+  MT: [
+    { label: "Yellowstone County", level: "County" },
+    { label: "Missoula County", level: "County" },
+    { label: "Gallatin County", level: "County" },
+  ],
+  NE: [
+    { label: "Douglas County", level: "County" },
+    { label: "Lancaster County", level: "County" },
+    { label: "Sarpy County", level: "County" },
+  ],
+  NV: [
+    { label: "Clark County", level: "County" },
+    { label: "Washoe County", level: "County" },
+    { label: "Nye County", level: "County" },
+  ],
+  NH: [
+    { label: "Hillsborough County", level: "County" },
+    { label: "Rockingham County", level: "County" },
+    { label: "Merrimack County", level: "County" },
+  ],
+  NJ: [
+    { label: "Bergen County", level: "County" },
+    { label: "Middlesex County", level: "County" },
+    { label: "Essex County", level: "County" },
+  ],
+  NM: [
+    { label: "Bernalillo County", level: "County" },
+    { label: "Santa Fe County", level: "County" },
+    { label: "Dona Ana County", level: "County" },
+  ],
+  NY: [
+    { label: "Nassau County", level: "County" },
+    { label: "Suffolk County", level: "County" },
+    { label: "New York City agencies", level: "Metro" },
+  ],
+  NC: [
+    { label: "Mecklenburg County", level: "County" },
+    { label: "Wake County", level: "County" },
+    { label: "Guilford County", level: "County" },
+  ],
+  ND: [
+    { label: "Cass County", level: "County" },
+    { label: "Burleigh County", level: "County" },
+    { label: "Grand Forks County", level: "County" },
+  ],
+  OH: [
+    { label: "Cuyahoga County", level: "County" },
+    { label: "Franklin County", level: "County" },
+    { label: "Hamilton County", level: "County" },
+  ],
+  OK: [
+    { label: "Oklahoma County", level: "County" },
+    { label: "Tulsa County", level: "County" },
+    { label: "Cleveland County", level: "County" },
+  ],
+  OR: [
+    { label: "Multnomah County", level: "County" },
+    { label: "Washington County", level: "County" },
+    { label: "Lane County", level: "County" },
+  ],
+  PA: [
+    { label: "Allegheny County", level: "County" },
+    { label: "Philadelphia city", level: "City" },
+    { label: "Montgomery County", level: "County" },
+  ],
+  RI: [
+    { label: "Providence city", level: "City" },
+    { label: "Warwick city", level: "City" },
+    { label: "Cranston city", level: "City" },
+  ],
+  SC: [
+    { label: "Greenville County", level: "County" },
+    { label: "Richland County", level: "County" },
+    { label: "Charleston County", level: "County" },
+  ],
+  SD: [
+    { label: "Minnehaha County", level: "County" },
+    { label: "Pennington County", level: "County" },
+    { label: "Lincoln County", level: "County" },
+  ],
+  TN: [
+    { label: "Davidson County", level: "County" },
+    { label: "Shelby County", level: "County" },
+    { label: "Knox County", level: "County" },
+  ],
+  TX: [
+    { label: "Harris County", level: "County" },
+    { label: "Dallas County", level: "County" },
+    { label: "Bexar County", level: "County" },
+  ],
+  UT: [
+    { label: "Salt Lake County", level: "County" },
+    { label: "Utah County", level: "County" },
+    { label: "Davis County", level: "County" },
+  ],
+  VT: [
+    { label: "Burlington city", level: "City" },
+    { label: "Rutland County", level: "County" },
+    { label: "Washington County", level: "County" },
+  ],
+  VA: [
+    { label: "Fairfax County", level: "County" },
+    { label: "Virginia Beach city", level: "City" },
+    { label: "Prince William County", level: "County" },
+  ],
+  WA: [
+    { label: "King County", level: "County" },
+    { label: "Pierce County", level: "County" },
+    { label: "Spokane County", level: "County" },
+  ],
+  WV: [
+    { label: "Kanawha County", level: "County" },
+    { label: "Monongalia County", level: "County" },
+    { label: "Cabell County", level: "County" },
+  ],
+  WI: [
+    { label: "Milwaukee County", level: "County" },
+    { label: "Dane County", level: "County" },
+    { label: "Waukesha County", level: "County" },
+  ],
+  WY: [
+    { label: "Laramie County", level: "County" },
+    { label: "Natrona County", level: "County" },
+    { label: "Teton County", level: "County" },
+  ],
+};
+
+const curatedLocalPortalEntries: Record<string, LocalDirectoryEntry[]> = {
+  AZ: [
+    {
+      slug: "mohave-county",
+      label: "Mohave County portal",
+      level: "County",
+      href: "https://procurement.opengov.com/portal/mohavecounty",
+      sourceType: "portal",
+    },
+    {
+      slug: "coconino-county",
+      label: "Coconino County purchasing",
+      level: "County",
+      href: "https://www.coconino.az.gov/316/Purchasing",
+      sourceType: "portal",
+    },
+    {
+      slug: "flagstaff-city",
+      label: "City of Flagstaff bids",
+      level: "City",
+      href: "https://flagstaff.az.gov/3922/Bid-Opportunities",
+      sourceType: "portal",
+    },
+  ],
+  NC: [
+    {
+      slug: "mecklenburg-county",
+      label: "Mecklenburg County procurement",
+      level: "County",
+      href: "https://fin.mecknc.gov/procurement",
+      sourceType: "portal",
+    },
+    {
+      slug: "guilford-county",
+      label: "Guilford County purchasing",
+      level: "County",
+      href: "https://www.guilfordcountync.gov/government/departments-and-agencies/finance/purchasing",
+      sourceType: "portal",
+    },
+  ],
+  NV: [
+    {
+      slug: "nye-county",
+      label: "Nye County bids",
+      level: "County",
+      href: "https://www.nyecountynv.gov/Bids.aspx?CatID=showStatus&Status=open&showAllBids=&txtSort=BidNumberAsc",
+      sourceType: "portal",
+    },
+    {
+      slug: "white-pine-county",
+      label: "White Pine County bids",
+      level: "County",
+      href: "https://www.whitepinecounty.net/Bids.aspx",
+      sourceType: "portal",
+    },
+  ],
+};
+
 export function getCountyContractsSearchUrl(stateName: string) {
   return buildBingSearchUrl(`${stateName} county bid opportunities procurement site:.gov`);
 }
@@ -604,4 +939,29 @@ export function getCityContractsSearchUrl(stateName: string) {
 
 export function getLocalGovernmentContractsSearchUrl(stateName: string) {
   return buildBingSearchUrl(`${stateName} local government bids procurement site:.gov`);
+}
+
+export function getLocalDirectoryEntries(
+  stateCode: string,
+  stateName: string,
+): LocalDirectoryEntry[] {
+  const curatedEntries = curatedLocalPortalEntries[stateCode] ?? [];
+  const templateEntries = majorLocalAreasByStateCode[stateCode] ?? [];
+
+  const generatedEntries = templateEntries
+    .filter(
+      (entry) =>
+        !curatedEntries.some(
+          (curated) => curated.label.toLowerCase().includes(entry.label.toLowerCase().replace(/\s+(county|city|parish|borough|municipality|metro)$/i, "")),
+        ),
+    )
+    .map<LocalDirectoryEntry>((entry) => ({
+      slug: slugifyDirectoryLabel(entry.label),
+      label: `${entry.label} search`,
+      level: entry.level,
+      href: buildLocalAreaSearchUrl(stateName, entry.label),
+      sourceType: "search",
+    }));
+
+  return [...curatedEntries, ...generatedEntries].slice(0, 6);
 }

@@ -6,6 +6,7 @@ import { buttonStyles } from "@/components/ui/button";
 import {
   getCityContractsSearchUrl,
   getCountyContractsSearchUrl,
+  getLocalDirectoryEntries,
   getLocalGovernmentContractsSearchUrl,
   type StateDirectoryEntry,
 } from "@/lib/sources/state-registry";
@@ -143,6 +144,9 @@ export function StateLocationPicker({
         },
       ]
     : [];
+  const localDirectoryEntries = selectedState
+    ? getLocalDirectoryEntries(selectedState.stateCode, selectedState.name).slice(0, 4)
+    : [];
 
   return (
     <div className="space-y-4 rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
@@ -217,12 +221,26 @@ export function StateLocationPicker({
         {selectedState ? (
           <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-slate-950/40 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-              Quick local search links
+              Popular county and city starting points
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              If this state does not have a fully connected county network yet, these links still get you into local contract hunting fast.
+              Start with a few useful local launch points, then use the broader county and city search links if you need to go deeper.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
+              {localDirectoryEntries.map((entry) => (
+                <a
+                  key={entry.slug}
+                  href={entry.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={buttonStyles({
+                    variant: entry.sourceType === "portal" ? "secondary" : "ghost",
+                    size: "sm",
+                  })}
+                >
+                  {entry.label}
+                </a>
+              ))}
               {countySearchLinks.map((link) => (
                 <a
                   key={link.href}
