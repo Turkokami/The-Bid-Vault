@@ -861,6 +861,17 @@ function buildIndexedRecord(record: CategoryCodeRecord): IndexedCategoryCodeReco
 
 const categoryCodeIndex = categoryCodeRecords.map(buildIndexedRecord);
 const categoryCodeIndexById = new Map(categoryCodeIndex.map((entry) => [entry.record.id, entry]));
+const categoryCodeRecordBySourceAndCode = new Map<string, CategoryCodeRecord>(
+  categoryCodeRecords.map((record) => [`${record.sourceName}:${record.code}`, record]),
+);
+
+export function findCategoryCodeRecordById(id: string) {
+  return categoryCodeIndexById.get(id)?.record ?? null;
+}
+
+export function findCategoryCodeRecordBySourceAndCode(sourceName: string, code: string) {
+  return categoryCodeRecordBySourceAndCode.get(`${sourceName}:${code}`) ?? null;
+}
 
 export function buildCategoryFilterOptions(records: CategoryCodeRecord[]) {
   const unique = (values: string[]) => Array.from(new Set(values)).sort();

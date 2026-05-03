@@ -62,3 +62,43 @@ export type AlertRule = Prisma.AlertRuleModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model StateLocalOpportunity
+ * 
+ */
+export type StateLocalOpportunity = Prisma.StateLocalOpportunityModel
+/**
+ * Model SourceSyncLog
+ * 
+ */
+export type SourceSyncLog = Prisma.SourceSyncLogModel
+/**
+ * Model SavedStateLocalOpportunity
+ * 
+ */
+export type SavedStateLocalOpportunity = Prisma.SavedStateLocalOpportunityModel
+/**
+ * Model CategoryCode
+ * 
+ */
+export type CategoryCode = Prisma.CategoryCodeModel
+/**
+ * Model UserSavedCategoryCode
+ * 
+ */
+export type UserSavedCategoryCode = Prisma.UserSavedCategoryCodeModel
+/**
+ * Model SavedCategoryCodeList
+ * 
+ */
+export type SavedCategoryCodeList = Prisma.SavedCategoryCodeListModel
+/**
+ * Model SavedCategoryCodeListItem
+ * 
+ */
+export type SavedCategoryCodeListItem = Prisma.SavedCategoryCodeListItemModel
+/**
+ * Model TenantCategoryCode
+ * 
+ */
+export type TenantCategoryCode = Prisma.TenantCategoryCodeModel

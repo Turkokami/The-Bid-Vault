@@ -59,7 +59,15 @@ export const ModelName = {
   SavedContract: 'SavedContract',
   RebidPrediction: 'RebidPrediction',
   AlertRule: 'AlertRule',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  StateLocalOpportunity: 'StateLocalOpportunity',
+  SourceSyncLog: 'SourceSyncLog',
+  SavedStateLocalOpportunity: 'SavedStateLocalOpportunity',
+  CategoryCode: 'CategoryCode',
+  UserSavedCategoryCode: 'UserSavedCategoryCode',
+  SavedCategoryCodeList: 'SavedCategoryCodeList',
+  SavedCategoryCodeListItem: 'SavedCategoryCodeListItem',
+  TenantCategoryCode: 'TenantCategoryCode'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -213,6 +221,116 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const StateLocalOpportunityScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  stateCode: 'stateCode',
+  title: 'title',
+  issuingEntity: 'issuingEntity',
+  opportunityType: 'opportunityType',
+  status: 'status',
+  categoryCode: 'categoryCode',
+  postedDate: 'postedDate',
+  dueDate: 'dueDate',
+  summary: 'summary',
+  location: 'location',
+  sourceUrl: 'sourceUrl',
+  registrationRequired: 'registrationRequired',
+  registrationNotes: 'registrationNotes',
+  contactName: 'contactName',
+  contactEmail: 'contactEmail',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StateLocalOpportunityScalarFieldEnum = (typeof StateLocalOpportunityScalarFieldEnum)[keyof typeof StateLocalOpportunityScalarFieldEnum]
+
+
+export const SourceSyncLogScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  syncStatus: 'syncStatus',
+  lastRunAt: 'lastRunAt',
+  recordsAdded: 'recordsAdded',
+  recordsUpdated: 'recordsUpdated',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt'
+} as const
+
+export type SourceSyncLogScalarFieldEnum = (typeof SourceSyncLogScalarFieldEnum)[keyof typeof SourceSyncLogScalarFieldEnum]
+
+
+export const SavedStateLocalOpportunityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  opportunityId: 'opportunityId',
+  reminderDaysBefore: 'reminderDaysBefore',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavedStateLocalOpportunityScalarFieldEnum = (typeof SavedStateLocalOpportunityScalarFieldEnum)[keyof typeof SavedStateLocalOpportunityScalarFieldEnum]
+
+
+export const CategoryCodeScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  code: 'code',
+  title: 'title',
+  description: 'description',
+  parentCode: 'parentCode',
+  topLevelCategory: 'topLevelCategory',
+  normalizedKeywords: 'normalizedKeywords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryCodeScalarFieldEnum = (typeof CategoryCodeScalarFieldEnum)[keyof typeof CategoryCodeScalarFieldEnum]
+
+
+export const UserSavedCategoryCodeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  categoryCodeId: 'categoryCodeId',
+  createdAt: 'createdAt'
+} as const
+
+export type UserSavedCategoryCodeScalarFieldEnum = (typeof UserSavedCategoryCodeScalarFieldEnum)[keyof typeof UserSavedCategoryCodeScalarFieldEnum]
+
+
+export const SavedCategoryCodeListScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  searchTerms: 'searchTerms',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavedCategoryCodeListScalarFieldEnum = (typeof SavedCategoryCodeListScalarFieldEnum)[keyof typeof SavedCategoryCodeListScalarFieldEnum]
+
+
+export const SavedCategoryCodeListItemScalarFieldEnum = {
+  id: 'id',
+  listId: 'listId',
+  categoryCodeId: 'categoryCodeId',
+  createdAt: 'createdAt'
+} as const
+
+export type SavedCategoryCodeListItemScalarFieldEnum = (typeof SavedCategoryCodeListItemScalarFieldEnum)[keyof typeof SavedCategoryCodeListItemScalarFieldEnum]
+
+
+export const TenantCategoryCodeScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  categoryCodeId: 'categoryCodeId',
+  createdAt: 'createdAt'
+} as const
+
+export type TenantCategoryCodeScalarFieldEnum = (typeof TenantCategoryCodeScalarFieldEnum)[keyof typeof TenantCategoryCodeScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -60,6 +60,7 @@ model User {
   savedContracts    SavedContract[]
   savedStateLocalOpportunities SavedStateLocalOpportunity[]
   savedCategoryCodes UserSavedCategoryCode[]
+  savedCategoryCodeLists SavedCategoryCodeList[]
   alertRules        AlertRule[]
   notifications     Notification[]
 }
@@ -272,6 +273,7 @@ model CategoryCode {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   savedByUsers       UserSavedCategoryCode[]
+  savedInLists       SavedCategoryCodeListItem[]
   tenantMappings     TenantCategoryCode[]
 
   @@unique([sourceName, code])
@@ -288,6 +290,32 @@ model UserSavedCategoryCode {
   categoryCode   CategoryCode @relation(fields: [categoryCodeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, categoryCodeId])
+  @@index([categoryCodeId])
+}
+
+model SavedCategoryCodeList {
+  id          String                      @id @default(cuid())
+  userId      String
+  name        String
+  searchTerms String[]                    @default([])
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
+  user        User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       SavedCategoryCodeListItem[]
+
+  @@unique([userId, name])
+  @@index([userId, updatedAt])
+}
+
+model SavedCategoryCodeListItem {
+  id             String                @id @default(cuid())
+  listId         String
+  categoryCodeId String
+  createdAt      DateTime              @default(now())
+  list           SavedCategoryCodeList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  categoryCode   CategoryCode          @relation(fields: [categoryCodeId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, categoryCodeId])
   @@index([categoryCodeId])
 }
 

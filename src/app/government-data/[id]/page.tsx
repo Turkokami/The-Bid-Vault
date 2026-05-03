@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ContractDetailLayout } from "@/components/contract-detail-layout";
 import { buttonStyles } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import {
@@ -34,6 +35,22 @@ function buildSafeFederalSourceUrl(record: {
   }
 
   return fallback;
+}
+
+function buildFederalAttachmentsUrl(record: {
+  noticeId?: string;
+  sourceUrl?: string;
+  title: string;
+  agency: string;
+}) {
+  const sourceHref = buildSafeFederalSourceUrl(record);
+  const oppId = sourceHref.match(/\/opp\/([^/?#]+)\//i)?.[1];
+
+  if (oppId) {
+    return `https://sam.gov/opp/${encodeURIComponent(oppId)}/view#attachments-links`;
+  }
+
+  return `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(record.noticeId ?? record.title)}`;
 }
 
 function pickParam(params: Record<string, string | string[] | undefined>, key: string) {
@@ -91,6 +108,8 @@ function buildFallbackRecord(id: string, params: Record<string, string | string[
     office: pickParam(params, "office") || "See SAM posting",
     pscCode: pickParam(params, "psc") || "Not listed",
     setAside: pickParam(params, "setAside") || "Not listed",
+    estimatedValue: null,
+    estimatedValueLabel: pickParam(params, "estimatedValueLabel") || "Not listed",
     fullDescription: pickParam(params, "summary") || "Open the original SAM posting to review the complete description.",
   };
 }
@@ -154,6 +173,9 @@ export default async function GovernmentDataRecordDetailPage({
 
   const keyTerms = Array.isArray(record.keyTerms) ? record.keyTerms : [];
   const sourceHref = buildSafeFederalSourceUrl(record);
+  const attachmentsHref = buildFederalAttachmentsUrl(record);
+  const attachmentReviewHref = `/attachments/review?title=${encodeURIComponent(record.title)}&source=${encodeURIComponent("SAM.gov")}&agency=${encodeURIComponent(record.agency)}&dueDate=${encodeURIComponent(record.responseDeadline)}&sourceUrl=${encodeURIComponent(sourceHref)}&attachmentsUrl=${encodeURIComponent(attachmentsHref)}&setAside=${encodeURIComponent(record.setAside)}&naics=${encodeURIComponent(record.naicsCode)}&summary=${encodeURIComponent(record.synopsis)}&location=${encodeURIComponent(record.location)}`;
+  const bidBuilderHref = `/bid-builder?title=${encodeURIComponent(record.title)}&noticeId=${encodeURIComponent(record.noticeId)}&agency=${encodeURIComponent(record.agency)}&source=${encodeURIComponent("SAM.gov")}&dueDate=${encodeURIComponent(record.responseDeadline)}&naics=${encodeURIComponent(record.naicsCode)}&setAside=${encodeURIComponent(record.setAside)}&summary=${encodeURIComponent(record.synopsis)}&sourceUrl=${encodeURIComponent(sourceHref)}&attachmentsUrl=${encodeURIComponent(attachmentsHref)}`;
 
   const relatedContracts = contracts.filter((contract) => {
     const sharedNaics = contract.naicsCode === record.naicsCode;
@@ -220,124 +242,201 @@ export default async function GovernmentDataRecordDetailPage({
         </div>
       </section>
 
-      <section className="grid gap-5 lg:grid-cols-4">
-        {[
-          { label: "Government agency", value: record.agency },
-          { label: "Industry Type (NAICS Code)", value: record.naicsCode },
-          { label: "Response deadline", value: formatDate(record.responseDeadline) },
-          { label: "Status", value: record.availabilityStatus },
-        ].map((item) => (
-          <article
-            key={item.label}
-            className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5"
-          >
-            <p className="text-sm text-slate-400">{item.label}</p>
-            <p className="mt-3 text-lg font-semibold text-emerald-300">{item.value}</p>
+      <ContractDetailLayout
+        links={[
+          { id: "overview", label: "Quick facts" },
+          { id: "details", label: "Opportunity summary" },
+          { id: "attachments", label: "Attachments and files" },
+          { id: "next-steps", label: "Helpful next steps" },
+          { id: "related", label: "Related saved contracts" },
+        ]}
+      >
+        <section id="overview" className="grid gap-5 lg:grid-cols-4">
+          {[
+            { label: "Government agency", value: record.agency },
+            { label: "Industry Type (NAICS Code)", value: record.naicsCode },
+            { label: "Response deadline", value: formatDate(record.responseDeadline) },
+            { label: "Status", value: record.availabilityStatus },
+          ].map((item) => (
+            <article
+              key={item.label}
+              className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5"
+            >
+              <p className="text-sm text-slate-400">{item.label}</p>
+              <p className="mt-3 text-lg font-semibold text-emerald-300">{item.value}</p>
+            </article>
+          ))}
+        </section>
+
+        <section id="details" className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+            <h2 className="text-xl font-semibold text-white">Opportunity summary</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              These details help you decide if the opportunity fits your business.
+            </p>
+            <dl className="mt-5 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Work location</dt>
+                <dd className="mt-1 text-white">{record.location}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Type of opportunity</dt>
+                <dd className="mt-1 text-white">{record.opportunityType}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Source document</dt>
+                <dd className="mt-1 text-white">Live SAM.gov source</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Source agency</dt>
+                <dd className="mt-1 text-white">{record.agency}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Estimated contract size</dt>
+                <dd className="mt-1 text-white">{record.estimatedValueLabel}</dd>
+              </div>
+            </dl>
+            <div className="mt-6">
+              <p className="text-sm text-slate-500">Search words found in this record</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {keyTerms.map((term) => (
+                  <span
+                    key={term}
+                    className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100"
+                  >
+                    {term}
+                  </span>
+                ))}
+              </div>
+            </div>
           </article>
-        ))}
-      </section>
 
-      <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <h2 className="text-xl font-semibold text-white">Opportunity summary</h2>
+          <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+            <h2 className="text-xl font-semibold text-white">Helpful next steps</h2>
+            <div className="mt-5 space-y-3 text-sm">
+              <Link
+                href={`/bids?keywords=${encodeURIComponent(record.naicsCode)}&recordId=${encodeURIComponent(record.id)}`}
+                className={buttonStyles({ variant: "secondary", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              >
+                See previous winning bids in this market
+              </Link>
+              <Link
+                href={`/contracts?keywords=${encodeURIComponent(keyTerms.join(", "))}&naics=${encodeURIComponent(record.naicsCode)}`}
+                className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              >
+                Compare with saved contracts
+              </Link>
+              <Link
+                href={`/sam-search?agency=${encodeURIComponent(record.agency)}&state=${encodeURIComponent(record.state)}`}
+                className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              >
+                Find nearby opportunities from the same agency
+              </Link>
+              <Link
+                href={attachmentReviewHref}
+                className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              >
+                Review attachments in Bid Vault
+              </Link>
+              <Link
+                href={bidBuilderHref}
+                className={buttonStyles({ variant: "primary", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              >
+                Start bid workspace
+              </Link>
+              <a
+                href={sourceHref}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              >
+                Open original SAM posting
+              </a>
+            </div>
+            {!snapshot.liveConfigured ? (
+              <p className="mt-4 text-sm leading-6 text-amber-100">
+                Search SAM is not fully live until a SAM.gov API key is configured in the app environment.
+              </p>
+            ) : null}
+          </article>
+        </section>
+
+        <section id="attachments" className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+          <h2 className="text-xl font-semibold text-white">Attachments and source files</h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            These details help you decide if the opportunity fits your business.
+            Use these links to open the original source record, jump to the source document area, or download files directly from the government portal when they are available there.
           </p>
-          <dl className="mt-5 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
-            <div>
-              <dt className="text-slate-500">Work location</dt>
-              <dd className="mt-1 text-white">{record.location}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Type of opportunity</dt>
-              <dd className="mt-1 text-white">{record.opportunityType}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Source document</dt>
-              <dd className="mt-1 text-white">Live SAM.gov source</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Source agency</dt>
-              <dd className="mt-1 text-white">{record.agency}</dd>
-            </div>
-          </dl>
-          <div className="mt-6">
-            <p className="text-sm text-slate-500">Search words found in this record</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {keyTerms.map((term) => (
-                <span
-                  key={term}
-                  className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100"
-                >
-                  {term}
-                </span>
-              ))}
-            </div>
-          </div>
-        </article>
-
-        <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-          <h2 className="text-xl font-semibold text-white">Helpful next steps</h2>
-          <div className="mt-5 space-y-3 text-sm">
-            <Link
-              href={`/bids?keywords=${encodeURIComponent(record.naicsCode)}&recordId=${encodeURIComponent(record.id)}`}
-              className={buttonStyles({ variant: "secondary", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
-            >
-              See previous winning bids in this market
-            </Link>
-            <Link
-              href={`/contracts?keywords=${encodeURIComponent(keyTerms.join(", "))}&naics=${encodeURIComponent(record.naicsCode)}`}
-              className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
-            >
-              Compare with saved contracts
-            </Link>
-            <Link
-              href={`/sam-search?agency=${encodeURIComponent(record.agency)}&state=${encodeURIComponent(record.state)}`}
-              className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
-            >
-              Find nearby opportunities from the same agency
-            </Link>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <a
               href={sourceHref}
               target="_blank"
               rel="noreferrer"
-              className={buttonStyles({ variant: "ghost", size: "lg", className: "flex w-full rounded-[1.5rem] justify-start px-5 py-4" })}
+              className={buttonStyles({ variant: "secondary", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
             >
               Open original SAM posting
             </a>
+            <a
+              href={attachmentsHref}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Open attachment and document section
+            </a>
+            <Link
+              href={attachmentReviewHref}
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Review the files inside Bid Vault
+            </Link>
+            <Link
+              href={bidBuilderHref}
+              className={buttonStyles({ variant: "primary", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Build this bid in Bid Vault
+            </Link>
+            <a
+              href={`https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(record.noticeId)}`}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Search this notice on SAM.gov
+            </a>
+            <Link
+              href={`/foia?agency=${encodeURIComponent(record.agency)}&facility=${encodeURIComponent(record.title)}&location=${encodeURIComponent(record.location)}&industry=${encodeURIComponent(record.opportunityType)}&source=${encodeURIComponent("SAM.gov")}`}
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Request related supporting records
+            </Link>
           </div>
-          {!snapshot.liveConfigured ? (
-            <p className="mt-4 text-sm leading-6 text-amber-100">
-              Search SAM is not fully live until a SAM.gov API key is configured in the app environment.
-            </p>
-          ) : null}
-        </article>
-      </section>
+        </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="text-xl font-semibold text-white">Related saved contracts</h2>
-        {relatedContracts.length > 0 ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {relatedContracts.map((contract) => (
-              <Link
-                key={contract.id}
-                href={`/contracts/${contract.id}`}
-                className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
-              >
-                <h3 className="text-base font-semibold text-white">{contract.title}</h3>
-                <p className="mt-2 text-sm text-slate-400">
-                  {contract.agency} / {contract.location}
-                </p>
-                <p className="mt-3 text-sm text-emerald-200">Open tracked contract detail</p>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-4 text-sm text-slate-400">
-            No saved contracts match this uploaded opportunity yet, but you can still use FOIA, similar search, and save-it-for-later tools from this page.
-          </p>
-        )}
-      </section>
+        <section id="related" className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+          <h2 className="text-xl font-semibold text-white">Related saved contracts</h2>
+          {relatedContracts.length > 0 ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {relatedContracts.map((contract) => (
+                <Link
+                  key={contract.id}
+                  href={`/contracts/${contract.id}`}
+                  className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+                >
+                  <h3 className="text-base font-semibold text-white">{contract.title}</h3>
+                  <p className="mt-2 text-sm text-slate-400">
+                    {contract.agency} / {contract.location}
+                  </p>
+                  <p className="mt-3 text-sm text-emerald-200">Open tracked contract detail</p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-slate-400">
+              No saved contracts match this uploaded opportunity yet, but you can still use FOIA, similar search, and save-it-for-later tools from this page.
+            </p>
+          )}
+        </section>
+      </ContractDetailLayout>
     </div>
   );
 }

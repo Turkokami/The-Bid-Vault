@@ -31,6 +31,25 @@ export async function GET(request: Request) {
         | "agency"
         | "title"
         | null) ?? "due-soon",
+    setAside:
+      (searchParams.get("setAside") as
+        | "all"
+        | "small-business"
+        | "veteran"
+        | "women-owned"
+        | "8a"
+        | "hubzone"
+        | "minority"
+        | "unrestricted"
+        | null) ?? "all",
+    valueBand:
+      (searchParams.get("valueBand") as
+        | "all"
+        | "under-250k"
+        | "under-1m"
+        | "1m-10m"
+        | "over-10m"
+        | null) ?? "all",
     browseAll: searchParams.get("browse") === "1",
   });
   return NextResponse.json(snapshot);

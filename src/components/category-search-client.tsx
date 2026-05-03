@@ -13,6 +13,7 @@ import {
   type CategorySearchFilters,
 } from "@/lib/category-codes";
 import {
+  hydrateSavedCategoryPreferences,
   readSavedCategoryCodeIds,
   readSavedNaicsCodeLists,
   removeNaicsCodeList,
@@ -48,6 +49,7 @@ export function CategorySearchClient({
       setSavedCodeLists(readSavedNaicsCodeLists());
     };
     sync();
+    void hydrateSavedCategoryPreferences();
     window.addEventListener("bid-vault-category-codes-updated", sync);
     window.addEventListener("bid-vault-naics-code-lists-updated", sync);
     return () => {
@@ -355,6 +357,7 @@ export function CategorySearchClient({
                           websCodes: selectedCodeGroups.websCodes,
                           pscCodes: selectedCodeGroups.pscCodes,
                           searchTerms: selectedCodeGroups.searchTerms,
+                          recordIds: savedRecords.map((record) => record.id),
                         });
                         setCustomListName("");
                       }}
@@ -423,7 +426,7 @@ export function CategorySearchClient({
                         </Link>
                         <button
                           type="button"
-                          onClick={() => removeNaicsCodeList(list.id)}
+                          onClick={() => void removeNaicsCodeList(list.id)}
                           className={buttonStyles({ variant: "ghost", size: "sm" })}
                         >
                           Remove

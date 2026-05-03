@@ -27,6 +27,26 @@ function getDirectSourceUrl(opportunity: NormalizedStateLocalOpportunity) {
   return opportunity.sourceUrl;
 }
 
+function buildSourceDocumentsUrl(opportunity: NormalizedStateLocalOpportunity, sourcePortalUrl?: string) {
+  if (opportunity.sourceName === "WEBS") {
+    return getDirectSourceUrl(opportunity) || sourcePortalUrl || "";
+  }
+
+  if (opportunity.sourceName === "Texas ESBD") {
+    return opportunity.sourceUrl || sourcePortalUrl || "";
+  }
+
+  if (opportunity.sourceName === "NevadaEPro") {
+    return opportunity.sourceUrl || sourcePortalUrl || "";
+  }
+
+  if (opportunity.sourceName === "North Carolina eVP") {
+    return opportunity.sourceUrl || sourcePortalUrl || "";
+  }
+
+  return opportunity.sourceUrl || sourcePortalUrl || "";
+}
+
 function buildSourceListHref(sourceCode: string) {
   const locationMap: Record<string, string> = {
     washington: "/state-local/washington",
@@ -137,6 +157,10 @@ export function StateLocalDetailClient({
 
   const backToListHref = buildSourceListHref(sourceCode);
   const backToListLabel = buildSourceListLabel(source?.sourceName ?? opportunity.sourceName, sourceCode);
+  const sourceDocumentsUrl = buildSourceDocumentsUrl(opportunity, source?.portalUrl);
+  const setAsideLabel = opportunity.registrationRequired ? "Registration may be required" : "Not listed";
+  const attachmentReviewHref = `/attachments/review?title=${encodeURIComponent(opportunity.title)}&source=${encodeURIComponent(opportunity.sourceName)}&agency=${encodeURIComponent(opportunity.issuingEntity)}&dueDate=${encodeURIComponent(opportunity.dueDate)}&sourceUrl=${encodeURIComponent(directSourceUrl || sourceDocumentsUrl)}&attachmentsUrl=${encodeURIComponent(sourceDocumentsUrl || directSourceUrl)}&setAside=${encodeURIComponent(setAsideLabel)}&naics=${encodeURIComponent(opportunity.categoryCode)}&summary=${encodeURIComponent(opportunity.summary)}&location=${encodeURIComponent(opportunity.location)}`;
+  const bidBuilderHref = `/bid-builder?title=${encodeURIComponent(opportunity.title)}&noticeId=${encodeURIComponent(opportunity.id)}&agency=${encodeURIComponent(opportunity.issuingEntity)}&source=${encodeURIComponent(opportunity.sourceName)}&dueDate=${encodeURIComponent(opportunity.dueDate)}&naics=${encodeURIComponent(opportunity.categoryCode)}&setAside=${encodeURIComponent(setAsideLabel)}&summary=${encodeURIComponent(opportunity.summary)}&sourceUrl=${encodeURIComponent(directSourceUrl || sourceDocumentsUrl)}&attachmentsUrl=${encodeURIComponent(sourceDocumentsUrl || directSourceUrl)}`;
 
   return (
     <div className="space-y-8">
@@ -166,6 +190,7 @@ export function StateLocalDetailClient({
           { id: "classification", label: "Work type" },
           { id: "description", label: "What the work is" },
           { id: "contacts", label: "Who to contact" },
+          { id: "attachments", label: "Attachments and files" },
           { id: "source", label: "Original source details" },
         ]}
       >
@@ -257,6 +282,68 @@ export function StateLocalDetailClient({
           </div>
         </section>
 
+        <section id="attachments" className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+          <h2 className="text-xl font-semibold text-white">Attachments and source files</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            Open the original source record or jump straight to the source page where downloadable files and supporting bid documents are provided.
+          </p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {directSourceUrl ? (
+              <a
+                href={directSourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonStyles({ variant: "secondary", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+              >
+                Open original posting
+              </a>
+            ) : null}
+            {sourceDocumentsUrl ? (
+              <a
+                href={sourceDocumentsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+              >
+                Open files and supporting documents
+              </a>
+            ) : null}
+            <Link
+              href={attachmentReviewHref}
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Review files inside Bid Vault
+            </Link>
+            <Link
+              href={bidBuilderHref}
+              className={buttonStyles({ variant: "primary", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Build this bid in Bid Vault
+            </Link>
+            {source?.portalUrl ? (
+              <a
+                href={source.portalUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+              >
+                Open source portal
+              </a>
+            ) : null}
+            <Link
+              href={`/foia?agency=${encodeURIComponent(opportunity.issuingEntity)}&facility=${encodeURIComponent(opportunity.title)}&location=${encodeURIComponent(opportunity.location)}&industry=${encodeURIComponent(opportunity.categoryCode)}&source=${encodeURIComponent(opportunity.sourceName)}`}
+              className={buttonStyles({ variant: "ghost", size: "lg", className: "justify-start rounded-[1.5rem] px-5 py-4" })}
+            >
+              Request related records
+            </Link>
+          </div>
+          {!directSourceUrl ? (
+            <div className="mt-5 rounded-[1.25rem] border border-amber-400/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
+              We could not confirm a direct posting-detail file link for this record yet, so we’re sending you to the best available official source page for attachments and documents.
+            </div>
+          ) : null}
+        </section>
+
         <section id="source" className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
           <h2 className="text-xl font-semibold text-white">Original source details</h2>
           <div className="mt-5 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
@@ -270,6 +357,18 @@ export function StateLocalDetailClient({
                 </div>
               ) : null}
               <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href={attachmentReviewHref}
+                  className={buttonStyles({ variant: "ghost", size: "md" })}
+                >
+                  Review attachments
+                </Link>
+                <Link
+                  href={bidBuilderHref}
+                  className={buttonStyles({ variant: "primary", size: "md" })}
+                >
+                  Start bid workspace
+                </Link>
                 <Link
                   href={`/foia?agency=${encodeURIComponent(opportunity.issuingEntity)}&facility=${encodeURIComponent(opportunity.title)}&location=${encodeURIComponent(opportunity.location)}&industry=${encodeURIComponent(opportunity.categoryCode)}&source=${encodeURIComponent(opportunity.sourceName)}`}
                   className={buttonStyles({ variant: "secondary", size: "md" })}

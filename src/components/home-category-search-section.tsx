@@ -7,7 +7,11 @@ import {
   categoryCodeRecords,
   mapServicePhraseToSuggestedCategories,
 } from "@/lib/category-codes";
-import { readSavedCategoryCodeIds, saveCategoryCodeId } from "@/lib/demo-category-store";
+import {
+  hydrateSavedCategoryPreferences,
+  readSavedCategoryCodeIds,
+  saveCategoryCodeId,
+} from "@/lib/demo-category-store";
 
 const suggestedSearches = [
   "pest control",
@@ -25,6 +29,7 @@ export function HomeCategorySearchSection() {
   useEffect(() => {
     const sync = () => setSavedCount(readSavedCategoryCodeIds().length);
     sync();
+    void hydrateSavedCategoryPreferences();
     window.addEventListener("bid-vault-category-codes-updated", sync);
     return () => window.removeEventListener("bid-vault-category-codes-updated", sync);
   }, []);
@@ -124,7 +129,7 @@ export function HomeCategorySearchSection() {
 
                   <button
                     type="button"
-                    onClick={() => saveCategoryCodeId(record.id)}
+                    onClick={() => void saveCategoryCodeId(record.id)}
                     className={buttonStyles({ variant: "primary", size: "sm" })}
                   >
                     Save code

@@ -7,7 +7,11 @@ import {
   type DemoContract,
   type SyncActivity,
 } from "@/lib/demo-data";
-import type { SamOpportunityRecord } from "@/lib/server/sam-search";
+import type {
+  SamContractValueBand,
+  SamOpportunityRecord,
+  SamSetAsideFilter,
+} from "@/lib/server/sam-search";
 
 const CONTRACTS_KEY = "bid-vault-demo-contracts";
 const PLANNING_KEY = "bid-vault-demo-planning";
@@ -42,6 +46,8 @@ type SamSnapshotQuery = {
   status?: "all" | "available" | "closing-soon" | "needs-review";
   sort?: "due-soon" | "newest" | "agency" | "title";
   browse?: boolean;
+  setAside?: SamSetAsideFilter;
+  valueBand?: SamContractValueBand;
 };
 
 function buildSamSnapshotUrl(query?: SamSnapshotQuery) {
@@ -56,6 +62,8 @@ function buildSamSnapshotUrl(query?: SamSnapshotQuery) {
   if (query?.status) params.set("status", query.status);
   if (query?.sort) params.set("sort", query.sort);
   if (query?.browse) params.set("browse", "1");
+  if (query?.setAside && query.setAside !== "all") params.set("setAside", query.setAside);
+  if (query?.valueBand && query.valueBand !== "all") params.set("valueBand", query.valueBand);
 
   const search = params.toString();
   return search ? `/api/sam-search/snapshot?${search}` : "/api/sam-search/snapshot";

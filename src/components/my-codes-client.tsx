@@ -9,6 +9,7 @@ import {
   type CategoryCodeRecord,
 } from "@/lib/category-codes";
 import {
+  hydrateSavedCategoryPreferences,
   readSavedCategoryCodeIds,
   readSavedNaicsCodeLists,
   removeCategoryCodeId,
@@ -37,6 +38,7 @@ export function MyCodesClient() {
     };
 
     sync();
+    void hydrateSavedCategoryPreferences();
     window.addEventListener("bid-vault-category-codes-updated", sync);
     window.addEventListener("bid-vault-naics-code-lists-updated", sync);
 
@@ -172,7 +174,7 @@ export function MyCodesClient() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => removeNaicsCodeList(list.id)}
+                          onClick={() => void removeNaicsCodeList(list.id)}
                           className={buttonStyles({ variant: "ghost", size: "sm" })}
                         >
                           Remove list
@@ -271,7 +273,7 @@ export function MyCodesClient() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => removeCategoryCodeId(record.id)}
+                          onClick={() => void removeCategoryCodeId(record.id)}
                           className={buttonStyles({ variant: "ghost", size: "sm" })}
                         >
                           Remove
@@ -400,7 +402,7 @@ export function MyCodesClient() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => saveCategoryCodeId(record.id)}
+                          onClick={() => void saveCategoryCodeId(record.id)}
                           className={buttonStyles({ variant: "primary", size: "sm" })}
                         >
                           Save code

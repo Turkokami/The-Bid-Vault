@@ -392,7 +392,15 @@ export const ModelName = {
   SavedContract: 'SavedContract',
   RebidPrediction: 'RebidPrediction',
   AlertRule: 'AlertRule',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  StateLocalOpportunity: 'StateLocalOpportunity',
+  SourceSyncLog: 'SourceSyncLog',
+  SavedStateLocalOpportunity: 'SavedStateLocalOpportunity',
+  CategoryCode: 'CategoryCode',
+  UserSavedCategoryCode: 'UserSavedCategoryCode',
+  SavedCategoryCodeList: 'SavedCategoryCodeList',
+  SavedCategoryCodeListItem: 'SavedCategoryCodeListItem',
+  TenantCategoryCode: 'TenantCategoryCode'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "tenantMembership" | "contract" | "winningBid" | "savedContract" | "rebidPrediction" | "alertRule" | "notification"
+    modelProps: "user" | "tenant" | "tenantMembership" | "contract" | "winningBid" | "savedContract" | "rebidPrediction" | "alertRule" | "notification" | "stateLocalOpportunity" | "sourceSyncLog" | "savedStateLocalOpportunity" | "categoryCode" | "userSavedCategoryCode" | "savedCategoryCodeList" | "savedCategoryCodeListItem" | "tenantCategoryCode"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1086,598 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StateLocalOpportunity: {
+      payload: Prisma.$StateLocalOpportunityPayload<ExtArgs>
+      fields: Prisma.StateLocalOpportunityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StateLocalOpportunityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StateLocalOpportunityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>
+        }
+        findFirst: {
+          args: Prisma.StateLocalOpportunityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StateLocalOpportunityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>
+        }
+        findMany: {
+          args: Prisma.StateLocalOpportunityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>[]
+        }
+        create: {
+          args: Prisma.StateLocalOpportunityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>
+        }
+        createMany: {
+          args: Prisma.StateLocalOpportunityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StateLocalOpportunityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>[]
+        }
+        delete: {
+          args: Prisma.StateLocalOpportunityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>
+        }
+        update: {
+          args: Prisma.StateLocalOpportunityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>
+        }
+        deleteMany: {
+          args: Prisma.StateLocalOpportunityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StateLocalOpportunityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StateLocalOpportunityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>[]
+        }
+        upsert: {
+          args: Prisma.StateLocalOpportunityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StateLocalOpportunityPayload>
+        }
+        aggregate: {
+          args: Prisma.StateLocalOpportunityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStateLocalOpportunity>
+        }
+        groupBy: {
+          args: Prisma.StateLocalOpportunityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StateLocalOpportunityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StateLocalOpportunityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StateLocalOpportunityCountAggregateOutputType> | number
+        }
+      }
+    }
+    SourceSyncLog: {
+      payload: Prisma.$SourceSyncLogPayload<ExtArgs>
+      fields: Prisma.SourceSyncLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SourceSyncLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SourceSyncLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>
+        }
+        findFirst: {
+          args: Prisma.SourceSyncLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SourceSyncLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>
+        }
+        findMany: {
+          args: Prisma.SourceSyncLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>[]
+        }
+        create: {
+          args: Prisma.SourceSyncLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>
+        }
+        createMany: {
+          args: Prisma.SourceSyncLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SourceSyncLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>[]
+        }
+        delete: {
+          args: Prisma.SourceSyncLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>
+        }
+        update: {
+          args: Prisma.SourceSyncLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.SourceSyncLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SourceSyncLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SourceSyncLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.SourceSyncLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SourceSyncLogPayload>
+        }
+        aggregate: {
+          args: Prisma.SourceSyncLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSourceSyncLog>
+        }
+        groupBy: {
+          args: Prisma.SourceSyncLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SourceSyncLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SourceSyncLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SourceSyncLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    SavedStateLocalOpportunity: {
+      payload: Prisma.$SavedStateLocalOpportunityPayload<ExtArgs>
+      fields: Prisma.SavedStateLocalOpportunityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedStateLocalOpportunityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedStateLocalOpportunityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedStateLocalOpportunityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedStateLocalOpportunityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>
+        }
+        findMany: {
+          args: Prisma.SavedStateLocalOpportunityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>[]
+        }
+        create: {
+          args: Prisma.SavedStateLocalOpportunityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>
+        }
+        createMany: {
+          args: Prisma.SavedStateLocalOpportunityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedStateLocalOpportunityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedStateLocalOpportunityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>
+        }
+        update: {
+          args: Prisma.SavedStateLocalOpportunityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedStateLocalOpportunityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedStateLocalOpportunityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedStateLocalOpportunityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedStateLocalOpportunityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedStateLocalOpportunityPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedStateLocalOpportunityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedStateLocalOpportunity>
+        }
+        groupBy: {
+          args: Prisma.SavedStateLocalOpportunityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedStateLocalOpportunityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedStateLocalOpportunityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedStateLocalOpportunityCountAggregateOutputType> | number
+        }
+      }
+    }
+    CategoryCode: {
+      payload: Prisma.$CategoryCodePayload<ExtArgs>
+      fields: Prisma.CategoryCodeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CategoryCodeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CategoryCodeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>
+        }
+        findFirst: {
+          args: Prisma.CategoryCodeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CategoryCodeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>
+        }
+        findMany: {
+          args: Prisma.CategoryCodeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>[]
+        }
+        create: {
+          args: Prisma.CategoryCodeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>
+        }
+        createMany: {
+          args: Prisma.CategoryCodeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CategoryCodeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>[]
+        }
+        delete: {
+          args: Prisma.CategoryCodeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>
+        }
+        update: {
+          args: Prisma.CategoryCodeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>
+        }
+        deleteMany: {
+          args: Prisma.CategoryCodeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CategoryCodeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CategoryCodeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>[]
+        }
+        upsert: {
+          args: Prisma.CategoryCodeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryCodePayload>
+        }
+        aggregate: {
+          args: Prisma.CategoryCodeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCategoryCode>
+        }
+        groupBy: {
+          args: Prisma.CategoryCodeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryCodeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CategoryCodeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryCodeCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserSavedCategoryCode: {
+      payload: Prisma.$UserSavedCategoryCodePayload<ExtArgs>
+      fields: Prisma.UserSavedCategoryCodeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserSavedCategoryCodeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserSavedCategoryCodeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>
+        }
+        findFirst: {
+          args: Prisma.UserSavedCategoryCodeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserSavedCategoryCodeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>
+        }
+        findMany: {
+          args: Prisma.UserSavedCategoryCodeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>[]
+        }
+        create: {
+          args: Prisma.UserSavedCategoryCodeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>
+        }
+        createMany: {
+          args: Prisma.UserSavedCategoryCodeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserSavedCategoryCodeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>[]
+        }
+        delete: {
+          args: Prisma.UserSavedCategoryCodeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>
+        }
+        update: {
+          args: Prisma.UserSavedCategoryCodeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>
+        }
+        deleteMany: {
+          args: Prisma.UserSavedCategoryCodeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserSavedCategoryCodeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserSavedCategoryCodeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>[]
+        }
+        upsert: {
+          args: Prisma.UserSavedCategoryCodeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSavedCategoryCodePayload>
+        }
+        aggregate: {
+          args: Prisma.UserSavedCategoryCodeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserSavedCategoryCode>
+        }
+        groupBy: {
+          args: Prisma.UserSavedCategoryCodeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserSavedCategoryCodeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserSavedCategoryCodeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserSavedCategoryCodeCountAggregateOutputType> | number
+        }
+      }
+    }
+    SavedCategoryCodeList: {
+      payload: Prisma.$SavedCategoryCodeListPayload<ExtArgs>
+      fields: Prisma.SavedCategoryCodeListFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedCategoryCodeListFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedCategoryCodeListFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedCategoryCodeListFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedCategoryCodeListFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>
+        }
+        findMany: {
+          args: Prisma.SavedCategoryCodeListFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>[]
+        }
+        create: {
+          args: Prisma.SavedCategoryCodeListCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>
+        }
+        createMany: {
+          args: Prisma.SavedCategoryCodeListCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedCategoryCodeListCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedCategoryCodeListDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>
+        }
+        update: {
+          args: Prisma.SavedCategoryCodeListUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedCategoryCodeListDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedCategoryCodeListUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedCategoryCodeListUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedCategoryCodeListUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedCategoryCodeListAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedCategoryCodeList>
+        }
+        groupBy: {
+          args: Prisma.SavedCategoryCodeListGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedCategoryCodeListGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedCategoryCodeListCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedCategoryCodeListCountAggregateOutputType> | number
+        }
+      }
+    }
+    SavedCategoryCodeListItem: {
+      payload: Prisma.$SavedCategoryCodeListItemPayload<ExtArgs>
+      fields: Prisma.SavedCategoryCodeListItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedCategoryCodeListItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedCategoryCodeListItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedCategoryCodeListItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedCategoryCodeListItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>
+        }
+        findMany: {
+          args: Prisma.SavedCategoryCodeListItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>[]
+        }
+        create: {
+          args: Prisma.SavedCategoryCodeListItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>
+        }
+        createMany: {
+          args: Prisma.SavedCategoryCodeListItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedCategoryCodeListItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedCategoryCodeListItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>
+        }
+        update: {
+          args: Prisma.SavedCategoryCodeListItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedCategoryCodeListItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedCategoryCodeListItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedCategoryCodeListItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedCategoryCodeListItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedCategoryCodeListItemPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedCategoryCodeListItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedCategoryCodeListItem>
+        }
+        groupBy: {
+          args: Prisma.SavedCategoryCodeListItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedCategoryCodeListItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedCategoryCodeListItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedCategoryCodeListItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantCategoryCode: {
+      payload: Prisma.$TenantCategoryCodePayload<ExtArgs>
+      fields: Prisma.TenantCategoryCodeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantCategoryCodeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantCategoryCodeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>
+        }
+        findFirst: {
+          args: Prisma.TenantCategoryCodeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantCategoryCodeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>
+        }
+        findMany: {
+          args: Prisma.TenantCategoryCodeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>[]
+        }
+        create: {
+          args: Prisma.TenantCategoryCodeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>
+        }
+        createMany: {
+          args: Prisma.TenantCategoryCodeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantCategoryCodeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>[]
+        }
+        delete: {
+          args: Prisma.TenantCategoryCodeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>
+        }
+        update: {
+          args: Prisma.TenantCategoryCodeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantCategoryCodeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantCategoryCodeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantCategoryCodeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantCategoryCodeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantCategoryCodePayload>
+        }
+        aggregate: {
+          args: Prisma.TenantCategoryCodeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantCategoryCode>
+        }
+        groupBy: {
+          args: Prisma.TenantCategoryCodeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantCategoryCodeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantCategoryCodeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantCategoryCodeCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1254,6 +1854,116 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+export const StateLocalOpportunityScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  stateCode: 'stateCode',
+  title: 'title',
+  issuingEntity: 'issuingEntity',
+  opportunityType: 'opportunityType',
+  status: 'status',
+  categoryCode: 'categoryCode',
+  postedDate: 'postedDate',
+  dueDate: 'dueDate',
+  summary: 'summary',
+  location: 'location',
+  sourceUrl: 'sourceUrl',
+  registrationRequired: 'registrationRequired',
+  registrationNotes: 'registrationNotes',
+  contactName: 'contactName',
+  contactEmail: 'contactEmail',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StateLocalOpportunityScalarFieldEnum = (typeof StateLocalOpportunityScalarFieldEnum)[keyof typeof StateLocalOpportunityScalarFieldEnum]
+
+
+export const SourceSyncLogScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  syncStatus: 'syncStatus',
+  lastRunAt: 'lastRunAt',
+  recordsAdded: 'recordsAdded',
+  recordsUpdated: 'recordsUpdated',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt'
+} as const
+
+export type SourceSyncLogScalarFieldEnum = (typeof SourceSyncLogScalarFieldEnum)[keyof typeof SourceSyncLogScalarFieldEnum]
+
+
+export const SavedStateLocalOpportunityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  opportunityId: 'opportunityId',
+  reminderDaysBefore: 'reminderDaysBefore',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavedStateLocalOpportunityScalarFieldEnum = (typeof SavedStateLocalOpportunityScalarFieldEnum)[keyof typeof SavedStateLocalOpportunityScalarFieldEnum]
+
+
+export const CategoryCodeScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  code: 'code',
+  title: 'title',
+  description: 'description',
+  parentCode: 'parentCode',
+  topLevelCategory: 'topLevelCategory',
+  normalizedKeywords: 'normalizedKeywords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryCodeScalarFieldEnum = (typeof CategoryCodeScalarFieldEnum)[keyof typeof CategoryCodeScalarFieldEnum]
+
+
+export const UserSavedCategoryCodeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  categoryCodeId: 'categoryCodeId',
+  createdAt: 'createdAt'
+} as const
+
+export type UserSavedCategoryCodeScalarFieldEnum = (typeof UserSavedCategoryCodeScalarFieldEnum)[keyof typeof UserSavedCategoryCodeScalarFieldEnum]
+
+
+export const SavedCategoryCodeListScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  searchTerms: 'searchTerms',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavedCategoryCodeListScalarFieldEnum = (typeof SavedCategoryCodeListScalarFieldEnum)[keyof typeof SavedCategoryCodeListScalarFieldEnum]
+
+
+export const SavedCategoryCodeListItemScalarFieldEnum = {
+  id: 'id',
+  listId: 'listId',
+  categoryCodeId: 'categoryCodeId',
+  createdAt: 'createdAt'
+} as const
+
+export type SavedCategoryCodeListItemScalarFieldEnum = (typeof SavedCategoryCodeListItemScalarFieldEnum)[keyof typeof SavedCategoryCodeListItemScalarFieldEnum]
+
+
+export const TenantCategoryCodeScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  categoryCodeId: 'categoryCodeId',
+  createdAt: 'createdAt'
+} as const
+
+export type TenantCategoryCodeScalarFieldEnum = (typeof TenantCategoryCodeScalarFieldEnum)[keyof typeof TenantCategoryCodeScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1425,6 +2135,13 @@ export type ListEnumNotificationStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1541,6 +2258,14 @@ export type GlobalOmitConfig = {
   rebidPrediction?: Prisma.RebidPredictionOmit
   alertRule?: Prisma.AlertRuleOmit
   notification?: Prisma.NotificationOmit
+  stateLocalOpportunity?: Prisma.StateLocalOpportunityOmit
+  sourceSyncLog?: Prisma.SourceSyncLogOmit
+  savedStateLocalOpportunity?: Prisma.SavedStateLocalOpportunityOmit
+  categoryCode?: Prisma.CategoryCodeOmit
+  userSavedCategoryCode?: Prisma.UserSavedCategoryCodeOmit
+  savedCategoryCodeList?: Prisma.SavedCategoryCodeListOmit
+  savedCategoryCodeListItem?: Prisma.SavedCategoryCodeListItemOmit
+  tenantCategoryCode?: Prisma.TenantCategoryCodeOmit
 }
 
 /* Types for Logging */

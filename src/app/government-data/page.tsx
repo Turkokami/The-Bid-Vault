@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { GovernmentDataClient } from "@/components/government-data-client";
-import { getSamSearchSnapshot, type SamKeywordMode } from "@/lib/server/sam-search";
+import {
+  getSamSearchSnapshot,
+  type SamContractValueBand,
+  type SamKeywordMode,
+  type SamSetAsideFilter,
+} from "@/lib/server/sam-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -32,6 +37,8 @@ type GovernmentDataPageProps = {
     status?: "all" | "available" | "closing-soon" | "needs-review";
     sort?: "due-soon" | "newest" | "agency" | "title";
     browse?: string;
+    setAside?: SamSetAsideFilter;
+    valueBand?: SamContractValueBand;
   }>;
 };
 
@@ -51,6 +58,8 @@ export default async function GovernmentDataPage({
     status: params.status,
     sort: params.sort,
     browseAll: params.browse === "1",
+    setAside: params.setAside,
+    valueBand: params.valueBand,
   });
   const clientKey = [
     params.keywords ?? "",
@@ -62,6 +71,8 @@ export default async function GovernmentDataPage({
     params.status ?? "",
     params.sort ?? "",
     params.browse ?? "",
+    params.setAside ?? "",
+    params.valueBand ?? "",
   ].join("|");
 
   return (
@@ -105,6 +116,8 @@ export default async function GovernmentDataPage({
         initialIndustry={params.industry}
         initialStatus={params.status}
         initialSort={params.sort}
+        initialSetAside={params.setAside}
+        initialValueBand={params.valueBand}
         initialErrorMessage={snapshot.errorMessage}
         liveConfigured={snapshot.liveConfigured}
         initialBrowseAll={params.browse === "1"}

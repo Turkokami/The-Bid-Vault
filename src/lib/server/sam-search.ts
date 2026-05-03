@@ -8,6 +8,21 @@ import { getSamApiKey, samLiveConfigured } from "@/lib/sources/source-runtime";
 export type SamSearchStatus = "all" | "available" | "closing-soon" | "needs-review";
 export type SamSearchSort = "due-soon" | "newest" | "agency" | "title";
 export type SamKeywordMode = "all" | "any" | "exact";
+export type SamSetAsideFilter =
+  | "all"
+  | "small-business"
+  | "veteran"
+  | "women-owned"
+  | "8a"
+  | "hubzone"
+  | "minority"
+  | "unrestricted";
+export type SamContractValueBand =
+  | "all"
+  | "under-250k"
+  | "under-1m"
+  | "1m-10m"
+  | "over-10m";
 
 export type SamSearchQuery = {
   keywords?: string[];
@@ -19,6 +34,8 @@ export type SamSearchQuery = {
   status?: SamSearchStatus;
   sort?: SamSearchSort;
   browseAll?: boolean;
+  setAside?: SamSetAsideFilter;
+  valueBand?: SamContractValueBand;
 };
 
 export type SamOpportunityRecord = ExtractedContractRecord & {
@@ -30,6 +47,8 @@ export type SamOpportunityRecord = ExtractedContractRecord & {
   pscCode: string;
   setAside: string;
   fullDescription: string;
+  estimatedValue: number | null;
+  estimatedValueLabel: string;
 };
 
 type SamSearchSnapshot = {
@@ -169,6 +188,24 @@ function parseMultiValue(value?: string | null) {
     .filter(Boolean);
 }
 
+function pickNumber(...values: unknown[]) {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      const cleaned = value.replace(/[$,\s]/g, "");
+      const parsed = Number(cleaned);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
 function toIsoDate(value?: string | null) {
   if (!value) {
     return "";
@@ -197,6 +234,92 @@ function slugifySamId(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function formatCurrencyLabel(value: number | null) {
+  if (value === null || !Number.isFinite(value)) {
+    return "Not listed";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function matchesSetAsideFilter(setAside: string, filter: SamSetAsideFilter) {
+  if (filter === "all") {
+    return true;
+  }
+
+  const text = normalize(setAside);
+
+  if (filter === "small-business") {
+    return text.includes("small business") || text.includes("sba");
+  }
+
+  if (filter === "veteran") {
+    return (
+      text.includes("veteran") ||
+      text.includes("sdvosb") ||
+      text.includes("service-disabled")
+    );
+  }
+
+  if (filter === "women-owned") {
+    return text.includes("women") || text.includes("wosb") || text.includes("edwosb");
+  }
+
+  if (filter === "8a") {
+    return text.includes("8(a)") || text.includes("8a");
+  }
+
+  if (filter === "hubzone") {
+    return text.includes("hubzone");
+  }
+
+  if (filter === "minority") {
+    return text.includes("minority") || text.includes("sdb");
+  }
+
+  if (filter === "unrestricted") {
+    return (
+      text.includes("full and open") ||
+      text.includes("unrestricted") ||
+      text.includes("not set aside")
+    );
+  }
+
+  return true;
+}
+
+function matchesValueBand(value: number | null, band: SamContractValueBand) {
+  if (band === "all") {
+    return true;
+  }
+
+  if (value === null) {
+    return false;
+  }
+
+  if (band === "under-250k") {
+    return value < 250000;
+  }
+
+  if (band === "under-1m") {
+    return value < 1000000;
+  }
+
+  if (band === "1m-10m") {
+    return value >= 1000000 && value <= 10000000;
+  }
+
+  if (band === "over-10m") {
+    return value > 10000000;
+  }
+
+  return true;
 }
 
 function buildSamCompositeKey(record: Pick<
@@ -435,6 +558,8 @@ function filterRecords(records: SamOpportunityRecord[], query: SamSearchQuery) {
   const agency = normalize(query.agency ?? "");
   const state = normalize(query.state ?? "");
   const status = query.status ?? "all";
+  const setAside = query.setAside ?? "all";
+  const valueBand = query.valueBand ?? "all";
 
   return records.filter((record) => {
     const matchesNaics = naicsCodes.length > 0 ? naicsCodes.includes(record.naicsCode) : true;
@@ -449,12 +574,16 @@ function filterRecords(records: SamOpportunityRecord[], query: SamSearchQuery) {
           : status === "closing-soon"
             ? record.availabilityStatus === "Closing Soon"
             : record.availabilityStatus === "Needs Review";
+    const matchesSetAside = matchesSetAsideFilter(record.setAside, setAside);
+    const matchesValue = matchesValueBand(record.estimatedValue, valueBand);
 
     return (
       matchesNaics &&
       matchesAgency &&
       matchesState &&
       matchesStatus &&
+      matchesSetAside &&
+      matchesValue &&
       matchesKeywords(record, keywords, keywordMode)
     );
   });
@@ -504,6 +633,16 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
   const updatedDate = toIsoDate(pickString(record.lastModifiedDate, record.modifiedDate, record.updatedDate));
   const sourceUrl = buildSourceUrl(record, noticeId);
   const location = buildLocation(record);
+  const award = record.award as Record<string, unknown> | undefined;
+  const estimatedValue = pickNumber(
+    record.awardAmount,
+    record.estimatedValue,
+    record.amount,
+    record.baseAndAllOptionsValue,
+    record.baseAndAllOptionsValueAmount,
+    record.ceilingAmount,
+    award?.amount,
+  );
   const primaryContact = Array.isArray(record.pointOfContact)
     ? (record.pointOfContact[0] as Record<string, unknown> | undefined)
     : undefined;
@@ -548,6 +687,8 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
     fullDescription:
       pickString(record.description, record.additionalInfoLink, record.additionalInfo) ||
       buildSynopsis(record, title, agency),
+    estimatedValue,
+    estimatedValueLabel: formatCurrencyLabel(estimatedValue),
   };
 }
 

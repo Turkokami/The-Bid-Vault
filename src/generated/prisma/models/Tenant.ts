@@ -184,6 +184,7 @@ export type TenantWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   memberships?: Prisma.TenantMembershipListRelationFilter
   contracts?: Prisma.ContractListRelationFilter
+  categoryCodes?: Prisma.TenantCategoryCodeListRelationFilter
   alertRules?: Prisma.AlertRuleListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
 }
@@ -196,6 +197,7 @@ export type TenantOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   memberships?: Prisma.TenantMembershipOrderByRelationAggregateInput
   contracts?: Prisma.ContractOrderByRelationAggregateInput
+  categoryCodes?: Prisma.TenantCategoryCodeOrderByRelationAggregateInput
   alertRules?: Prisma.AlertRuleOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
 }
@@ -211,6 +213,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   memberships?: Prisma.TenantMembershipListRelationFilter
   contracts?: Prisma.ContractListRelationFilter
+  categoryCodes?: Prisma.TenantCategoryCodeListRelationFilter
   alertRules?: Prisma.AlertRuleListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
 }, "id" | "slug">
@@ -245,6 +248,7 @@ export type TenantCreateInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
   contracts?: Prisma.ContractCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
 }
@@ -257,6 +261,7 @@ export type TenantUncheckedCreateInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
   contracts?: Prisma.ContractUncheckedCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
 }
@@ -269,6 +274,7 @@ export type TenantUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
 }
@@ -281,6 +287,7 @@ export type TenantUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
   contracts?: Prisma.ContractUncheckedUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
@@ -394,6 +401,20 @@ export type TenantUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutNotificationsInput, Prisma.TenantUpdateWithoutNotificationsInput>, Prisma.TenantUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type TenantCreateNestedOneWithoutCategoryCodesInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutCategoryCodesInput, Prisma.TenantUncheckedCreateWithoutCategoryCodesInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutCategoryCodesInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutCategoryCodesNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutCategoryCodesInput, Prisma.TenantUncheckedCreateWithoutCategoryCodesInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutCategoryCodesInput
+  upsert?: Prisma.TenantUpsertWithoutCategoryCodesInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutCategoryCodesInput, Prisma.TenantUpdateWithoutCategoryCodesInput>, Prisma.TenantUncheckedUpdateWithoutCategoryCodesInput>
+}
+
 export type TenantCreateWithoutMembershipsInput = {
   id?: string
   name: string
@@ -401,6 +422,7 @@ export type TenantCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   contracts?: Prisma.ContractCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
 }
@@ -412,6 +434,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   contracts?: Prisma.ContractUncheckedCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
 }
@@ -439,6 +462,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contracts?: Prisma.ContractUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
 }
@@ -450,6 +474,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contracts?: Prisma.ContractUncheckedUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
@@ -461,6 +486,7 @@ export type TenantCreateWithoutContractsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
 }
@@ -472,6 +498,7 @@ export type TenantUncheckedCreateWithoutContractsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
 }
@@ -499,6 +526,7 @@ export type TenantUpdateWithoutContractsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
 }
@@ -510,6 +538,7 @@ export type TenantUncheckedUpdateWithoutContractsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
@@ -522,6 +551,7 @@ export type TenantCreateWithoutAlertRulesInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
   contracts?: Prisma.ContractCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
 }
 
@@ -533,6 +563,7 @@ export type TenantUncheckedCreateWithoutAlertRulesInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
   contracts?: Prisma.ContractUncheckedCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
@@ -560,6 +591,7 @@ export type TenantUpdateWithoutAlertRulesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
 }
 
@@ -571,6 +603,7 @@ export type TenantUncheckedUpdateWithoutAlertRulesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
   contracts?: Prisma.ContractUncheckedUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
@@ -582,6 +615,7 @@ export type TenantCreateWithoutNotificationsInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
   contracts?: Prisma.ContractCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutTenantInput
 }
 
@@ -593,6 +627,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
   contracts?: Prisma.ContractUncheckedCreateNestedManyWithoutTenantInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedCreateNestedManyWithoutTenantInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutTenantInput
 }
 
@@ -620,6 +655,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutTenantNestedInput
 }
 
@@ -631,7 +667,72 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
   contracts?: Prisma.ContractUncheckedUpdateManyWithoutTenantNestedInput
+  categoryCodes?: Prisma.TenantCategoryCodeUncheckedUpdateManyWithoutTenantNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutCategoryCodesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  contracts?: Prisma.ContractCreateNestedManyWithoutTenantInput
+  alertRules?: Prisma.AlertRuleCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutCategoryCodesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  contracts?: Prisma.ContractUncheckedCreateNestedManyWithoutTenantInput
+  alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutCategoryCodesInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutCategoryCodesInput, Prisma.TenantUncheckedCreateWithoutCategoryCodesInput>
+}
+
+export type TenantUpsertWithoutCategoryCodesInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutCategoryCodesInput, Prisma.TenantUncheckedUpdateWithoutCategoryCodesInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutCategoryCodesInput, Prisma.TenantUncheckedCreateWithoutCategoryCodesInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutCategoryCodesInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutCategoryCodesInput, Prisma.TenantUncheckedUpdateWithoutCategoryCodesInput>
+}
+
+export type TenantUpdateWithoutCategoryCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  contracts?: Prisma.ContractUpdateManyWithoutTenantNestedInput
+  alertRules?: Prisma.AlertRuleUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutCategoryCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  contracts?: Prisma.ContractUncheckedUpdateManyWithoutTenantNestedInput
+  alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -642,6 +743,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
 export type TenantCountOutputType = {
   memberships: number
   contracts: number
+  categoryCodes: number
   alertRules: number
   notifications: number
 }
@@ -649,6 +751,7 @@ export type TenantCountOutputType = {
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | TenantCountOutputTypeCountMembershipsArgs
   contracts?: boolean | TenantCountOutputTypeCountContractsArgs
+  categoryCodes?: boolean | TenantCountOutputTypeCountCategoryCodesArgs
   alertRules?: boolean | TenantCountOutputTypeCountAlertRulesArgs
   notifications?: boolean | TenantCountOutputTypeCountNotificationsArgs
 }
@@ -680,6 +783,13 @@ export type TenantCountOutputTypeCountContractsArgs<ExtArgs extends runtime.Type
 /**
  * TenantCountOutputType without action
  */
+export type TenantCountOutputTypeCountCategoryCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantCategoryCodeWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
 export type TenantCountOutputTypeCountAlertRulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AlertRuleWhereInput
 }
@@ -700,6 +810,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   updatedAt?: boolean
   memberships?: boolean | Prisma.Tenant$membershipsArgs<ExtArgs>
   contracts?: boolean | Prisma.Tenant$contractsArgs<ExtArgs>
+  categoryCodes?: boolean | Prisma.Tenant$categoryCodesArgs<ExtArgs>
   alertRules?: boolean | Prisma.Tenant$alertRulesArgs<ExtArgs>
   notifications?: boolean | Prisma.Tenant$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
@@ -733,6 +844,7 @@ export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.Tenant$membershipsArgs<ExtArgs>
   contracts?: boolean | Prisma.Tenant$contractsArgs<ExtArgs>
+  categoryCodes?: boolean | Prisma.Tenant$categoryCodesArgs<ExtArgs>
   alertRules?: boolean | Prisma.Tenant$alertRulesArgs<ExtArgs>
   notifications?: boolean | Prisma.Tenant$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
@@ -745,6 +857,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   objects: {
     memberships: Prisma.$TenantMembershipPayload<ExtArgs>[]
     contracts: Prisma.$ContractPayload<ExtArgs>[]
+    categoryCodes: Prisma.$TenantCategoryCodePayload<ExtArgs>[]
     alertRules: Prisma.$AlertRulePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
   }
@@ -1150,6 +1263,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   readonly [Symbol.toStringTag]: "PrismaPromise"
   memberships<T extends Prisma.Tenant$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contracts<T extends Prisma.Tenant$contractsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$contractsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  categoryCodes<T extends Prisma.Tenant$categoryCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$categoryCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantCategoryCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   alertRules<T extends Prisma.Tenant$alertRulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$alertRulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.Tenant$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1624,6 +1738,30 @@ export type Tenant$contractsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ContractScalarFieldEnum | Prisma.ContractScalarFieldEnum[]
+}
+
+/**
+ * Tenant.categoryCodes
+ */
+export type Tenant$categoryCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantCategoryCode
+   */
+  select?: Prisma.TenantCategoryCodeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantCategoryCode
+   */
+  omit?: Prisma.TenantCategoryCodeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantCategoryCodeInclude<ExtArgs> | null
+  where?: Prisma.TenantCategoryCodeWhereInput
+  orderBy?: Prisma.TenantCategoryCodeOrderByWithRelationInput | Prisma.TenantCategoryCodeOrderByWithRelationInput[]
+  cursor?: Prisma.TenantCategoryCodeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantCategoryCodeScalarFieldEnum | Prisma.TenantCategoryCodeScalarFieldEnum[]
 }
 
 /**

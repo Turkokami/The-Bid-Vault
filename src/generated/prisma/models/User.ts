@@ -192,6 +192,9 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   memberships?: Prisma.TenantMembershipListRelationFilter
   savedContracts?: Prisma.SavedContractListRelationFilter
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityListRelationFilter
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeListRelationFilter
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListListRelationFilter
   alertRules?: Prisma.AlertRuleListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
 }
@@ -205,6 +208,9 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   memberships?: Prisma.TenantMembershipOrderByRelationAggregateInput
   savedContracts?: Prisma.SavedContractOrderByRelationAggregateInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityOrderByRelationAggregateInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeOrderByRelationAggregateInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListOrderByRelationAggregateInput
   alertRules?: Prisma.AlertRuleOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
 }
@@ -221,6 +227,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   memberships?: Prisma.TenantMembershipListRelationFilter
   savedContracts?: Prisma.SavedContractListRelationFilter
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityListRelationFilter
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeListRelationFilter
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListListRelationFilter
   alertRules?: Prisma.AlertRuleListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
 }, "id" | "email">
@@ -258,6 +267,9 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -271,6 +283,9 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -284,6 +299,9 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -297,6 +315,9 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -428,6 +449,48 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutSavedStateLocalOpportunitiesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedStateLocalOpportunitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSavedStateLocalOpportunitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedStateLocalOpportunitiesInput
+  upsert?: Prisma.UserUpsertWithoutSavedStateLocalOpportunitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUpdateWithoutSavedStateLocalOpportunitiesInput>, Prisma.UserUncheckedUpdateWithoutSavedStateLocalOpportunitiesInput>
+}
+
+export type UserCreateNestedOneWithoutSavedCategoryCodesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodesInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedCategoryCodesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSavedCategoryCodesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodesInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedCategoryCodesInput
+  upsert?: Prisma.UserUpsertWithoutSavedCategoryCodesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavedCategoryCodesInput, Prisma.UserUpdateWithoutSavedCategoryCodesInput>, Prisma.UserUncheckedUpdateWithoutSavedCategoryCodesInput>
+}
+
+export type UserCreateNestedOneWithoutSavedCategoryCodeListsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodeListsInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodeListsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedCategoryCodeListsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSavedCategoryCodeListsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodeListsInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodeListsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedCategoryCodeListsInput
+  upsert?: Prisma.UserUpsertWithoutSavedCategoryCodeListsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavedCategoryCodeListsInput, Prisma.UserUpdateWithoutSavedCategoryCodeListsInput>, Prisma.UserUncheckedUpdateWithoutSavedCategoryCodeListsInput>
+}
+
 export type UserCreateWithoutMembershipsInput = {
   id?: string
   email: string
@@ -436,6 +499,9 @@ export type UserCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -448,6 +514,9 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -476,6 +545,9 @@ export type UserUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -488,6 +560,9 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -500,6 +575,9 @@ export type UserCreateWithoutSavedContractsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -512,6 +590,9 @@ export type UserUncheckedCreateWithoutSavedContractsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -540,6 +621,9 @@ export type UserUpdateWithoutSavedContractsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -552,6 +636,9 @@ export type UserUncheckedUpdateWithoutSavedContractsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -565,6 +652,9 @@ export type UserCreateWithoutAlertRulesInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
@@ -577,6 +667,9 @@ export type UserUncheckedCreateWithoutAlertRulesInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -605,6 +698,9 @@ export type UserUpdateWithoutAlertRulesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
@@ -617,6 +713,9 @@ export type UserUncheckedUpdateWithoutAlertRulesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -629,6 +728,9 @@ export type UserCreateWithoutNotificationsInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
 }
 
@@ -641,6 +743,9 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -669,6 +774,9 @@ export type UserUpdateWithoutNotificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
 }
 
@@ -681,7 +789,238 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSavedStateLocalOpportunitiesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSavedStateLocalOpportunitiesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput>
+}
+
+export type UserUpsertWithoutSavedStateLocalOpportunitiesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedUpdateWithoutSavedStateLocalOpportunitiesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSavedStateLocalOpportunitiesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedUpdateWithoutSavedStateLocalOpportunitiesInput>
+}
+
+export type UserUpdateWithoutSavedStateLocalOpportunitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSavedStateLocalOpportunitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSavedCategoryCodesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSavedCategoryCodesInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSavedCategoryCodesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodesInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodesInput>
+}
+
+export type UserUpsertWithoutSavedCategoryCodesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSavedCategoryCodesInput, Prisma.UserUncheckedUpdateWithoutSavedCategoryCodesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodesInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSavedCategoryCodesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSavedCategoryCodesInput, Prisma.UserUncheckedUpdateWithoutSavedCategoryCodesInput>
+}
+
+export type UserUpdateWithoutSavedCategoryCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSavedCategoryCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSavedCategoryCodeListsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSavedCategoryCodeListsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSavedCategoryCodeListsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodeListsInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodeListsInput>
+}
+
+export type UserUpsertWithoutSavedCategoryCodeListsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSavedCategoryCodeListsInput, Prisma.UserUncheckedUpdateWithoutSavedCategoryCodeListsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedCategoryCodeListsInput, Prisma.UserUncheckedCreateWithoutSavedCategoryCodeListsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSavedCategoryCodeListsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSavedCategoryCodeListsInput, Prisma.UserUncheckedUpdateWithoutSavedCategoryCodeListsInput>
+}
+
+export type UserUpdateWithoutSavedCategoryCodeListsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSavedCategoryCodeListsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -692,6 +1031,9 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
 export type UserCountOutputType = {
   memberships: number
   savedContracts: number
+  savedStateLocalOpportunities: number
+  savedCategoryCodes: number
+  savedCategoryCodeLists: number
   alertRules: number
   notifications: number
 }
@@ -699,6 +1041,9 @@ export type UserCountOutputType = {
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
   savedContracts?: boolean | UserCountOutputTypeCountSavedContractsArgs
+  savedStateLocalOpportunities?: boolean | UserCountOutputTypeCountSavedStateLocalOpportunitiesArgs
+  savedCategoryCodes?: boolean | UserCountOutputTypeCountSavedCategoryCodesArgs
+  savedCategoryCodeLists?: boolean | UserCountOutputTypeCountSavedCategoryCodeListsArgs
   alertRules?: boolean | UserCountOutputTypeCountAlertRulesArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
 }
@@ -730,6 +1075,27 @@ export type UserCountOutputTypeCountSavedContractsArgs<ExtArgs extends runtime.T
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountSavedStateLocalOpportunitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedStateLocalOpportunityWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSavedCategoryCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserSavedCategoryCodeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSavedCategoryCodeListsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedCategoryCodeListWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountAlertRulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AlertRuleWhereInput
 }
@@ -751,6 +1117,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   savedContracts?: boolean | Prisma.User$savedContractsArgs<ExtArgs>
+  savedStateLocalOpportunities?: boolean | Prisma.User$savedStateLocalOpportunitiesArgs<ExtArgs>
+  savedCategoryCodes?: boolean | Prisma.User$savedCategoryCodesArgs<ExtArgs>
+  savedCategoryCodeLists?: boolean | Prisma.User$savedCategoryCodeListsArgs<ExtArgs>
   alertRules?: boolean | Prisma.User$alertRulesArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -787,6 +1156,9 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   savedContracts?: boolean | Prisma.User$savedContractsArgs<ExtArgs>
+  savedStateLocalOpportunities?: boolean | Prisma.User$savedStateLocalOpportunitiesArgs<ExtArgs>
+  savedCategoryCodes?: boolean | Prisma.User$savedCategoryCodesArgs<ExtArgs>
+  savedCategoryCodeLists?: boolean | Prisma.User$savedCategoryCodeListsArgs<ExtArgs>
   alertRules?: boolean | Prisma.User$alertRulesArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -799,6 +1171,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     memberships: Prisma.$TenantMembershipPayload<ExtArgs>[]
     savedContracts: Prisma.$SavedContractPayload<ExtArgs>[]
+    savedStateLocalOpportunities: Prisma.$SavedStateLocalOpportunityPayload<ExtArgs>[]
+    savedCategoryCodes: Prisma.$UserSavedCategoryCodePayload<ExtArgs>[]
+    savedCategoryCodeLists: Prisma.$SavedCategoryCodeListPayload<ExtArgs>[]
     alertRules: Prisma.$AlertRulePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
   }
@@ -1205,6 +1580,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   savedContracts<T extends Prisma.User$savedContractsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedContractsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedStateLocalOpportunities<T extends Prisma.User$savedStateLocalOpportunitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedStateLocalOpportunitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedStateLocalOpportunityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedCategoryCodes<T extends Prisma.User$savedCategoryCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedCategoryCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSavedCategoryCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedCategoryCodeLists<T extends Prisma.User$savedCategoryCodeListsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedCategoryCodeListsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedCategoryCodeListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   alertRules<T extends Prisma.User$alertRulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alertRulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1680,6 +2058,78 @@ export type User$savedContractsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.SavedContractScalarFieldEnum | Prisma.SavedContractScalarFieldEnum[]
+}
+
+/**
+ * User.savedStateLocalOpportunities
+ */
+export type User$savedStateLocalOpportunitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedStateLocalOpportunity
+   */
+  select?: Prisma.SavedStateLocalOpportunitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedStateLocalOpportunity
+   */
+  omit?: Prisma.SavedStateLocalOpportunityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedStateLocalOpportunityInclude<ExtArgs> | null
+  where?: Prisma.SavedStateLocalOpportunityWhereInput
+  orderBy?: Prisma.SavedStateLocalOpportunityOrderByWithRelationInput | Prisma.SavedStateLocalOpportunityOrderByWithRelationInput[]
+  cursor?: Prisma.SavedStateLocalOpportunityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedStateLocalOpportunityScalarFieldEnum | Prisma.SavedStateLocalOpportunityScalarFieldEnum[]
+}
+
+/**
+ * User.savedCategoryCodes
+ */
+export type User$savedCategoryCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserSavedCategoryCode
+   */
+  select?: Prisma.UserSavedCategoryCodeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserSavedCategoryCode
+   */
+  omit?: Prisma.UserSavedCategoryCodeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserSavedCategoryCodeInclude<ExtArgs> | null
+  where?: Prisma.UserSavedCategoryCodeWhereInput
+  orderBy?: Prisma.UserSavedCategoryCodeOrderByWithRelationInput | Prisma.UserSavedCategoryCodeOrderByWithRelationInput[]
+  cursor?: Prisma.UserSavedCategoryCodeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserSavedCategoryCodeScalarFieldEnum | Prisma.UserSavedCategoryCodeScalarFieldEnum[]
+}
+
+/**
+ * User.savedCategoryCodeLists
+ */
+export type User$savedCategoryCodeListsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedCategoryCodeList
+   */
+  select?: Prisma.SavedCategoryCodeListSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedCategoryCodeList
+   */
+  omit?: Prisma.SavedCategoryCodeListOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedCategoryCodeListInclude<ExtArgs> | null
+  where?: Prisma.SavedCategoryCodeListWhereInput
+  orderBy?: Prisma.SavedCategoryCodeListOrderByWithRelationInput | Prisma.SavedCategoryCodeListOrderByWithRelationInput[]
+  cursor?: Prisma.SavedCategoryCodeListWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedCategoryCodeListScalarFieldEnum | Prisma.SavedCategoryCodeListScalarFieldEnum[]
 }
 
 /**

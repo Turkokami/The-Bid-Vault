@@ -207,13 +207,13 @@ const locationViews: LocationView[] = [
         "This gives you a stronger North Carolina page immediately, without pretending the statewide portal can always be extracted cleanly in the background.",
       links: [
         {
-          href: "https://evp.nc.gov/",
-          label: "Open North Carolina eVP",
+          href: "https://evp.nc.gov/solicitations/?status=0",
+          label: "Open live statewide solicitations",
           external: true,
         },
         {
-          href: "https://evp.nc.gov/solicitations/",
-          label: "Open eVP solicitations",
+          href: "https://evp.nc.gov/",
+          label: "Open North Carolina eVP",
           external: true,
         },
         {
@@ -222,20 +222,6 @@ const locationViews: LocationView[] = [
           external: true,
         },
       ],
-    },
-    livePortalView: {
-      eyebrow: "North Carolina live portal",
-      title: "Review the live North Carolina eVP solicitations without leaving this state page.",
-      description:
-        "This embedded portal view keeps the statewide North Carolina search visible inside The Bid Vault while still using the official eVP source for the live posting list.",
-      href: "https://evp.nc.gov/solicitations/?status=0",
-      embedSrc: "https://evp.nc.gov/solicitations/?status=0",
-      openLabel: "Open NC statewide solicitations",
-      note:
-        "If the eVP site limits the embedded view in your browser, use the button above to open the same live statewide listing in a new tab.",
-      allowEmbed: false,
-      blockedMessage:
-        "North Carolina eVP blocks embedded viewing in the browser, so the cleanest path is to open the live statewide solicitations page directly in a new tab.",
     },
   },
   {
@@ -325,24 +311,6 @@ function buildStateLocationView(location: string, allSourceCodes: string[]): Loc
           ],
         }
       : undefined;
-  const livePortalView =
-    state.slug === "north-carolina"
-      ? {
-          eyebrow: "North Carolina live portal",
-          title: "Review the live North Carolina eVP solicitations without leaving this state page.",
-          description:
-            "This embedded portal view keeps the statewide North Carolina search visible inside The Bid Vault while still using the official eVP source for the live posting list.",
-          href: "https://evp.nc.gov/solicitations/?status=0",
-          embedSrc: "https://evp.nc.gov/solicitations/?status=0",
-          openLabel: "Open NC statewide solicitations",
-          note:
-            "If the eVP site limits the embedded view in your browser, use the button above to open the same live statewide listing in a new tab.",
-          allowEmbed: false,
-          blockedMessage:
-            "North Carolina eVP blocks embedded viewing in the browser, so the cleanest path is to open the live statewide solicitations page directly in a new tab.",
-        }
-      : undefined;
-
   return {
     slug: state.slug,
     title: `${state.name} state and local opportunities.`,
@@ -356,7 +324,6 @@ function buildStateLocationView(location: string, allSourceCodes: string[]): Loc
         ? `No ${state.name} results are showing right now. Try refreshing the page or opening the official ${state.name} portal directly.`
         : `This ${state.name} page is ready as a statewide launch point. Open the official ${state.name} portal while county and city connectors are built out.`,
     portalAssist,
-    livePortalView,
   };
 }
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
 import {
+  hydrateSavedCategoryPreferences,
   readSavedNaicsCodeLists,
   removeNaicsCodeList,
   saveNaicsCodeList,
@@ -23,10 +24,31 @@ import {
   readAnyCachedSamSnapshot,
   readCachedSamSnapshot,
 } from "@/lib/demo-contract-store";
-import type { SamKeywordMode, SamOpportunityRecord } from "@/lib/server/sam-search";
+import type {
+  SamContractValueBand,
+  SamKeywordMode,
+  SamOpportunityRecord,
+  SamSetAsideFilter,
+} from "@/lib/server/sam-search";
 
 type SearchSamStatus = "all" | "available" | "closing-soon" | "needs-review";
 type SearchSamSort = "due-soon" | "newest" | "agency" | "title";
+const setAsideTabs: Array<{ value: SamSetAsideFilter; label: string }> = [
+  { value: "all", label: "All set-asides" },
+  { value: "small-business", label: "Small business" },
+  { value: "veteran", label: "Veteran only" },
+  { value: "women-owned", label: "Women-owned" },
+  { value: "8a", label: "8(a)" },
+  { value: "hubzone", label: "HUBZone" },
+];
+
+const contractValueTabs: Array<{ value: SamContractValueBand; label: string }> = [
+  { value: "all", label: "All sizes" },
+  { value: "under-250k", label: "Under $250k" },
+  { value: "under-1m", label: "Under $1M" },
+  { value: "1m-10m", label: "$1M to $10M" },
+  { value: "over-10m", label: "Over $10M" },
+];
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
@@ -141,6 +163,8 @@ function buildSamSearchHref(params: {
   status?: SearchSamStatus;
   sort?: SearchSamSort;
   browse?: boolean;
+  setAside?: SamSetAsideFilter;
+  valueBand?: SamContractValueBand;
 }) {
   const search = new URLSearchParams();
 
@@ -153,6 +177,8 @@ function buildSamSearchHref(params: {
   if (params.status && params.status !== "all") search.set("status", params.status);
   if (params.sort && params.sort !== "due-soon") search.set("sort", params.sort);
   if (params.browse) search.set("browse", "1");
+  if (params.setAside && params.setAside !== "all") search.set("setAside", params.setAside);
+  if (params.valueBand && params.valueBand !== "all") search.set("valueBand", params.valueBand);
 
   const query = search.toString();
   return query ? `/sam-search?${query}` : "/sam-search";
@@ -176,6 +202,7 @@ function buildSamDetailHref(record: SamOpportunityRecord, returnTo?: string) {
   if (record.pscCode) search.set("psc", record.pscCode);
   if (record.office) search.set("office", record.office);
   if (record.setAside) search.set("setAside", record.setAside);
+  if (record.estimatedValueLabel) search.set("estimatedValueLabel", record.estimatedValueLabel);
   if (record.synopsis) search.set("summary", record.synopsis);
   if (returnTo) search.set("returnTo", returnTo);
 
@@ -236,6 +263,8 @@ function filterRecords(
   agency?: string,
   state?: string,
   status: SearchSamStatus = "all",
+  setAside: SamSetAsideFilter = "all",
+  valueBand: SamContractValueBand = "all",
 ) {
   const naicsCodes = parseMultiValue(naics);
   const normalizedState = normalizeStateInput(state);
@@ -264,6 +293,35 @@ function filterRecords(
           : status === "closing-soon"
             ? record.availabilityStatus === "Closing Soon"
             : record.availabilityStatus === "Needs Review";
+    const setAsideText = normalize(record.setAside);
+    const matchesSetAside =
+      setAside === "all"
+        ? true
+        : setAside === "small-business"
+          ? setAsideText.includes("small business") || setAsideText.includes("sba")
+          : setAside === "veteran"
+            ? setAsideText.includes("veteran") || setAsideText.includes("sdvosb") || setAsideText.includes("service-disabled")
+            : setAside === "women-owned"
+              ? setAsideText.includes("women") || setAsideText.includes("wosb") || setAsideText.includes("edwosb")
+              : setAside === "8a"
+                ? setAsideText.includes("8(a)") || setAsideText.includes("8a")
+                : setAside === "hubzone"
+                  ? setAsideText.includes("hubzone")
+                  : setAside === "minority"
+                    ? setAsideText.includes("minority") || setAsideText.includes("sdb")
+                    : setAsideText.includes("full and open") || setAsideText.includes("unrestricted") || setAsideText.includes("not set aside");
+    const matchesValue =
+      valueBand === "all"
+        ? true
+        : typeof record.estimatedValue === "number"
+          ? valueBand === "under-250k"
+            ? record.estimatedValue < 250000
+            : valueBand === "under-1m"
+              ? record.estimatedValue < 1000000
+              : valueBand === "1m-10m"
+                ? record.estimatedValue >= 1000000 && record.estimatedValue <= 10000000
+                : record.estimatedValue > 10000000
+          : false;
     const blob = [
       record.title,
       record.synopsis,
@@ -283,7 +341,7 @@ function filterRecords(
           ? keywords.some((keyword) => blob.includes(keyword.toLowerCase()))
           : keywords.every((keyword) => blob.includes(keyword.toLowerCase())));
 
-    return matchesNaics && matchesAgency && matchesState && matchesStatus && matchesKeywords;
+    return matchesNaics && matchesAgency && matchesState && matchesStatus && matchesSetAside && matchesValue && matchesKeywords;
   });
 }
 
@@ -339,6 +397,8 @@ export function GovernmentDataClient({
   initialIndustry,
   initialStatus = "all",
   initialSort = "due-soon",
+  initialSetAside = "all",
+  initialValueBand = "all",
   initialErrorMessage,
   liveConfigured,
   initialBrowseAll = false,
@@ -354,6 +414,8 @@ export function GovernmentDataClient({
   initialIndustry?: string;
   initialStatus?: SearchSamStatus;
   initialSort?: SearchSamSort;
+  initialSetAside?: SamSetAsideFilter;
+  initialValueBand?: SamContractValueBand;
   initialErrorMessage?: string;
   liveConfigured: boolean;
   initialBrowseAll?: boolean;
@@ -374,6 +436,8 @@ export function GovernmentDataClient({
   const [searchState, setSearchState] = useState(initialState ?? "");
   const [searchStatus, setSearchStatus] = useState<SearchSamStatus>(initialStatus);
   const [sortBy, setSortBy] = useState<SearchSamSort>(initialSort);
+  const [searchSetAside, setSearchSetAside] = useState<SamSetAsideFilter>(initialSetAside);
+  const [searchValueBand, setSearchValueBand] = useState<SamContractValueBand>(initialValueBand);
   const [isLiveConfigured, setIsLiveConfigured] = useState(liveConfigured);
   const [browseAll, setBrowseAll] = useState(initialBrowseAll ?? false);
   const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
@@ -381,6 +445,7 @@ export function GovernmentDataClient({
 
   useEffect(() => {
     const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
+    void hydrateSavedCategoryPreferences();
     syncSavedLists();
     window.addEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
 
@@ -401,18 +466,20 @@ export function GovernmentDataClient({
         activities,
         liveConfigured: isLiveConfigured,
       },
-      {
-        keywords: searchKeywords,
-        keywordMode,
-        industry: searchIndustry,
-        naics: searchNaics,
-        agency: searchAgency,
-        state: searchState,
-        status: searchStatus,
-        sort: sortBy,
-        browse: browseAll,
-      },
-    );
+        {
+          keywords: searchKeywords,
+          keywordMode,
+          industry: searchIndustry,
+          naics: searchNaics,
+          agency: searchAgency,
+          state: searchState,
+          status: searchStatus,
+          sort: sortBy,
+          browse: browseAll,
+          setAside: searchSetAside,
+          valueBand: searchValueBand,
+        },
+      );
   }, [
     activities,
     browseAll,
@@ -423,12 +490,14 @@ export function GovernmentDataClient({
     searchAgency,
     searchIndustry,
     searchKeywords,
-    searchNaics,
-    searchState,
-    searchStatus,
-    sortBy,
-    sources,
-  ]);
+      searchNaics,
+      searchSetAside,
+      searchState,
+      searchStatus,
+      searchValueBand,
+      sortBy,
+      sources,
+    ]);
 
   useEffect(() => {
     if (records.length > 0) {
@@ -449,6 +518,8 @@ export function GovernmentDataClient({
       status: searchStatus,
       sort: sortBy,
       browse: browseAll,
+      setAside: searchSetAside,
+      valueBand: searchValueBand,
     });
 
     if (!cached || cached.records.length === 0) {
@@ -486,8 +557,10 @@ export function GovernmentDataClient({
     searchIndustry,
     searchKeywords,
     searchNaics,
+    searchSetAside,
     searchState,
     searchStatus,
+    searchValueBand,
     sortBy,
   ]);
 
@@ -547,6 +620,8 @@ export function GovernmentDataClient({
         status: searchStatus,
         sort: sortBy,
         browse: browseAll,
+        setAside: searchSetAside,
+        valueBand: searchValueBand,
       }),
     [
       browseAll,
@@ -554,12 +629,14 @@ export function GovernmentDataClient({
       searchAgency,
       searchIndustry,
       searchKeywords,
-      searchNaics,
-      searchState,
-      searchStatus,
-      sortBy,
-    ],
-  );
+        searchNaics,
+        searchSetAside,
+        searchState,
+        searchStatus,
+        searchValueBand,
+        sortBy,
+      ],
+    );
   const directSamSearchUrl = useMemo(
     () =>
       buildDirectSamSearchUrl({
@@ -578,17 +655,19 @@ export function GovernmentDataClient({
           filterRecords(
             records,
             appliedKeywordTerms,
-            keywordMode,
-            searchNaics,
-            searchAgency,
-            searchState,
-            searchStatus,
+              keywordMode,
+              searchNaics,
+              searchAgency,
+              searchState,
+              searchStatus,
+              searchSetAside,
+              searchValueBand,
+            ),
           ),
+          sortBy,
         ),
-        sortBy,
-      ),
-    [appliedKeywordTerms, keywordMode, records, searchAgency, searchNaics, searchState, searchStatus, sortBy],
-  );
+      [appliedKeywordTerms, keywordMode, records, searchAgency, searchNaics, searchSetAside, searchState, searchStatus, searchValueBand, sortBy],
+    );
 
   const availableCount = useMemo(
     () => dedupeRecords(records).filter((record) => record.availabilityStatus === "Available").length,
@@ -601,22 +680,26 @@ export function GovernmentDataClient({
     industry: string;
     naics: string;
     agency: string;
-    state: string;
-    status: SearchSamStatus;
-    sort: SearchSamSort;
-    browse: boolean;
-  }>) => {
+      state: string;
+      status: SearchSamStatus;
+      sort: SearchSamSort;
+      browse: boolean;
+      setAside: SamSetAsideFilter;
+      valueBand: SamContractValueBand;
+    }>) => {
     const href = buildSamSearchHref({
       keywords: next?.keywords ?? searchKeywords,
       keywordMode: next?.keywordMode ?? keywordMode,
       industry: next?.industry ?? searchIndustry,
       naics: next?.naics ?? searchNaics,
-      agency: next?.agency ?? searchAgency,
-      state: next?.state ?? searchState,
-      status: next?.status ?? searchStatus,
-      sort: next?.sort ?? sortBy,
-      browse: next?.browse ?? browseAll,
-    });
+        agency: next?.agency ?? searchAgency,
+        state: next?.state ?? searchState,
+        status: next?.status ?? searchStatus,
+        sort: next?.sort ?? sortBy,
+        browse: next?.browse ?? browseAll,
+        setAside: next?.setAside ?? searchSetAside,
+        valueBand: next?.valueBand ?? searchValueBand,
+      });
 
     startTransition(() => {
       router.push(href);
@@ -649,6 +732,8 @@ export function GovernmentDataClient({
                 setSearchAgency("");
                 setSearchState("");
                 setSearchStatus("available");
+                setSearchSetAside("all");
+                setSearchValueBand("all");
                 setSortBy("due-soon");
                 setBrowseAll(true);
                 setErrorMessage("");
@@ -660,6 +745,8 @@ export function GovernmentDataClient({
                   state: "",
                   status: "available",
                   keywordMode: "all",
+                  setAside: "all",
+                  valueBand: "all",
                   sort: "due-soon",
                   browse: true,
                 });
@@ -679,6 +766,8 @@ export function GovernmentDataClient({
                   agency: searchAgency,
                   state: searchState,
                   status: searchStatus,
+                  setAside: searchSetAside,
+                  valueBand: searchValueBand,
                   sort: sortBy,
                   browse: browseAll,
                 })
@@ -760,6 +849,56 @@ export function GovernmentDataClient({
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <span className="text-sm text-slate-200">Set-aside focus</span>
+              <p className="text-xs leading-5 text-slate-400">
+                Narrow the list to contract groups like small business, veteran-owned, or women-owned opportunities.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {setAsideTabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => {
+                      setSearchSetAside(tab.value);
+                      setBrowseAll(true);
+                    }}
+                    className={buttonStyles({
+                      variant: searchSetAside === tab.value ? "primary" : "ghost",
+                      size: "sm",
+                    })}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <span className="text-sm text-slate-200">Contract size</span>
+              <p className="text-xs leading-5 text-slate-400">
+                Focus on opportunities by the estimated contract value when SAM lists it.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {contractValueTabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => {
+                      setSearchValueBand(tab.value);
+                      setBrowseAll(true);
+                    }}
+                    className={buttonStyles({
+                      variant: searchValueBand === tab.value ? "primary" : "ghost",
+                      size: "sm",
+                    })}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
               <span>Search words</span>
               <p className="text-xs leading-5 text-slate-400">
@@ -986,6 +1125,8 @@ export function GovernmentDataClient({
                             applySearch({
                               naics: samCodes.join(", "),
                               keywords,
+                              setAside: searchSetAside,
+                              valueBand: searchValueBand,
                             });
                           }}
                           className={buttonStyles({ variant: "secondary", size: "sm" })}
@@ -994,7 +1135,7 @@ export function GovernmentDataClient({
                         </button>
                         <button
                           type="button"
-                          onClick={() => removeNaicsCodeList(list.id)}
+                          onClick={() => void removeNaicsCodeList(list.id)}
                           className={buttonStyles({ variant: "ghost", size: "sm" })}
                         >
                           Remove
@@ -1023,6 +1164,8 @@ export function GovernmentDataClient({
                 setSearchAgency("");
                 setSearchState("");
                 setSearchStatus("all");
+                setSearchSetAside("all");
+                setSearchValueBand("all");
                 setSortBy("due-soon");
                 setBrowseAll(false);
                 applySearch({
@@ -1033,6 +1176,8 @@ export function GovernmentDataClient({
                   state: "",
                   status: "all",
                   keywordMode: "all",
+                  setAside: "all",
+                  valueBand: "all",
                   sort: "due-soon",
                   browse: false,
                 });
@@ -1066,6 +1211,16 @@ export function GovernmentDataClient({
               {appliedNaicsCodes.length > 0 ? (
                 <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
                   Using codes: {appliedNaicsCodes.join(", ")}
+                </div>
+              ) : null}
+              {searchSetAside !== "all" ? (
+                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                  Set-aside: {setAsideTabs.find((tab) => tab.value === searchSetAside)?.label}
+                </div>
+              ) : null}
+              {searchValueBand !== "all" ? (
+                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                  Size: {contractValueTabs.find((tab) => tab.value === searchValueBand)?.label}
                 </div>
               ) : null}
 
@@ -1158,6 +1313,17 @@ export function GovernmentDataClient({
                     <p className="text-slate-500">Due date</p>
                     <p className="mt-1 text-white">{result.responseDeadline}</p>
                   </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                  {result.setAside && result.setAside !== "Not listed" ? (
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 font-medium text-emerald-100">
+                      {result.setAside}
+                    </span>
+                  ) : null}
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-medium text-slate-200">
+                    Estimated size: {result.estimatedValueLabel}
+                  </span>
                 </div>
 
                 <p className="mt-4 text-sm leading-6 text-slate-400">{result.synopsis}</p>

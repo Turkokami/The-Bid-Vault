@@ -6,6 +6,7 @@ import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
 import type { CategoryCodeRecord } from "@/lib/category-codes";
 import {
+  hydrateSavedCategoryPreferences,
   readSavedCategoryCodeIds,
   removeCategoryCodeId,
   saveCategoryCodeId,
@@ -17,6 +18,7 @@ export function CategoryCodeCard({ record }: { record: CategoryCodeRecord }) {
   useEffect(() => {
     const sync = () => setSavedIds(readSavedCategoryCodeIds());
     sync();
+    void hydrateSavedCategoryPreferences();
     window.addEventListener("bid-vault-category-codes-updated", sync);
     return () => window.removeEventListener("bid-vault-category-codes-updated", sync);
   }, []);
@@ -51,7 +53,7 @@ export function CategoryCodeCard({ record }: { record: CategoryCodeRecord }) {
 
         <button
           type="button"
-          onClick={() => (isSaved ? removeCategoryCodeId(record.id) : saveCategoryCodeId(record.id))}
+          onClick={() => void (isSaved ? removeCategoryCodeId(record.id) : saveCategoryCodeId(record.id))}
           className={buttonStyles({
             variant: isSaved ? "ghost" : "secondary",
             size: "sm",

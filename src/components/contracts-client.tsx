@@ -7,6 +7,7 @@ import { FilterSidebar } from "@/components/filter-sidebar";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
 import {
+  hydrateSavedCategoryPreferences,
   readSavedNaicsCodeLists,
   removeNaicsCodeList,
   type SavedNaicsCodeList,
@@ -54,6 +55,7 @@ export function ContractsClient({
 
   useEffect(() => {
     const sync = () => setSavedCodeLists(readSavedNaicsCodeLists());
+    void hydrateSavedCategoryPreferences();
     sync();
     window.addEventListener("bid-vault-naics-code-lists-updated", sync);
     return () => window.removeEventListener("bid-vault-naics-code-lists-updated", sync);
@@ -196,7 +198,7 @@ export function ContractsClient({
                     </button>
                     <button
                       type="button"
-                      onClick={() => removeNaicsCodeList(list.id)}
+                      onClick={() => void removeNaicsCodeList(list.id)}
                       className={buttonStyles({ variant: "ghost", size: "sm" })}
                     >
                       Remove

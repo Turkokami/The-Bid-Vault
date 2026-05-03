@@ -7,6 +7,7 @@ import { StateLocalFilterSidebar } from "@/components/state-local-filter-sidebar
 import { StateLocalOpportunityCard } from "@/components/state-local-opportunity-card";
 import { buttonStyles } from "@/components/ui/button";
 import {
+  hydrateSavedCategoryPreferences,
   readSavedNaicsCodeLists,
   removeNaicsCodeList,
   type SavedNaicsCodeList,
@@ -153,6 +154,7 @@ export function StateLocalClient({
 
   useEffect(() => {
     const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
+    void hydrateSavedCategoryPreferences();
     syncSavedLists();
     window.addEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
     return () => window.removeEventListener("bid-vault-naics-code-lists-updated", syncSavedLists);
@@ -250,15 +252,15 @@ export function StateLocalClient({
             </article>
 
             <article className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">County and city options</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">County and city navigation</p>
               <div className="mt-4 space-y-4">
                 {stateNavigator.localDirectoryEntries.length > 0 ? (
                   <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
                     <p className="text-sm font-medium text-white">
-                      Popular local starting points in {stateNavigator.stateName}
+                      Top local starting points in {stateNavigator.stateName}
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-400">
-                      These are the fastest local launch points for county and city contract hunting in this state.
+                      Start here if you want to jump directly into the most useful county and city source pages for this state.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {stateNavigator.localDirectoryEntries.map((entry) => (
@@ -281,6 +283,7 @@ export function StateLocalClient({
 
                 {stateNavigator.localSources.length > 0 ? (
                   <div className="space-y-3">
+                  <p className="text-sm font-medium text-white">Dedicated local pages inside The Bid Vault</p>
                   {stateNavigator.localSources.map((source) => (
                     <div key={source.id} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
                       <div className="flex items-center justify-between gap-3">
@@ -314,10 +317,15 @@ export function StateLocalClient({
                   </div>
                 ) : (
                   <div className="rounded-[1.25rem] border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-400">
-                    This state page is ready for county and city rollout. Until we connect curated local sources here, use these quick county-level search links to jump straight into local contract hunting for this state.
+                    This state page is ready for county and city rollout. Until we connect more dedicated local sources here, use these quick local search links to jump straight into county and city contract hunting for this state.
                   </div>
                 )}
-                <div className="flex flex-wrap gap-2">
+                <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                  <p className="text-sm font-medium text-white">Broader local search shortcuts</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Use these when you want to widen the search beyond the named county and city sources above.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
                   {stateNavigator.countySearchLinks.map((link) => (
                     <a
                       key={link.href}
@@ -329,6 +337,7 @@ export function StateLocalClient({
                       {link.label}
                     </a>
                   ))}
+                  </div>
                 </div>
               </div>
             </article>
@@ -491,7 +500,7 @@ export function StateLocalClient({
                         </button>
                         <button
                           type="button"
-                          onClick={() => removeNaicsCodeList(list.id)}
+                          onClick={() => void removeNaicsCodeList(list.id)}
                           className={buttonStyles({ variant: "ghost", size: "sm" })}
                         >
                           Remove
