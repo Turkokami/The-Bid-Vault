@@ -440,6 +440,7 @@ export function GovernmentDataClient({
   const [searchValueBand, setSearchValueBand] = useState<SamContractValueBand>(initialValueBand);
   const [isLiveConfigured, setIsLiveConfigured] = useState(liveConfigured);
   const [browseAll, setBrowseAll] = useState(initialBrowseAll ?? false);
+  const [resultsPage, setResultsPage] = useState(1);
   const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
   const [newListName, setNewListName] = useState("");
 
@@ -668,6 +669,13 @@ export function GovernmentDataClient({
         ),
       [appliedKeywordTerms, keywordMode, records, searchAgency, searchNaics, searchSetAside, searchState, searchStatus, searchValueBand, sortBy],
     );
+  const resultsPageSize = 20;
+  const resultsTotalPages = Math.max(1, Math.ceil(filteredResults.length / resultsPageSize));
+  const currentResultsPage = Math.min(resultsPage, resultsTotalPages);
+  const visibleResults = filteredResults.slice(
+    (currentResultsPage - 1) * resultsPageSize,
+    currentResultsPage * resultsPageSize,
+  );
 
   const availableCount = useMemo(
     () => dedupeRecords(records).filter((record) => record.availabilityStatus === "Available").length,
@@ -1208,6 +1216,11 @@ export function GovernmentDataClient({
               <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-100">
                 {filteredResults.length} matching {filteredResults.length === 1 ? "result" : "results"}
               </div>
+              {records.length > 0 ? (
+                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                  Live records loaded: {records.length}
+                </div>
+              ) : null}
               {appliedNaicsCodes.length > 0 ? (
                 <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
                   Using codes: {appliedNaicsCodes.join(", ")}
@@ -1279,7 +1292,7 @@ export function GovernmentDataClient({
               </div>
             ) : null}
 
-            {filteredResults.map((result) => (
+            {visibleResults.map((result) => (
               <Link
                 key={result.id}
                 href={buildSamDetailHref(result, currentSearchHref)}
@@ -1337,6 +1350,34 @@ export function GovernmentDataClient({
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
                 No results yet. Try broad terms like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;, or use Browse all available contracts.
               </div>
+            ) : null}
+
+            {filteredResults.length > resultsPageSize ? (
+              <section className="flex flex-col gap-4 rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-slate-300">
+                  Page {currentResultsPage} of {resultsTotalPages}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={currentResultsPage <= 1}
+                    onClick={() => setResultsPage((current) => Math.max(1, current - 1))}
+                    className={buttonStyles({ variant: "ghost", size: "sm" })}
+                  >
+                    Previous page
+                  </button>
+                  <button
+                    type="button"
+                    disabled={currentResultsPage >= resultsTotalPages}
+                    onClick={() =>
+                      setResultsPage((current) => Math.min(resultsTotalPages, current + 1))
+                    }
+                    className={buttonStyles({ variant: "secondary", size: "sm" })}
+                  >
+                    Next page
+                  </button>
+                </div>
+              </section>
             ) : null}
           </div>
         </section>

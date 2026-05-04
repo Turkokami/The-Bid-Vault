@@ -8,7 +8,11 @@ import {
   readAttachmentReviewDraft,
   saveAttachmentReviewDraft,
 } from "@/lib/attachment-review-store";
-import { readBidDraft, saveBidDraft } from "@/lib/bid-builder-store";
+import {
+  mergeBidRequirements,
+  readBidDraft,
+  saveBidDraft,
+} from "@/lib/bid-builder-store";
 
 type AttachmentReviewClientProps = {
   reviewId: string;
@@ -44,6 +48,13 @@ function buildKickoffMemo(params: {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function slugifyRequirement(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export function AttachmentReviewClient(props: AttachmentReviewClientProps) {
@@ -137,6 +148,47 @@ export function AttachmentReviewClient(props: AttachmentReviewClientProps) {
 
     return sections.filter(Boolean).join("\n");
   }, [insights, internalNotes, props.title]);
+
+  const aiRequirements = useMemo(
+    () => [
+      ...insights.criticalAlerts.map((item) => ({
+        id: `critical-${slugifyRequirement(item.label)}`,
+        title: item.label,
+        detail: item.detail,
+        category: "critical" as const,
+        status: "needs-response" as const,
+      })),
+      ...insights.submissionItems.map((item) => ({
+        id: `submission-${slugifyRequirement(item.label)}`,
+        title: item.label,
+        detail: item.detail,
+        category: "submission" as const,
+        status: "needs-response" as const,
+      })),
+      ...insights.complianceItems.map((item) => ({
+        id: `compliance-${slugifyRequirement(item.label)}`,
+        title: item.label,
+        detail: item.detail,
+        category: "compliance" as const,
+        status: "needs-response" as const,
+      })),
+      ...insights.pricingItems.map((item) => ({
+        id: `pricing-${slugifyRequirement(item.label)}`,
+        title: item.label,
+        detail: item.detail,
+        category: "pricing" as const,
+        status: "needs-response" as const,
+      })),
+      ...insights.evaluationItems.map((item) => ({
+        id: `evaluation-${slugifyRequirement(item.label)}`,
+        title: item.label,
+        detail: item.detail,
+        category: "evaluation" as const,
+        status: "needs-response" as const,
+      })),
+    ],
+    [insights],
+  );
 
   const renderList = (
     title: string,
@@ -334,6 +386,10 @@ export function AttachmentReviewClient(props: AttachmentReviewClientProps) {
                     submissionChecklist: existingBidDraft?.submissionChecklist ?? "",
                     teammateAssignments: existingBidDraft?.teammateAssignments ?? "",
                     aiReviewPoints: aiReviewMemo,
+                    reviewRequirements: mergeBidRequirements(
+                      existingBidDraft?.reviewRequirements,
+                      aiRequirements,
+                    ),
                     updatedAt: new Date().toISOString(),
                   });
                   setStatusMessage("AI review points were saved to your bid workspace.");

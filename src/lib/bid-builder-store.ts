@@ -20,7 +20,18 @@ export type BidDraftRecord = {
   submissionChecklist: string;
   teammateAssignments: string;
   aiReviewPoints?: string;
+  reviewRequirements?: BidRequirementItem[];
   updatedAt: string;
+};
+
+export type BidRequirementStatus = "needs-response" | "addressed" | "blocked";
+
+export type BidRequirementItem = {
+  id: string;
+  title: string;
+  detail: string;
+  category: "critical" | "submission" | "compliance" | "pricing" | "evaluation";
+  status: BidRequirementStatus;
 };
 
 const BID_DRAFTS_KEY = "bid-vault-bid-drafts";
@@ -59,4 +70,22 @@ export function saveBidDraft(draft: BidDraftRecord) {
   const next = [{ ...draft, updatedAt: new Date().toISOString() }, ...existing];
   window.localStorage.setItem(BID_DRAFTS_KEY, JSON.stringify(next));
   window.dispatchEvent(new CustomEvent("bid-vault-bid-drafts-updated"));
+}
+
+export function mergeBidRequirements(
+  existing: BidRequirementItem[] = [],
+  incoming: BidRequirementItem[] = [],
+) {
+  const byId = new Map<string, BidRequirementItem>();
+
+  for (const item of existing) {
+    byId.set(item.id, item);
+  }
+
+  for (const item of incoming) {
+    const current = byId.get(item.id);
+    byId.set(item.id, current ? { ...item, status: current.status } : item);
+  }
+
+  return Array.from(byId.values());
 }

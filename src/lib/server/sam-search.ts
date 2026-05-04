@@ -65,6 +65,9 @@ type SamSnapshotCacheEntry = {
 };
 
 const SAM_SNAPSHOT_CACHE_TTL_MS = 1000 * 60 * 15;
+const SAM_API_PAGE_SIZE = 100;
+const SAM_MAX_BROWSE_PAGES = 8;
+const SAM_MAX_FILTERED_PAGES = 5;
 const samSnapshotCache = new Map<string, SamSnapshotCacheEntry>();
 
 function normalize(value: string) {
@@ -709,8 +712,18 @@ async function fetchSamRecords(options?: {
   const postedTo = formatSamApiDate(now);
   const postedFrom = formatSamApiDate(new Date(now.getTime() - 1000 * 60 * 60 * 24 * 364));
   const baseUrl = "https://api.sam.gov/opportunities/v2/search";
-  const limit = options?.searchPhrase ? 100 : 50;
-  const maxPages = options?.searchPhrase ? 1 : 1;
+  const hasTargetedFilters = !!(
+    options?.searchPhrase ||
+    options?.naics ||
+    options?.agency ||
+    options?.state
+  );
+  const limit = SAM_API_PAGE_SIZE;
+  const maxPages = options?.noticeId
+    ? 1
+    : hasTargetedFilters
+      ? SAM_MAX_FILTERED_PAGES
+      : SAM_MAX_BROWSE_PAGES;
   const fetched: SamOpportunityRecord[] = [];
   let totalRecords = Number.POSITIVE_INFINITY;
   let offset = 0;

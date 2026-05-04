@@ -3,6 +3,7 @@ import { buildStateLocalOpportunityId } from "@/lib/sources/normalizers";
 
 const TEXAS_ESBD_URL = "https://www.txsmartbuy.gov/esbd";
 const TEXAS_ROOT_URL = "https://www.txsmartbuy.gov";
+const TEXAS_MAX_ROWS = 200;
 
 function decodeHtml(value: string) {
   return value
@@ -83,7 +84,7 @@ export async function fetchLiveTexasOpportunities(): Promise<NormalizedStateLoca
     html.matchAll(/<div class="esbd-result-row">([\s\S]*?)<\/div><\/div>/gi),
   ).map((match) => match[1]);
 
-  return rows.slice(0, 40).flatMap((row) => {
+  return rows.slice(0, TEXAS_MAX_ROWS).flatMap((row) => {
     const titleMatch = row.match(/<div class="esbd-result-title"><a href="([^"]+)">([\s\S]*?)<\/a><\/div>/i);
     const solicitationId = stripHtml(row.match(/<strong>Solicitation ID:\s*<\/strong>\s*([^<]+)/i)?.[1] ?? "");
     const dueDateRaw = stripHtml(row.match(/<strong>Due Date:\s*<\/strong>\s*([^<]+)/i)?.[1] ?? "");

@@ -3,6 +3,7 @@ import type { RawWebsOpportunity } from "@/lib/sources/types";
 
 const WEBS_BID_CALENDAR_URL = "https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx";
 const WEBS_ROOT_URL = "https://pr-webs-vendor.des.wa.gov/";
+const WEBS_MAX_ROWS = 200;
 
 function decodeHtml(value: string) {
   return value
@@ -118,7 +119,7 @@ export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunit
 
   const matches = Array.from(html.matchAll(anchorRegex));
 
-  return matches.slice(0, 40).map((match, index) => {
+  return matches.slice(0, WEBS_MAX_ROWS).map((match, index) => {
     const href = match[1];
     const sourceId = href.match(/ID=(\d+)/i)?.[1] ?? `${index + 1}`;
     const title = stripHtml(match[2]);
