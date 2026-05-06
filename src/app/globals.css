@@ -6,7 +6,7 @@
 }
 
 :root {
-  --app-shell-offset: 1.5rem;
+  --app-shell-offset: 10.5rem;
 }
 
 html {
@@ -20,8 +20,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (min-width: 640px) {
+  :root {
+    --app-shell-offset: 11.25rem;
+  }
+}
+
 @media (min-width: 1024px) {
   :root {
-    --app-shell-offset: 2rem;
+    --app-shell-offset: 12.5rem;
   }
 }

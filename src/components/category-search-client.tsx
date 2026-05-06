@@ -81,13 +81,13 @@ export function CategorySearchClient({
     return {
       allCodes,
       samCodes: savedRecords
-        .filter((record) => record.sourceName === "Bid Vault Map" && /^\d{6}$/.test(record.code))
-        .map((record) => record.code),
-      websCodes: savedRecords
-        .filter((record) => record.sourceName === "WEBS")
+        .filter((record) => /^\d{6}$/.test(record.code))
         .map((record) => record.code),
       pscCodes: savedRecords
         .filter((record) => record.sourceName === "PSC")
+        .map((record) => record.code),
+      websCodes: savedRecords
+        .filter((record) => record.sourceName === "WEBS")
         .map((record) => record.code),
       searchTerms: Array.from(
         new Set(
@@ -102,12 +102,12 @@ export function CategorySearchClient({
   }, [savedRecords]);
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
+    <div className="space-y-6 sm:space-y-8">
+      <section className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur sm:rounded-[2rem] sm:p-8">
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
           Work Category / Commodity Code Search
         </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
           Find the category codes that match the work your business does.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
@@ -115,9 +115,9 @@ export function CategorySearchClient({
         </p>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)_300px]">
+      <section className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)_280px]">
         <aside className="space-y-5 xl:sticky xl:top-[calc(var(--app-shell-offset)-2rem)] xl:self-start">
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+          <section className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[2rem] sm:p-5">
             <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Start here</p>
             <label className="mt-4 block space-y-2 text-sm text-slate-200">
               <span className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export function CategorySearchClient({
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+          <section className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[2rem] sm:p-5">
             <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Narrow results</p>
 
             <div className="mt-4 space-y-4">
@@ -225,8 +225,8 @@ export function CategorySearchClient({
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
-            <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Browse A–Z</p>
+          <section className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[2rem] sm:p-5">
+            <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Browse A-Z</p>
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Browse categories alphabetically if you want to explore without searching first.
             </p>
@@ -259,12 +259,12 @@ export function CategorySearchClient({
           </section>
         </aside>
 
-        <div className="space-y-6">
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+        <div className="space-y-5 sm:space-y-6">
+          <section className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:rounded-[2rem] sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <p className="text-sm text-slate-300">
-                  Select the categories that best describe your services. These categories help us find matching contract opportunities for you.
+                  Select the categories that best describe your services. Federal-style matches are shown first, then state and local category options.
                 </p>
                 <p className="mt-3 text-sm font-medium text-emerald-200">
                   {results.length} category codes found
@@ -276,7 +276,7 @@ export function CategorySearchClient({
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+          <section className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 sm:rounded-[2rem] sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">
@@ -310,7 +310,7 @@ export function CategorySearchClient({
               <CategoryCodeCard key={record.id} record={record} />
             ))}
             {results.length === 0 ? (
-              <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/60 p-10 text-center text-sm text-slate-400">
+              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-8 text-center text-sm text-slate-400 sm:rounded-[2rem] sm:p-10">
                 No results yet. Try broad words like &quot;pest control&quot;, &quot;landscaping&quot;, or &quot;janitorial&quot;.
               </div>
             ) : null}
@@ -318,7 +318,7 @@ export function CategorySearchClient({
         </div>
 
         <aside className="space-y-5 xl:sticky xl:top-[calc(var(--app-shell-offset)-2rem)] xl:self-start">
-          <section className="rounded-[2rem] border border-emerald-400/20 bg-emerald-400/10 p-5">
+          <section className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4 sm:rounded-[2rem] sm:p-5">
             <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Selected codes</p>
             <h2 className="mt-3 text-xl font-semibold text-white">Saved for your business</h2>
             <p className="mt-2 text-sm leading-6 text-emerald-50/90">
@@ -371,7 +371,7 @@ export function CategorySearchClient({
                       Save as reusable search list
                     </button>
                     <p className="mt-3 text-xs leading-5 text-emerald-50/75">
-                      This list can be applied in bulk to SAM Search and WEBS Search.
+                      This list can be applied in bulk to Search SAM and state or local searches.
                     </p>
                   </div>
                 </>
@@ -383,7 +383,7 @@ export function CategorySearchClient({
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+          <section className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[2rem] sm:p-5">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Helpful examples</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
               <li>plumbing</li>
@@ -397,7 +397,7 @@ export function CategorySearchClient({
           </section>
 
           {savedCodeLists.length > 0 ? (
-            <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+            <section className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[2rem] sm:p-5">
               <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Reusable search lists</p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 Apply a saved code list to SAM or WEBS in bulk.

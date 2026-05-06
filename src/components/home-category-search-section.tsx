@@ -40,14 +40,14 @@ export function HomeCategorySearchSection() {
   );
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+    <section className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur sm:rounded-[2rem] sm:p-8">
+      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-5">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
               Work category search
             </p>
-            <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Find the category codes that match the work you do.
             </h2>
             <p className="mt-4 text-sm leading-7 text-slate-300">
@@ -81,7 +81,7 @@ export function HomeCategorySearchSection() {
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
+          <div className="rounded-[1.25rem] border border-emerald-400/20 bg-emerald-400/10 p-4 sm:rounded-[1.5rem]">
             <p className="text-sm text-emerald-50/90">
               These categories help us find matching contract opportunities for you.
             </p>
@@ -106,7 +106,7 @@ export function HomeCategorySearchSection() {
             {matches.map((record) => (
               <article
                 key={record.id}
-                className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4"
+                className="rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4 sm:rounded-[1.5rem]"
               >
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div>

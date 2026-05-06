@@ -963,7 +963,8 @@ export function searchCategoryCodes(records: CategoryCodeRecord[], filters: Cate
 
   return filtered.sort((left, right) => {
     if (!filters.query) {
-      return left.record.title.localeCompare(right.record.title);
+      return sourcePriority(right.record) - sourcePriority(left.record)
+        || left.record.title.localeCompare(right.record.title);
     }
 
     const score = (entry: IndexedCategoryCodeRecord) => {
@@ -974,6 +975,7 @@ export function searchCategoryCodes(records: CategoryCodeRecord[], filters: Cate
         if (entry.keywordText.includes(term)) total += 3;
         if (entry.searchText.includes(term)) total += 1;
       }
+      total += sourcePriority(entry.record) * 2;
       return total;
     };
 
@@ -1002,4 +1004,24 @@ export function mapServicePhraseToSuggestedCategories(query: string, records: Ca
   [...searchResults, ...relatedPool].forEach((record) => unique.set(record.id, record));
 
   return Array.from(unique.values()).slice(0, 8);
+}
+
+function sourcePriority(record: CategoryCodeRecord) {
+  if (/^\d{6}$/.test(record.code)) {
+    return 5;
+  }
+
+  if (record.sourceName === "PSC") {
+    return 4;
+  }
+
+  if (record.sourceName === "Bid Vault Map") {
+    return 3;
+  }
+
+  if (record.sourceName === "WEBS") {
+    return 1;
+  }
+
+  return 0;
 }
