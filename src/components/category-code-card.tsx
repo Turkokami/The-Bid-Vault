@@ -12,6 +12,18 @@ import {
   saveCategoryCodeId,
 } from "@/lib/demo-category-store";
 
+function buildSourceLabel(sourceName: CategoryCodeRecord["sourceName"]) {
+  if (sourceName === "PSC") {
+    return "Federal";
+  }
+
+  if (sourceName === "WEBS") {
+    return "State";
+  }
+
+  return "Local support";
+}
+
 export function CategoryCodeCard({ record }: { record: CategoryCodeRecord }) {
   const [savedIds, setSavedIds] = useState<string[]>([]);
 
@@ -34,7 +46,7 @@ export function CategoryCodeCard({ record }: { record: CategoryCodeRecord }) {
               {record.code}
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-              {record.sourceName}
+              {buildSourceLabel(record.sourceName)}
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
               {record.topLevelCategory}

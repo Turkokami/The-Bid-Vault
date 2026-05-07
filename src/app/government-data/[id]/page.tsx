@@ -103,6 +103,9 @@ function buildFallbackRecord(id: string, params: Record<string, string | string[
       .filter((term) => term.length > 4)
       .slice(0, 8),
     sourceUrl,
+    attachmentsUrl: sourceUrl
+      ? `${sourceUrl.replace(/\/$/, "")}#attachments-links`
+      : `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(noticeId)}`,
     postedDate: pickParam(params, "posted"),
     updatedDate: pickParam(params, "updated"),
     office: pickParam(params, "office") || "See SAM posting",
@@ -111,6 +114,18 @@ function buildFallbackRecord(id: string, params: Record<string, string | string[
     estimatedValue: null,
     estimatedValueLabel: pickParam(params, "estimatedValueLabel") || "Not listed",
     fullDescription: pickParam(params, "summary") || "Open the original SAM posting to review the complete description.",
+    agencyCode: "Not listed",
+    contractingAgency: agency,
+    contractingDepartment: agency,
+    congressionalDistrict: "Not listed",
+    cageCode: "Not listed",
+    primaryContactName: "Not listed",
+    primaryContactEmail: "Not listed",
+    primaryContactPhone: "Not listed",
+    descriptionOfRequirement:
+      pickParam(params, "summary") || "Open the original SAM posting to review the complete description.",
+    bondingRequired: false,
+    bondingLevel: "Not listed",
   };
 }
 
@@ -173,7 +188,7 @@ export default async function GovernmentDataRecordDetailPage({
 
   const keyTerms = Array.isArray(record.keyTerms) ? record.keyTerms : [];
   const sourceHref = buildSafeFederalSourceUrl(record);
-  const attachmentsHref = buildFederalAttachmentsUrl(record);
+  const attachmentsHref = record.attachmentsUrl || buildFederalAttachmentsUrl(record);
   const attachmentReviewHref = `/attachments/review?title=${encodeURIComponent(record.title)}&source=${encodeURIComponent("SAM.gov")}&agency=${encodeURIComponent(record.agency)}&dueDate=${encodeURIComponent(record.responseDeadline)}&sourceUrl=${encodeURIComponent(sourceHref)}&attachmentsUrl=${encodeURIComponent(attachmentsHref)}&setAside=${encodeURIComponent(record.setAside)}&naics=${encodeURIComponent(record.naicsCode)}&summary=${encodeURIComponent(record.synopsis)}&location=${encodeURIComponent(record.location)}`;
   const bidBuilderHref = `/bid-builder?title=${encodeURIComponent(record.title)}&noticeId=${encodeURIComponent(record.noticeId)}&agency=${encodeURIComponent(record.agency)}&source=${encodeURIComponent("SAM.gov")}&dueDate=${encodeURIComponent(record.responseDeadline)}&naics=${encodeURIComponent(record.naicsCode)}&setAside=${encodeURIComponent(record.setAside)}&summary=${encodeURIComponent(record.synopsis)}&sourceUrl=${encodeURIComponent(sourceHref)}&attachmentsUrl=${encodeURIComponent(attachmentsHref)}`;
 
@@ -246,6 +261,7 @@ export default async function GovernmentDataRecordDetailPage({
         links={[
           { id: "overview", label: "Quick facts" },
           { id: "details", label: "Opportunity summary" },
+          { id: "classification", label: "Classification and contacts" },
           { id: "attachments", label: "Attachments and files" },
           { id: "next-steps", label: "Helpful next steps" },
           { id: "related", label: "Related saved contracts" },
@@ -294,6 +310,14 @@ export default async function GovernmentDataRecordDetailPage({
               <div>
                 <dt className="text-slate-500">Estimated contract size</dt>
                 <dd className="mt-1 text-white">{record.estimatedValueLabel}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Reserved for Small Businesses?</dt>
+                <dd className="mt-1 text-white">{record.setAside}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Description of requirement</dt>
+                <dd className="mt-1 text-white">{record.descriptionOfRequirement}</dd>
               </div>
             </dl>
             <div className="mt-6">
@@ -358,6 +382,74 @@ export default async function GovernmentDataRecordDetailPage({
                 Search SAM is not fully live until a SAM.gov API key is configured in the app environment.
               </p>
             ) : null}
+          </article>
+        </section>
+
+        <section id="classification" className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+          <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+            <h2 className="text-xl font-semibold text-white">Classification and contract signals</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              These fields come from the SAM source record and help you judge fit, compliance risk, and routing.
+            </p>
+            <dl className="mt-5 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Government agency code</dt>
+                <dd className="mt-1 text-white">{record.agencyCode}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Contracting department</dt>
+                <dd className="mt-1 text-white">{record.contractingDepartment}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Contracting agency</dt>
+                <dd className="mt-1 text-white">{record.contractingAgency}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Service Category (PSC Code)</dt>
+                <dd className="mt-1 text-white">{record.pscCode}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Congressional district</dt>
+                <dd className="mt-1 text-white">{record.congressionalDistrict}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">CAGE code</dt>
+                <dd className="mt-1 text-white">{record.cageCode}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Bonding required?</dt>
+                <dd className="mt-1 text-white">{record.bondingRequired ? "Yes" : "Not listed"}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Bonding level</dt>
+                <dd className="mt-1 text-white">{record.bondingLevel}</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
+            <h2 className="text-xl font-semibold text-white">Contact information</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Use these details to confirm submission instructions and route questions before you invest too much time in the bid.
+            </p>
+            <dl className="mt-5 space-y-4 text-sm text-slate-300">
+              <div>
+                <dt className="text-slate-500">Primary contact</dt>
+                <dd className="mt-1 text-white">{record.primaryContactName}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Email</dt>
+                <dd className="mt-1 text-white">{record.primaryContactEmail}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Phone</dt>
+                <dd className="mt-1 text-white">{record.primaryContactPhone}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Office / sub-tier</dt>
+                <dd className="mt-1 text-white">{record.office}</dd>
+              </div>
+            </dl>
           </article>
         </section>
 

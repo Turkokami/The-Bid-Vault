@@ -2,6 +2,11 @@ import Link from "next/link";
 
 const researchTools = [
   {
+    href: "/learn",
+    label: "Learn Government Bidding",
+    description: "A beginner-friendly training page that explains how government bidding works, what to do first, and how to avoid common mistakes.",
+  },
+  {
     href: "/categories",
     label: "Category Search",
     description: "Find work category and commodity codes by plain English, then save the ones that fit your business.",

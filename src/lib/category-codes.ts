@@ -1008,18 +1008,18 @@ export function mapServicePhraseToSuggestedCategories(query: string, records: Ca
 
 function sourcePriority(record: CategoryCodeRecord) {
   if (/^\d{6}$/.test(record.code)) {
-    return 5;
+    return 7;
   }
 
   if (record.sourceName === "PSC") {
-    return 4;
-  }
-
-  if (record.sourceName === "Bid Vault Map") {
-    return 3;
+    return 6;
   }
 
   if (record.sourceName === "WEBS") {
+    return 3;
+  }
+
+  if (record.sourceName === "Bid Vault Map") {
     return 1;
   }
 

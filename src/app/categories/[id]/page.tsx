@@ -7,6 +7,18 @@ import {
   findRelatedCategoryCodes,
 } from "@/lib/category-codes";
 
+function buildSourceLabel(sourceName: "WEBS" | "PSC" | "Bid Vault Map") {
+  if (sourceName === "PSC") {
+    return "Federal";
+  }
+
+  if (sourceName === "WEBS") {
+    return "State";
+  }
+
+  return "Local support";
+}
+
 export default async function CategoryDetailPage({
   params,
 }: {
@@ -33,7 +45,7 @@ export default async function CategoryDetailPage({
             {record.code}
           </span>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-            {record.sourceName}
+            {buildSourceLabel(record.sourceName)}
           </span>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
             {record.topLevelCategory}
@@ -71,7 +83,7 @@ export default async function CategoryDetailPage({
               </div>
               <div>
                 <dt className="text-slate-500">Source</dt>
-                <dd className="mt-1 text-white">{record.sourceName}</dd>
+                <dd className="mt-1 text-white">{buildSourceLabel(record.sourceName)}</dd>
               </div>
               <div>
                 <dt className="text-slate-500">Top-level family</dt>

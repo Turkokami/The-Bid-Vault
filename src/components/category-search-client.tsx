@@ -23,6 +23,38 @@ import {
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+const naicsLearningPoints = [
+  {
+    title: "What NAICS means",
+    description:
+      "NAICS is the official industry classification system the government uses to label the type of work a business performs.",
+  },
+  {
+    title: "How codes are organized",
+    description:
+      "The full NAICS manual is organized by sector, then subsector, then more specific industry codes. Start broad, then narrow down.",
+  },
+  {
+    title: "How to choose a code",
+    description:
+      "Pick the code that best matches the main work you perform, not just a single side service. Similar businesses can still use different codes.",
+  },
+  {
+    title: "Why the right code matters",
+    description:
+      "Small-business size rules, contract matching, and search results can all change based on the NAICS code attached to an opportunity.",
+  },
+];
+
+const contractorStartingPoints = [
+  "23 Construction",
+  "236 Building Construction",
+  "237 Heavy and Civil Engineering Construction",
+  "238 Specialty Trade Contractors",
+  "561 Administrative and Support Services",
+  "541 Professional, Scientific, and Technical Services",
+];
+
 function toggleValue(values: string[], value: string) {
   return values.includes(value)
     ? values.filter((item) => item !== value)
@@ -113,6 +145,50 @@ export function CategorySearchClient({
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
           Use this tool to find the category codes that match the services or products your business provides.
         </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/learn" className={buttonStyles({ variant: "secondary", size: "sm" })}>
+            Learn government bidding basics
+          </Link>
+          <Link href="/sam-search" className={buttonStyles({ variant: "ghost", size: "sm" })}>
+            Search contracts with saved codes
+          </Link>
+        </div>
+      </section>
+
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.9fr)]">
+        <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-5 sm:rounded-[2rem] sm:p-6">
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">
+            NAICS made simpler
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-white">
+            Use the official NAICS structure without getting buried in jargon.
+          </h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {naicsLearningPoints.map((item) => (
+              <div key={item.title} className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                <p className="font-semibold text-white">{item.title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-5 sm:rounded-[2rem] sm:p-6">
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">
+            Good starting areas for contractors
+          </p>
+          <p className="mt-3 text-sm leading-6 text-emerald-50/90">
+            If you are not sure where to start, these are common NAICS families for contractors,
+            trades, maintenance teams, and service vendors.
+          </p>
+          <ul className="mt-5 space-y-3 text-sm text-white">
+            {contractorStartingPoints.map((item) => (
+              <li key={item} className="rounded-[1rem] border border-emerald-400/15 bg-black/20 px-4 py-3">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)_280px]">
@@ -264,7 +340,7 @@ export function CategorySearchClient({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <p className="text-sm text-slate-300">
-                  Select the categories that best describe your services. Federal-style matches are shown first, then state and local category options.
+                  Select the categories that best describe your services. Federal and SAM-style codes are shown first, then state-level codes, then local support matches.
                 </p>
                 <p className="mt-3 text-sm font-medium text-emerald-200">
                   {results.length} category codes found

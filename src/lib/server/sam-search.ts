@@ -41,6 +41,7 @@ export type SamSearchQuery = {
 export type SamOpportunityRecord = ExtractedContractRecord & {
   noticeId: string;
   sourceUrl: string;
+  attachmentsUrl: string;
   postedDate: string;
   updatedDate: string;
   office: string;
@@ -49,6 +50,17 @@ export type SamOpportunityRecord = ExtractedContractRecord & {
   fullDescription: string;
   estimatedValue: number | null;
   estimatedValueLabel: string;
+  agencyCode: string;
+  contractingAgency: string;
+  contractingDepartment: string;
+  congressionalDistrict: string;
+  cageCode: string;
+  primaryContactName: string;
+  primaryContactEmail: string;
+  primaryContactPhone: string;
+  descriptionOfRequirement: string;
+  bondingRequired: boolean;
+  bondingLevel: string;
 };
 
 type SamSearchSnapshot = {
@@ -462,6 +474,52 @@ function buildSourceUrl(record: Record<string, unknown>, noticeId: string) {
   return rawUrl || `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(noticeId)}`;
 }
 
+function buildAttachmentsUrl(record: Record<string, unknown>, noticeId: string) {
+  const directAttachmentUrl = pickString(
+    record.attachment,
+    record.attachmentsUrl,
+    record.attachmentUrl,
+  );
+
+  if (/^https?:\/\//i.test(directAttachmentUrl)) {
+    return directAttachmentUrl;
+  }
+
+  const sourceUrl = buildSourceUrl(record, noticeId);
+  const oppId = sourceUrl.match(/\/opp\/([^/?#]+)\/view/i)?.[1];
+
+  if (oppId) {
+    return `https://sam.gov/opp/${encodeURIComponent(oppId)}/view#attachments-links`;
+  }
+
+  return `https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(noticeId)}`;
+}
+
+function buildBondingLevel(record: Record<string, unknown>) {
+  const levelType = pickString(
+    record.bondingLevelType,
+    record.bondingType,
+    record.bondType,
+  );
+  const levelValue = pickString(
+    record.bondingLevelValue,
+    record.bondingValue,
+    record.bondAmount,
+  );
+
+  return [levelType, levelValue].filter(Boolean).join(": ") || "Not listed";
+}
+
+function buildBondingRequired(record: Record<string, unknown>) {
+  const flag = pickString(
+    record.bondingToBidFlag,
+    record.bidBondRequired,
+    record.bondRequired,
+  ).toLowerCase();
+
+  return flag === "yes" || flag === "true" || flag === "required";
+}
+
 function getResponseArray(payload: unknown): Record<string, unknown>[] {
   if (Array.isArray(payload)) {
     return payload as Record<string, unknown>[];
@@ -635,6 +693,7 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
   const postedDate = toIsoDate(pickString(record.postedDate, record.publishDate, record.archiveDate));
   const updatedDate = toIsoDate(pickString(record.lastModifiedDate, record.modifiedDate, record.updatedDate));
   const sourceUrl = buildSourceUrl(record, noticeId);
+  const attachmentsUrl = buildAttachmentsUrl(record, noticeId);
   const location = buildLocation(record);
   const award = record.award as Record<string, unknown> | undefined;
   const estimatedValue = pickNumber(
@@ -649,6 +708,28 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
   const primaryContact = Array.isArray(record.pointOfContact)
     ? (record.pointOfContact[0] as Record<string, unknown> | undefined)
     : undefined;
+  const organizationHierarchy = pickString(
+    record.fullParentPathName,
+    record.organizationHierarchy,
+  );
+  const contractingDepartment = pickString(
+    record.department,
+    record.departmentName,
+    organizationHierarchy.split("/")[0],
+  );
+  const contractingAgency = pickString(
+    record.organizationName,
+    record.subTier,
+    record.subtier,
+    organizationHierarchy.split("/").at(-1),
+  );
+  const descriptionOfRequirement =
+    pickString(
+      record.descriptionOfRequirement,
+      record.description,
+      record.summary,
+      record.additionalInfo,
+    ) || buildSynopsis(record, title, agency);
   const stableIdSeed =
     noticeId ||
     sourceUrl ||
@@ -674,6 +755,7 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
       .filter((term) => term.length > 4)
       .slice(0, 8),
     sourceUrl,
+    attachmentsUrl,
     postedDate,
     updatedDate,
     office:
@@ -687,11 +769,28 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
     pscCode: pickString(record.pscCode, record.classificationCode) || "Not listed",
     setAside:
       pickString(record.typeOfSetAsideDescription, record.typeOfSetAside, record.setAside) || "Not listed",
-    fullDescription:
-      pickString(record.description, record.additionalInfoLink, record.additionalInfo) ||
-      buildSynopsis(record, title, agency),
+    fullDescription: descriptionOfRequirement,
     estimatedValue,
     estimatedValueLabel: formatCurrencyLabel(estimatedValue),
+    agencyCode: pickString(record.agencyCode, record.officeCode, record.organizationCode) || "Not listed",
+    contractingAgency: contractingAgency || "Not listed",
+    contractingDepartment: contractingDepartment || "Not listed",
+    congressionalDistrict:
+      pickString(
+        record.congressionalDistrict,
+        record.placeOfPerformanceCongDist,
+        primaryContact?.congressionalDistrict,
+      ) || "Not listed",
+    cageCode: pickString(record.cageCode, record.cage, award?.awardeeCageCode) || "Not listed",
+    primaryContactName:
+      pickString(primaryContact?.fullName, primaryContact?.name, record.primaryContactName) || "Not listed",
+    primaryContactEmail:
+      pickString(primaryContact?.email, record.primaryContactEmail, record.email) || "Not listed",
+    primaryContactPhone:
+      pickString(primaryContact?.phone, record.primaryContactPhone, record.phone) || "Not listed",
+    descriptionOfRequirement,
+    bondingRequired: buildBondingRequired(record),
+    bondingLevel: buildBondingLevel(record),
   };
 }
 
