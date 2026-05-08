@@ -137,7 +137,7 @@ export function UsStateTileMap({
 
   const activeState = states.find((state) => state.stateCode === activeStateCode) ?? states[0];
   const localDirectoryEntries = activeState
-    ? getLocalDirectoryEntries(activeState.stateCode, activeState.name).slice(0, 4)
+    ? getLocalDirectoryEntries(activeState.stateCode).slice(0, 4)
     : [];
 
   return (

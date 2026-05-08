@@ -80,7 +80,7 @@ export default async function WashingtonStateLocalPage({
         stateCode: "WA",
         statewideSources: focusSources,
         localSources: [],
-        localDirectoryEntries: getLocalDirectoryEntries("WA", "Washington"),
+        localDirectoryEntries: getLocalDirectoryEntries("WA"),
       }}
       enableLiveRefresh
       refreshButtonLabel="Refresh live WEBS records"

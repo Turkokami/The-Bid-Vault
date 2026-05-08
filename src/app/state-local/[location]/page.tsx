@@ -399,7 +399,7 @@ function getStateNavigatorData(
     stateCode,
     statewideSources,
     localSources,
-    localDirectoryEntries: getLocalDirectoryEntries(stateCode, stateName),
+    localDirectoryEntries: getLocalDirectoryEntries(stateCode),
   };
 }
 

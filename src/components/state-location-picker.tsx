@@ -126,7 +126,7 @@ export function StateLocationPicker({
     (state) => state.connectionMode === "live" || state.connectionMode === "portal-assisted",
   );
   const localDirectoryEntries = selectedState
-    ? getLocalDirectoryEntries(selectedState.stateCode, selectedState.name).slice(0, 4)
+    ? getLocalDirectoryEntries(selectedState.stateCode).slice(0, 4)
     : [];
 
   return (
