@@ -4,10 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buttonStyles } from "@/components/ui/button";
 import {
-  getCityContractsSearchUrl,
-  getCountyContractsSearchUrl,
   getLocalDirectoryEntries,
-  getLocalGovernmentContractsSearchUrl,
   type StateDirectoryEntry,
 } from "@/lib/sources/state-registry";
 
@@ -128,22 +125,6 @@ export function StateLocationPicker({
   const liveStates = filteredStates.filter(
     (state) => state.connectionMode === "live" || state.connectionMode === "portal-assisted",
   );
-  const countySearchLinks = selectedState
-    ? [
-        {
-          href: getCountyContractsSearchUrl(selectedState.name),
-          label: `Search county bids in ${selectedState.name}`,
-        },
-        {
-          href: getCityContractsSearchUrl(selectedState.name),
-          label: `Search city bids in ${selectedState.name}`,
-        },
-        {
-          href: getLocalGovernmentContractsSearchUrl(selectedState.name),
-          label: `Search local government bids in ${selectedState.name}`,
-        },
-      ]
-    : [];
   const localDirectoryEntries = selectedState
     ? getLocalDirectoryEntries(selectedState.stateCode, selectedState.name).slice(0, 4)
     : [];
@@ -224,35 +205,27 @@ export function StateLocationPicker({
               Popular county and city starting points
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              Start with a few useful local launch points, then use the broader county and city search links if you need to go deeper.
+              Start with a few useful official county and city source links for this state.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            {localDirectoryEntries.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
               {localDirectoryEntries.map((entry) => (
                 <a
                   key={entry.slug}
                   href={entry.href}
                   target="_blank"
                   rel="noreferrer"
-                  className={buttonStyles({
-                    variant: entry.sourceType === "portal" ? "secondary" : "ghost",
-                    size: "sm",
-                  })}
+                  className={buttonStyles({ variant: "secondary", size: "sm" })}
                 >
                   {entry.label}
                 </a>
               ))}
-              {countySearchLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={buttonStyles({ variant: "ghost", size: "sm" })}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-slate-400">
+                Official county and city source links will appear here as we connect them for this state.
+              </p>
+            )}
           </div>
         ) : null}
       </div>

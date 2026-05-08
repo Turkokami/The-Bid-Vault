@@ -1,10 +1,7 @@
 import { notFound } from "next/navigation";
 import { StateLocalClient } from "@/components/state-local-client";
 import {
-  getCityContractsSearchUrl,
-  getCountyContractsSearchUrl,
   getStateDirectoryEntry,
-  getLocalGovernmentContractsSearchUrl,
   getLocalDirectoryEntries,
 } from "@/lib/sources/state-registry";
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
@@ -403,20 +400,6 @@ function getStateNavigatorData(
     statewideSources,
     localSources,
     localDirectoryEntries: getLocalDirectoryEntries(stateCode, stateName),
-    countySearchLinks: [
-      {
-        href: getCountyContractsSearchUrl(stateName),
-        label: `Search county bids in ${stateName}`,
-      },
-      {
-        href: getCityContractsSearchUrl(stateName),
-        label: `Search city bids in ${stateName}`,
-      },
-      {
-        href: getLocalGovernmentContractsSearchUrl(stateName),
-        label: `Search local government bids in ${stateName}`,
-      },
-    ],
   };
 }
 

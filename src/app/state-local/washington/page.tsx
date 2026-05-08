@@ -81,20 +81,6 @@ export default async function WashingtonStateLocalPage({
         statewideSources: focusSources,
         localSources: [],
         localDirectoryEntries: getLocalDirectoryEntries("WA", "Washington"),
-        countySearchLinks: [
-          {
-            href: "https://www.bing.com/search?q=Washington%20county%20bid%20opportunities%20procurement%20site%3A.gov",
-            label: "Search county bids in Washington",
-          },
-          {
-            href: "https://www.bing.com/search?q=Washington%20city%20bid%20opportunities%20procurement%20site%3A.gov",
-            label: "Search city bids in Washington",
-          },
-          {
-            href: "https://www.bing.com/search?q=Washington%20local%20government%20bids%20procurement%20site%3A.gov",
-            label: "Search local government bids in Washington",
-          },
-        ],
       }}
       enableLiveRefresh
       refreshButtonLabel="Refresh live WEBS records"

@@ -8,6 +8,7 @@ import { getViewerContext } from "@/lib/server/workspace";
 const navigation = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/learn", label: "Learn" },
   { href: "/sam-search", label: "Search SAM" },
   { href: "/state-local", label: "State & Local" },
   { href: "/bid-builder", label: "Build Bid" },

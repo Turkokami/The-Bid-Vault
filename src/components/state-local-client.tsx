@@ -107,10 +107,6 @@ export function StateLocalClient({
     statewideSources: StateLocalSourceSummary[];
     localSources: StateLocalSourceSummary[];
     localDirectoryEntries: LocalDirectoryEntry[];
-    countySearchLinks: Array<{
-      href: string;
-      label: string;
-    }>;
   };
   showSourceHubSection?: boolean;
 }) {
@@ -269,10 +265,7 @@ export function StateLocalClient({
                           href={entry.href}
                           target="_blank"
                           rel="noreferrer"
-                          className={buttonStyles({
-                            variant: entry.sourceType === "portal" ? "secondary" : "ghost",
-                            size: "sm",
-                          })}
+                          className={buttonStyles({ variant: "secondary", size: "sm" })}
                         >
                           {entry.label}
                         </a>
@@ -317,28 +310,9 @@ export function StateLocalClient({
                   </div>
                 ) : (
                   <div className="rounded-[1.25rem] border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-400">
-                    This state page is ready for county and city rollout. Until we connect more dedicated local sources here, use these quick local search links to jump straight into county and city contract hunting for this state.
+                    This state page is ready for county and city rollout. Official county and city source links will appear here as we connect them for this state.
                   </div>
                 )}
-                <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-sm font-medium text-white">Broader local search shortcuts</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
-                    Use these when you want to widen the search beyond the named county and city sources above.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                  {stateNavigator.countySearchLinks.map((link) => (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={buttonStyles({ variant: "secondary", size: "sm" })}
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                  </div>
-                </div>
               </div>
             </article>
           </div>

@@ -134,6 +134,38 @@ export default function Home() {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+              Learn how to win bids
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              Need help understanding how government contracts work?
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              Open the training page for a simple walkthrough on how to find bids, read the requirements,
+              match your business to the right codes, and build a response without getting buried in jargon.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/learn"
+              className={buttonStyles({ variant: "primary", size: "lg" })}
+            >
+              Open training guide
+            </Link>
+            <Link
+              href="/sam-search"
+              className={buttonStyles({ variant: "secondary", size: "lg" })}
+            >
+              Search live contracts
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
               Service plans
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">

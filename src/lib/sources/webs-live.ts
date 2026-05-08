@@ -103,10 +103,13 @@ function buildSummary(text: string, title: string) {
 
 export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunity[]> {
   const response = await fetch(WEBS_BID_CALENDAR_URL, {
-    next: { revalidate: 1800 },
+    cache: "no-store",
     headers: {
       "user-agent": "The Bid Vault/1.0",
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "accept-language": "en-US,en;q=0.9",
     },
+    signal: AbortSignal.timeout(20000),
   });
 
   if (!response.ok) {
@@ -118,6 +121,9 @@ export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunit
     /<a[^>]+href="(Search_BidDetails\.aspx\?ID=\d+)"[^>]*>([\s\S]*?)<\/a>/gi;
 
   const matches = Array.from(html.matchAll(anchorRegex));
+  if (matches.length === 0) {
+    throw new Error("WEBS bid calendar returned no recognizable bid rows");
+  }
 
   return matches.slice(0, WEBS_MAX_ROWS).map((match, index) => {
     const href = match[1];
