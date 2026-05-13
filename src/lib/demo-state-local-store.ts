@@ -21,8 +21,8 @@ type StateLocalSnapshot = {
   sources: StateLocalSourceSummary[];
 };
 
-async function fetchStateLocalSnapshot(): Promise<StateLocalSnapshot> {
-  const response = await fetch("/api/state-local/snapshot", {
+async function fetchStateLocalSnapshot(forceRefresh = false): Promise<StateLocalSnapshot> {
+  const response = await fetch(`/api/state-local/snapshot${forceRefresh ? "?refresh=1" : ""}`, {
     cache: "no-store",
   });
 
@@ -86,7 +86,6 @@ export function removeSavedStateLocalOpportunity(opportunityId: string) {
 }
 
 export async function forceRefreshStateLocalSource() {
-  await fetchStateLocalSnapshot();
+  await fetchStateLocalSnapshot(true);
   window.dispatchEvent(new CustomEvent("bid-vault-state-local-updated"));
 }
-

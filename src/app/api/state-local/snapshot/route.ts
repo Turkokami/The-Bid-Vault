@@ -4,9 +4,10 @@ import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const snapshot = await getStateLocalSyncSnapshot();
+    const refresh = new URL(request.url).searchParams.get("refresh") === "1";
+    const snapshot = await getStateLocalSyncSnapshot({ forceRefresh: refresh });
     return NextResponse.json(snapshot);
   } catch {
     return NextResponse.json(

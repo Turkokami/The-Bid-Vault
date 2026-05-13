@@ -6,6 +6,7 @@ import { CategoryCodeCard } from "@/components/category-code-card";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
 import {
+  CATEGORY_SEARCH_DEFAULT_RESULT_LIMIT,
   buildCategoryFilterOptions,
   mapServicePhraseToSuggestedCategories,
   searchCategoryCodes,
@@ -55,6 +56,8 @@ const contractorStartingPoints = [
   "541 Professional, Scientific, and Technical Services",
 ];
 
+const FAMILY_FILTER_PREVIEW_LIMIT = 14;
+
 function toggleValue(values: string[], value: string) {
   return values.includes(value)
     ? values.filter((item) => item !== value)
@@ -72,6 +75,8 @@ export function CategorySearchClient({
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [savedCodeLists, setSavedCodeLists] = useState<SavedNaicsCodeList[]>([]);
   const [customListName, setCustomListName] = useState("");
+  const [visibleResultCount, setVisibleResultCount] = useState(CATEGORY_SEARCH_DEFAULT_RESULT_LIMIT);
+  const [showAllFamilies, setShowAllFamilies] = useState(false);
   const deferredQuery = useDeferredValue(filters.query);
   const deferredExactCode = useDeferredValue(filters.exactCode);
 
@@ -104,6 +109,19 @@ export function CategorySearchClient({
     () => mapServicePhraseToSuggestedCategories(deferredQuery, records),
     [deferredQuery, records],
   );
+  const visibleResults = useMemo(
+    () => results.slice(0, visibleResultCount),
+    [results, visibleResultCount],
+  );
+  const visibleFamilies = useMemo(() => {
+    if (showAllFamilies) {
+      return options.families;
+    }
+
+    const activeFamilies = filters.families.filter((family) => options.families.includes(family));
+    const previewFamilies = options.families.slice(0, FAMILY_FILTER_PREVIEW_LIMIT);
+    return Array.from(new Set([...activeFamilies, ...previewFamilies]));
+  }, [filters.families, options.families, showAllFamilies]);
   const savedRecords = useMemo(
     () => records.filter((record) => savedIds.includes(record.id)),
     [records, savedIds],
@@ -275,7 +293,7 @@ export function CategorySearchClient({
               <div>
                 <p className="text-sm font-medium text-white">Category family</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {options.families.map((family) => {
+                  {visibleFamilies.map((family) => {
                     const active = filters.families.includes(family);
                     return (
                       <button
@@ -297,6 +315,15 @@ export function CategorySearchClient({
                     );
                   })}
                 </div>
+                {options.families.length > FAMILY_FILTER_PREVIEW_LIMIT ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllFamilies((current) => !current)}
+                    className={`${buttonStyles({ variant: "ghost", size: "sm" })} mt-3`}
+                  >
+                    {showAllFamilies ? "Show fewer families" : `Show all ${options.families.length} families`}
+                  </button>
+                ) : null}
               </div>
             </div>
           </section>
@@ -344,6 +371,7 @@ export function CategorySearchClient({
                 </p>
                 <p className="mt-3 text-sm font-medium text-emerald-200">
                   {results.length} category codes found
+                  {results.length > visibleResults.length ? ` / showing ${visibleResults.length} now` : ""}
                 </p>
               </div>
               <Link href="/contracts" className={buttonStyles({ variant: "secondary", size: "sm" })}>
@@ -382,12 +410,28 @@ export function CategorySearchClient({
           </section>
 
           <section className="space-y-4">
-            {results.map((record) => (
-              <CategoryCodeCard key={record.id} record={record} />
+            {visibleResults.map((record) => (
+              <CategoryCodeCard key={record.id} record={record} isSaved={savedIds.includes(record.id)} />
             ))}
             {results.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-8 text-center text-sm text-slate-400 sm:rounded-[2rem] sm:p-10">
                 No results yet. Try broad words like &quot;pest control&quot;, &quot;landscaping&quot;, or &quot;janitorial&quot;.
+              </div>
+            ) : null}
+            {results.length > visibleResults.length ? (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4 sm:rounded-[2rem]">
+                <p className="text-sm text-slate-300">
+                  Showing {visibleResults.length} of {results.length} results to keep the page fast and easy to scan.
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleResultCount((current) => current + CATEGORY_SEARCH_DEFAULT_RESULT_LIMIT)
+                  }
+                  className={buttonStyles({ variant: "secondary", size: "sm" })}
+                >
+                  Load more results
+                </button>
               </div>
             ) : null}
           </section>
@@ -498,7 +542,7 @@ export function CategorySearchClient({
                           href={`/state-local/washington?codes=${encodeURIComponent(websCodes.join(", "))}&keywords=${encodeURIComponent(keywords)}`}
                           className={buttonStyles({ variant: "ghost", size: "sm" })}
                         >
-                          Search WEBS
+                          Open Washington view
                         </Link>
                         <button
                           type="button"

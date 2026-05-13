@@ -3,20 +3,16 @@ import { StateLocationPicker } from "@/components/state-location-picker";
 import { UsStateTileMap } from "@/components/us-state-tile-map";
 import { buttonStyles } from "@/components/ui/button";
 import { getStatePortalHref, stateDirectory } from "@/lib/sources/state-registry";
-import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
+import { getStateLocalSourceCatalog } from "@/lib/sources/sync-state-local";
 
 function sourceViewHref(sourceCode: string) {
   return getStatePortalHref(sourceCode);
 }
 
 export default async function StateLocalPage() {
-  const snapshot = await getStateLocalSyncSnapshot().catch(() => ({
-    opportunities: [],
-    syncLogs: [],
-    sources: [],
-  }));
-  const connectedSources = snapshot.sources.filter((source) => source.status === "Connected");
-  const localSources = snapshot.sources.filter((source) => source.sourceType === "County / City");
+  const sourceCatalog = getStateLocalSourceCatalog();
+  const connectedSources = sourceCatalog.filter((source) => source.status === "Connected");
+  const localSources = sourceCatalog.filter((source) => source.sourceType === "County / City");
   const northernArizonaSources = localSources.filter((source) => source.regionLabel === "Northern Arizona");
   const serviceAreaSources = localSources.filter((source) =>
     ["Northwest Arizona", "Eastern Nevada", "Southern Nevada"].includes(source.regionLabel ?? ""),

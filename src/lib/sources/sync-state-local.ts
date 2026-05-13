@@ -10,6 +10,20 @@ import type {
 
 let cachedWebsOpportunities: NormalizedStateLocalOpportunity[] = [];
 let cachedTexasOpportunities: NormalizedStateLocalOpportunity[] = [];
+const STATE_LOCAL_SNAPSHOT_CACHE_TTL_MS = 1000 * 60 * 10;
+
+type StateLocalSnapshot = {
+  opportunities: NormalizedStateLocalOpportunity[];
+  syncLogs: StateLocalSourceSyncLog[];
+  sources: StateLocalSourceSummary[];
+};
+
+let cachedStateLocalSnapshot:
+  | {
+      cachedAt: number;
+      snapshot: StateLocalSnapshot;
+    }
+  | null = null;
 
 const localAndRegionalSources: StateLocalSourceSummary[] = [
   {
@@ -170,6 +184,18 @@ const statewideSources: StateLocalSourceSummary[] = stateDirectory.map((state) =
         : "Not connected yet",
 }));
 
+function cloneSnapshot(snapshot: StateLocalSnapshot): StateLocalSnapshot {
+  return {
+    opportunities: snapshot.opportunities.map((opportunity) => ({ ...opportunity })),
+    syncLogs: snapshot.syncLogs.map((log) => ({ ...log })),
+    sources: snapshot.sources.map((source) => ({ ...source })),
+  };
+}
+
+export function getStateLocalSourceCatalog(): StateLocalSourceSummary[] {
+  return [...statewideSources, ...localAndRegionalSources].map((source) => ({ ...source }));
+}
+
 function formatSyncTime() {
   return new Date().toLocaleString("en-US", {
     month: "short",
@@ -200,14 +226,20 @@ function updateConnectedSource(
   };
 }
 
-export async function getStateLocalSyncSnapshot(): Promise<{
-  opportunities: NormalizedStateLocalOpportunity[];
-  syncLogs: StateLocalSourceSyncLog[];
-  sources: StateLocalSourceSummary[];
-}> {
+export async function getStateLocalSyncSnapshot(options?: {
+  forceRefresh?: boolean;
+}): Promise<StateLocalSnapshot> {
+  if (
+    !options?.forceRefresh &&
+    cachedStateLocalSnapshot &&
+    Date.now() - cachedStateLocalSnapshot.cachedAt < STATE_LOCAL_SNAPSHOT_CACHE_TTL_MS
+  ) {
+    return cloneSnapshot(cachedStateLocalSnapshot.snapshot);
+  }
+
   const opportunities: NormalizedStateLocalOpportunity[] = [];
   const syncLogs: StateLocalSourceSyncLog[] = [];
-  const sources = [...statewideSources, ...localAndRegionalSources];
+  const sources = getStateLocalSourceCatalog();
 
   try {
     const raws = await fetchLiveWebsRawOpportunities();
@@ -376,7 +408,7 @@ export async function getStateLocalSyncSnapshot(): Promise<{
       "North Carolina eVP is available in portal-assisted mode. The Bid Vault keeps your statewide and county workflow organized, then hands you into the live eVP portal for the official postings.",
   });
 
-  return {
+  const snapshot: StateLocalSnapshot = {
     opportunities,
     syncLogs,
     sources: [
@@ -395,4 +427,11 @@ export async function getStateLocalSyncSnapshot(): Promise<{
       ...sources.filter((source) => source.sourceCode !== "washington"),
     ],
   };
+
+  cachedStateLocalSnapshot = {
+    cachedAt: Date.now(),
+    snapshot: cloneSnapshot(snapshot),
+  };
+
+  return snapshot;
 }

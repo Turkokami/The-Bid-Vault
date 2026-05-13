@@ -1,13 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 import { InfoTip } from "@/components/info-tip";
 import { buttonStyles } from "@/components/ui/button";
 import type { CategoryCodeRecord } from "@/lib/category-codes";
 import {
-  hydrateSavedCategoryPreferences,
-  readSavedCategoryCodeIds,
   removeCategoryCodeId,
   saveCategoryCodeId,
 } from "@/lib/demo-category-store";
@@ -24,18 +21,13 @@ function buildSourceLabel(sourceName: CategoryCodeRecord["sourceName"]) {
   return "Local support";
 }
 
-export function CategoryCodeCard({ record }: { record: CategoryCodeRecord }) {
-  const [savedIds, setSavedIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    const sync = () => setSavedIds(readSavedCategoryCodeIds());
-    sync();
-    void hydrateSavedCategoryPreferences();
-    window.addEventListener("bid-vault-category-codes-updated", sync);
-    return () => window.removeEventListener("bid-vault-category-codes-updated", sync);
-  }, []);
-
-  const isSaved = useMemo(() => savedIds.includes(record.id), [record.id, savedIds]);
+export function CategoryCodeCard({
+  record,
+  isSaved,
+}: {
+  record: CategoryCodeRecord;
+  isSaved: boolean;
+}) {
 
   return (
     <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/25 hover:bg-emerald-400/5">

@@ -19,6 +19,8 @@ export type CategorySearchFilters = {
   letter: string;
 };
 
+export const CATEGORY_SEARCH_DEFAULT_RESULT_LIMIT = 24;
+
 type IndexedCategoryCodeRecord = {
   record: CategoryCodeRecord;
   codeLower: string;
@@ -935,6 +937,21 @@ export function searchCategoryCodes(records: CategoryCodeRecord[], filters: Cate
   const queryTerms = tokenize(filters.query);
   const exactCode = filters.exactCode.trim().toLowerCase();
   const indexedRecords = getIndexedRecords(records);
+  const hasFilters =
+    queryTerms.length > 0
+    || Boolean(exactCode)
+    || filters.sources.length > 0
+    || filters.families.length > 0
+    || Boolean(filters.letter);
+
+  if (!hasFilters) {
+    return curatedCategoryCodeRecords
+      .slice()
+      .sort(
+        (left, right) =>
+          sourcePriority(right) - sourcePriority(left) || left.title.localeCompare(right.title),
+      );
+  }
 
   const filtered = indexedRecords.filter((entry) => {
     const record = entry.record;
@@ -987,6 +1004,10 @@ export function mapServicePhraseToSuggestedCategories(query: string, records: Ca
   const trimmedQuery = query.trim();
   if (!trimmedQuery) {
     return curatedCategoryCodeRecords.slice(0, 8);
+  }
+
+  if (trimmedQuery.length < 2) {
+    return [];
   }
 
   const searchResults = searchCategoryCodes(records, {

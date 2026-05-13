@@ -138,7 +138,11 @@ export function StateLocalClient({
       }
     };
 
-    void sync();
+    if (initialOpportunities.length === 0 && initialSources.length === 0) {
+      void sync();
+    } else {
+      setSavedCount(readSavedStateLocalEntries().length);
+    }
     window.addEventListener("bid-vault-state-local-updated", sync);
     window.addEventListener("bid-vault-state-local-saved-updated", sync);
 
@@ -146,7 +150,7 @@ export function StateLocalClient({
       window.removeEventListener("bid-vault-state-local-updated", sync);
       window.removeEventListener("bid-vault-state-local-saved-updated", sync);
     };
-  }, [refreshFailureMessage]);
+  }, [initialOpportunities.length, initialSources.length, refreshFailureMessage]);
 
   useEffect(() => {
     const syncSavedLists = () => setSavedCodeLists(readSavedNaicsCodeLists());
