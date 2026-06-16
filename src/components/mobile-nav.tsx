@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type NavGroup = {
   label: string;
@@ -85,8 +86,8 @@ export function MobileNav({
         )}
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-slate-950/98 backdrop-blur-xl">
+      {open && createPortal(
+        <div className="fixed inset-0 z-[200] flex flex-col bg-slate-950 text-slate-100">
           <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
             <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">Menu</p>
             <button
@@ -165,7 +166,8 @@ export function MobileNav({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
