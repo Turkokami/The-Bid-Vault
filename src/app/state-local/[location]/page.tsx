@@ -291,23 +291,31 @@ function buildStateLocationView(location: string, allSourceCodes: string[]): Loc
 
   const sourceCodes = [state.slug, ...localCodesForState];
   const portalAssist =
-    state.connectionMode === "portal-assisted"
+    state.connectionMode === "portal-assisted" || state.connectionMode === "planned"
       ? {
-          eyebrow: "Portal-assisted now",
-          title: `Use ${state.portalName} directly, with The Bid Vault guiding the workflow.`,
+          eyebrow: state.connectionMode === "portal-assisted" ? "Portal-assisted now" : "Direct portal link",
+          title: `Open ${state.portalName} to search ${state.name} opportunities.`,
           description:
-            `${state.name}'s official source works best as a live portal handoff today. Use your saved terms, saved code lists, and local coverage plan here, then open the official state portal to review the live postings directly.`,
+            state.connectionMode === "portal-assisted"
+              ? `${state.name}'s official source works best as a live portal handoff today. Use your saved terms, saved code lists, and local coverage plan here, then open the official state portal to review the live postings directly.`
+              : `${state.name} procurement is available through ${state.portalName}. Click below to open the official portal and search for open solicitations, bids, and contract opportunities in ${state.name}.`,
           note:
-            "This keeps the page useful right now instead of pretending the portal can always be scraped in the background.",
+            state.connectionMode === "planned"
+              ? `Live in-app results for ${state.name} are on the roadmap. Until then, the official portal is the fastest way to find ${state.name} contracts.`
+              : "This keeps the page useful right now instead of pretending the portal can always be scraped in the background.",
           links: [
             {
               href: state.portalUrl,
-              label: `Open ${state.name} portal`,
+              label: `Open ${state.portalName}`,
               external: true,
             },
             {
+              href: "/sam-search",
+              label: "Search federal contracts on SAM.gov",
+            },
+            {
               href: "/categories",
-              label: "Review saved work categories",
+              label: "Review your work category codes",
             },
           ],
         }
