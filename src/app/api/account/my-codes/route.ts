@@ -7,8 +7,7 @@ import {
   saveCodeListForUser,
 } from "@/lib/server/my-codes";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const dynamic = "force-static";
 
 export async function GET() {
   const snapshot = await getMyCodesSnapshot();

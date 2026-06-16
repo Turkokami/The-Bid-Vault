@@ -1,4 +1,8 @@
 import { notFound } from "next/navigation";
+
+export function generateStaticParams() {
+  return [{ location: "washington" }];
+}
 import { StateLocalClient } from "@/components/state-local-client";
 import {
   getStateDirectoryEntry,

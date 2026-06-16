@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { demoTenants } from "@/lib/demo-data";
+
+export function generateStaticParams() {
+  return demoTenants.map((t) => ({ slug: t.slug }));
+}
 import { formatCurrency } from "@/lib/format";
 import { getTenantDetail } from "@/lib/server/contracts";
 

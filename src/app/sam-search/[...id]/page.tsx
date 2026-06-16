@@ -1,7 +1,9 @@
 import SamSearchRecordDetailPage from "@/app/government-data/[id]/page";
+import { demoContracts } from "@/lib/demo-data";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export function generateStaticParams() {
+  return demoContracts.map((c) => ({ id: [c.id] }));
+}
 
 export default async function SamSearchCatchAllDetailPage({
   params,

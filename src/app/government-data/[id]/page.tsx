@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ContractDetailLayout } from "@/components/contract-detail-layout";
+
+export function generateStaticParams() {
+  // Demo contract IDs only; live SAM.gov records are fetched client-side via Vercel
+  return [{ id: "demo" }];
+}
 import { buttonStyles } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import {

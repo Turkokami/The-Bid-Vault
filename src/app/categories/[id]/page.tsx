@@ -7,6 +7,10 @@ import {
   findRelatedCategoryCodes,
 } from "@/lib/category-codes";
 
+export function generateStaticParams() {
+  return categoryCodeRecords.map((r) => ({ id: r.id }));
+}
+
 function buildSourceLabel(sourceName: "WEBS" | "PSC" | "Bid Vault Map") {
   if (sourceName === "PSC") {
     return "Federal";

@@ -1,5 +1,9 @@
 import { demoWinningBids, getContractById } from "@/lib/demo-data";
 
+export function generateStaticParams() {
+  return demoWinningBids.map((bid) => ({ id: bid.id }));
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import { StateLocalDetailClient } from "@/components/state-local-detail-client";
+
+export function generateStaticParams() {
+  return [{ source: "washington", id: "demo" }];
+}
 import { getStateLocalSyncSnapshot } from "@/lib/sources/sync-state-local";
 import type { StateLocalSourceCode } from "@/lib/sources/types";
 

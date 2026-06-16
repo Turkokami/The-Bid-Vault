@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { demoContracts } from "@/lib/demo-data";
+
+export function generateStaticParams() {
+  return demoContracts.map((c) => ({ id: c.id }));
+}
 import { SavePlanningForm } from "@/app/contracts/[id]/save-planning-form";
 import { ContractDetailLayout } from "@/components/contract-detail-layout";
 import { InfoTip } from "@/components/info-tip";
