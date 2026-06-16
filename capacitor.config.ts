@@ -5,6 +5,8 @@ const config: CapacitorConfig = {
   appName: "The Bid Vault",
   webDir: "capacitor-static",
   server: {
+    url: "https://the-bid-vault-frx2.vercel.app",
+    cleartext: false,
     androidScheme: "https",
   },
 };

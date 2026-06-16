@@ -6,7 +6,8 @@
 }
 
 :root {
-  --app-shell-offset: 10.5rem;
+  /* Mobile: single-bar header (brand only, no nav row) */
+  --app-shell-offset: 5.5rem;
 }
 
 html {
@@ -22,12 +23,13 @@ body {
 
 @media (min-width: 640px) {
   :root {
-    --app-shell-offset: 11.25rem;
+    --app-shell-offset: 6rem;
   }
 }
 
 @media (min-width: 1024px) {
+  /* Desktop: brand bar + nav pill row */
   :root {
-    --app-shell-offset: 12.5rem;
+    --app-shell-offset: 10rem;
   }
 }
