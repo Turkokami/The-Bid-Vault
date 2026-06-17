@@ -18,13 +18,13 @@ export function WorkspaceCreateForm({
       <div className="space-y-5">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">
-            New workspace
+            Add company
           </p>
           <h2 className="mt-3 text-2xl font-semibold text-white">
-            Create another workspace for a business or division.
+            Add a company to your account.
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            Use separate workspaces when you want saved searches, watchlists, and planning tools grouped by company or team.
+            Keep saved searches, watchlists, and bids organized separately for each business you manage.
           </p>
         </div>
 
@@ -35,11 +35,11 @@ export function WorkspaceCreateForm({
         ) : null}
 
         <label className="space-y-2 text-sm text-slate-200">
-          <span>Workspace name</span>
+          <span>Company name</span>
           <input
             name="workspaceName"
             className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-            placeholder="Atlas Contracting Group"
+            placeholder="Your company name"
           />
         </label>
 
@@ -48,7 +48,7 @@ export function WorkspaceCreateForm({
           disabled={pending}
           className={buttonStyles({ variant: "primary", size: "lg" })}
         >
-          {pending ? "Creating workspace..." : "Create workspace"}
+          {pending ? "Adding company..." : "Add company"}
         </button>
       </div>
     </form>

@@ -24,12 +24,12 @@ export function AuthForm({
             {mode === "sign-up" ? "Create your account" : "Welcome back"}
           </p>
           <h2 className="mt-3 text-3xl font-semibold text-white">
-            {mode === "sign-up" ? "Start your Bid Vault workspace." : "Sign in to your workspace."}
+            {mode === "sign-up" ? "Create your Bid Vault account." : "Sign in to your account."}
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">
             {mode === "sign-up"
-              ? "Create an account so your saved searches, watchlist, and workspace stay personal to your business."
-              : "Use your email and password to get back into your saved opportunities and workspace."}
+              ? "Create an account so your saved searches, watchlist, and bids stay personal to your business."
+              : "Use your email and password to get back into your saved opportunities and bids."}
           </p>
         </div>
 
@@ -52,11 +52,11 @@ export function AuthForm({
               </label>
 
               <label className="space-y-2 text-sm text-slate-200">
-                <span>Workspace name</span>
+                <span>Company name</span>
                 <input
                   name="workspaceName"
                   className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                  placeholder="Turkokami Pest Control"
+                  placeholder="Your company name"
                 />
               </label>
             </>
@@ -95,7 +95,7 @@ export function AuthForm({
               ? "Creating account..."
               : "Signing in..."
             : mode === "sign-up"
-              ? "Create account and workspace"
+              ? "Create account"
               : "Sign in"}
         </button>
 

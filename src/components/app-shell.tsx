@@ -91,7 +91,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
                         href="/workspaces/new"
                         className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white transition hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200"
                       >
-                        New workspace
+                        Add company
                       </Link>
                       <form action={signOutAction}>
                         <button

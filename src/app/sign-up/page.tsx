@@ -22,10 +22,10 @@ export default function SignUpPage() {
         </div>
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Get started</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-          Create your account and your first workspace.
+          Create your free account.
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
-          Start with one workspace for your business, then add more later if you manage multiple companies or teams.
+          Save contracts, track deadlines, and build bids — all tied to your account so nothing gets lost.
         </p>
       </section>
 

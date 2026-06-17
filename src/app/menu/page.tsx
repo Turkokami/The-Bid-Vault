@@ -94,7 +94,7 @@ export default async function MenuPage() {
             href="/workspaces/new"
             className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/4 px-4 py-3.5"
           >
-            <p className="text-sm font-medium text-white">New workspace</p>
+            <p className="text-sm font-medium text-white">Add another company</p>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-slate-600">
               <line x1="4" y1="8" x2="12" y2="8" />
               <polyline points="9,5 12,8 9,11" />
