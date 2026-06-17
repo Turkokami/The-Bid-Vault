@@ -1,9 +1,11 @@
-import { PrismaClient } from "../src/generated/prisma/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
+// PrismaClient is generated into src/generated/prisma at build time
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { PrismaClient } = require("../src/generated/prisma/index.js");
 
-const { Pool } = pg;
+const connectionString = process.env.DATABASE_URL ?? "";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-export const db = new PrismaClient({ adapter } as never);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const db = new PrismaClient({
+  adapter: new PrismaPg({ connectionString }),
+}) as any;
