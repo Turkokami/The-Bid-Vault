@@ -1,200 +1,156 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HomeCategorySearchSection } from "@/components/home-category-search-section";
 import { buttonStyles } from "@/components/ui/button";
 
-const highlights = [
-  "Track contracts across agencies, locations, and NAICS codes",
-  "See historical award winners and pricing patterns",
-  "Predict rebid windows before competitors move",
-  "Search through uploaded government contract files to identify available opportunities",
-  "Draft FOIA requests for prior facility budgets and planning records before new bids are released",
+const quickStats = [
+  { label: "Tracked contracts", value: "8,420", href: "/sam-search" },
+  { label: "Award records", value: "$196M", href: "/contracts" },
+  { label: "Predicted rebids", value: "312", href: "/dashboard" },
 ];
 
-const quickStats = [
-  { label: "Tracked contracts", value: "8,420" },
-  { label: "Award records", value: "$196M" },
-  { label: "Predicted rebids", value: "312" },
+const featureList = [
+  { icon: "🔍", text: "Search live federal contracts on SAM.gov by keyword, NAICS code, or agency" },
+  { icon: "🏛️", text: "Browse state & local bids from 40+ portals across the US" },
+  { icon: "📄", text: "Build a professional bid response with AI-generated sections and PDF export" },
+  { icon: "🔔", text: "Save contracts to your watchlist and get alerts before deadlines" },
+  { icon: "📈", text: "See historical award winners, pricing patterns, and rebid windows" },
 ];
 
 export default function Home() {
   return (
-    <div className="space-y-10">
-      <section className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/6 p-8 shadow-[0_0_40px_rgba(34,197,94,0.10)] backdrop-blur md:p-10">
-          <div className="mb-6 flex items-center gap-4">
-            <div className="relative h-20 w-20 overflow-hidden rounded-[1.75rem] border border-emerald-400/30 bg-black/50 shadow-[0_0_30px_rgba(74,222,128,0.18)]">
-              <Image
-                src="/bid-vault-logo.png"
-                alt="The Bid Vault logo"
-                fill
-                sizes="80px"
-                className="object-contain p-2"
-                priority
-              />
-            </div>
-            <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.35em] text-emerald-200">
-              Secure the lead. Own the margin.
-            </div>
+    <div className="space-y-8">
+      {/* Hero */}
+      <section className="rounded-[2rem] border border-white/10 bg-white/6 p-8 shadow-[0_0_40px_rgba(34,197,94,0.10)] backdrop-blur md:p-10">
+        <div className="mb-6 flex items-center gap-4">
+          <div className="relative h-16 w-16 overflow-hidden rounded-[1.75rem] border border-emerald-400/30 bg-black/50 shadow-[0_0_30px_rgba(74,222,128,0.18)]">
+            <Image
+              src="/bid-vault-logo.png"
+              alt="The Bid Vault logo"
+              fill
+              sizes="64px"
+              className="object-contain p-2"
+              priority
+            />
           </div>
-
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
+          <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.35em] text-emerald-200">
             Contract acquisition intelligence
-          </p>
-          <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-white md:text-7xl">
-            Win more contracts without paying finder fees.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300">
-            The Bid Vault brings contract discovery, award history, rebid
-            prediction, and early alerts into one workspace built for
-            contractors.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/dashboard"
-              className={buttonStyles({ variant: "primary", size: "lg" })}
-            >
-              Enter dashboard
-            </Link>
-            <Link
-              href="/contracts"
-              className={buttonStyles({ variant: "secondary", size: "lg" })}
-            >
-              Browse contracts
-            </Link>
-            <Link
-              href="/sam-search"
-              className={buttonStyles({ variant: "ghost", size: "lg" })}
-            >
-              Open SAM Search
-            </Link>
-            <Link
-              href="/foia"
-              className={buttonStyles({ variant: "ghost", size: "lg" })}
-            >
-              Build FOIA request
-            </Link>
-          </div>
-
-          <div className="mt-8 grid gap-3 md:grid-cols-3">
-            {quickStats.map((stat) => (
-              <article
-                key={stat.label}
-                className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4"
-              >
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  {stat.label}
-                </p>
-                <p className="mt-3 text-2xl font-semibold text-emerald-300">
-                  {stat.value}
-                </p>
-              </article>
-            ))}
           </div>
         </div>
 
-        <aside className="rounded-[2rem] border border-emerald-400/20 bg-slate-950/80 p-8 shadow-[0_0_60px_rgba(34,197,94,0.12)]">
-          <div className="mb-6 flex items-center gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
-            <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/40">
-              <Image
-                src="/bid-vault-logo.png"
-                alt="The Bid Vault logo mark"
-                fill
-                sizes="56px"
-                className="object-contain p-1.5"
-              />
+        <h1 className="mt-2 max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-white md:text-6xl">
+          Win more contracts without paying finder fees.
+        </h1>
+        <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
+          The Bid Vault brings federal, state, and local contract discovery into one workspace — with AI bid building, award history, and deadline tracking.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/sam-search" className={buttonStyles({ variant: "primary", size: "lg" })}>
+            Start searching
+          </Link>
+          <Link href="/dashboard" className={buttonStyles({ variant: "secondary", size: "lg" })}>
+            My dashboard
+          </Link>
+        </div>
+
+        {/* Clickable stats */}
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          {quickStats.map((stat) => (
+            <Link
+              key={stat.label}
+              href={stat.href}
+              className="group rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4 transition hover:border-emerald-400/30 hover:bg-emerald-400/[0.04]"
+            >
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                {stat.label}
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-emerald-300 group-hover:text-emerald-200">
+                {stat.value}
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* What you can do */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur">
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">What&apos;s inside</p>
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white">
+            Everything a contractor needs in one place
+          </h2>
+          <ul className="mt-6 space-y-3">
+            {featureList.map((item) => (
+              <li key={item.text} className="flex items-start gap-3 text-sm leading-7 text-slate-200">
+                <span className="mt-0.5 shrink-0 text-base">{item.icon}</span>
+                {item.text}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/sam-search"
+            className="group flex flex-1 flex-col justify-between rounded-[2rem] border border-emerald-400/20 bg-emerald-400/[0.06] p-8 transition hover:border-emerald-400/40 hover:bg-emerald-400/[0.10]"
+          >
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Federal</p>
+              <h3 className="mt-3 text-xl font-semibold text-white">Search SAM.gov live</h3>
+              <p className="mt-2 text-sm leading-7 text-slate-300">
+                Pull real contracts directly from SAM.gov using keyword, NAICS, agency, or location filters.
+              </p>
             </div>
-            <p className="text-sm leading-7 text-slate-300">
-              The platform is built to feel like a secure planning vault, not just another contract table.
-            </p>
-          </div>
+            <span className="mt-4 text-sm font-medium text-emerald-300 group-hover:text-emerald-200">Open SAM Search →</span>
+          </Link>
 
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-            What Phase 1 unlocks
-          </p>
-          <div className="mt-6 space-y-4">
-            {highlights.map((item) => (
-              <div
-                key={item}
-                className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-sm leading-7 text-slate-200"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/8 p-4 text-sm leading-7 text-slate-200">
-            Tailwind, Prisma, seeding, and a reusable shell are now the base
-            layer for the rest of the roadmap.
-          </div>
-        </aside>
-      </section>
+          <Link
+            href="/state-local"
+            className="group flex flex-1 flex-col justify-between rounded-[2rem] border border-white/10 bg-white/5 p-8 transition hover:border-emerald-400/20 hover:bg-emerald-400/[0.04]"
+          >
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">State & Local</p>
+              <h3 className="mt-3 text-xl font-semibold text-white">Browse 40+ state portals</h3>
+              <p className="mt-2 text-sm leading-7 text-slate-300">
+                WA, TX, GA, FL, OR, PA and dozens more — all in one search view.
+              </p>
+            </div>
+            <span className="mt-4 text-sm font-medium text-emerald-300 group-hover:text-emerald-200">Open State & Local →</span>
+          </Link>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-              Learn how to win bids
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              Need help understanding how government contracts work?
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-slate-300">
-              Open the training page for a simple walkthrough on how to find bids, read the requirements,
-              match your business to the right codes, and build a response without getting buried in jargon.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/learn"
-              className={buttonStyles({ variant: "primary", size: "lg" })}
-            >
-              Open training guide
-            </Link>
-            <Link
-              href="/sam-search"
-              className={buttonStyles({ variant: "secondary", size: "lg" })}
-            >
-              Search live contracts
-            </Link>
-          </div>
+          <Link
+            href="/bid-builder"
+            className="group flex flex-1 flex-col justify-between rounded-[2rem] border border-white/10 bg-white/5 p-8 transition hover:border-emerald-400/20 hover:bg-emerald-400/[0.04]"
+          >
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Bid Builder</p>
+              <h3 className="mt-3 text-xl font-semibold text-white">AI-powered bid writing</h3>
+              <p className="mt-2 text-sm leading-7 text-slate-300">
+                Generate cover letters, technical approaches, and full proposals. Download as PDF.
+              </p>
+            </div>
+            <span className="mt-4 text-sm font-medium text-emerald-300 group-hover:text-emerald-200">Open Bid Builder →</span>
+          </Link>
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
+      {/* Training CTA */}
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-              Service plans
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              Need more support? Compare plans on the pricing page.
+          <div className="max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">New to government contracting?</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white">
+              Learn how to find and win bids
             </h2>
-            <p className="mt-4 text-sm leading-7 text-slate-300">
-              The homepage keeps things simple. When you are ready, open pricing
-              to compare service plans, see what each option includes, and start
-              a subscription.
+            <p className="mt-3 text-sm leading-7 text-slate-300">
+              Step-by-step training on reading solicitations, matching NAICS codes, and building a winning response — no jargon.
             </p>
           </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/pricing"
-              className={buttonStyles({ variant: "primary", size: "lg" })}
-            >
-              View service plans
-            </Link>
-            <Link
-              href="/dashboard"
-              className={buttonStyles({ variant: "secondary", size: "lg" })}
-            >
-              Keep exploring first
-            </Link>
-          </div>
+          <Link href="/learn" className={buttonStyles({ variant: "primary", size: "lg" })}>
+            Open training guide
+          </Link>
         </div>
       </section>
-      <HomeCategorySearchSection />
     </div>
   );
 }

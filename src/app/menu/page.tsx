@@ -24,11 +24,10 @@ const navGroups = [
     label: "My Workspace",
     items: [
       { href: "/dashboard", label: "Dashboard", description: "Your saved contracts at a glance" },
+      { href: "/tracking", label: "Tracking", description: "Watchlist & alerts in one place" },
+      { href: "/bids", label: "My Bids", description: "Bid drafts you're working on" },
       { href: "/contracts", label: "Contracts", description: "Track and manage bids" },
-      { href: "/watchlist", label: "Watchlist", description: "Saved opportunities" },
-      { href: "/alerts", label: "Alerts", description: "Get notified before rebids" },
       { href: "/calendar", label: "Calendar", description: "Upcoming deadlines" },
-      { href: "/planning", label: "Planning", description: "Research and strategy tools" },
     ],
   },
   {

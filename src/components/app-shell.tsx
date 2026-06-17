@@ -10,13 +10,9 @@ const desktopNav = [
   { href: "/sam-search", label: "Search SAM" },
   { href: "/state-local", label: "State & Local" },
   { href: "/bid-builder", label: "Build Bid" },
-  { href: "/foia", label: "FOIA" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/contracts", label: "Contracts" },
-  { href: "/watchlist", label: "Watchlist" },
-  { href: "/alerts", label: "Alerts" },
+  { href: "/dashboard", label: "My Work" },
+  { href: "/tracking", label: "Tracking" },
   { href: "/learn", label: "Learn" },
-  { href: "/pricing", label: "Pricing" },
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
