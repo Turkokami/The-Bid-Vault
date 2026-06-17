@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String?
+  passwordHash      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  memberships       TenantMembership[]
+  savedContracts    SavedContract[]
+  savedStateLocalOpportunities SavedStateLocalOpportunity[]
+}
+
+model Tenant {
+  id             String             @id @default(cuid())
+  name           String
+  slug           String             @unique
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  memberships    TenantMembership[]
+  contracts      Contract[]
+}
+
+model TenantMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      String   @default("MEMBER")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+}
+
+model Contract {
+  id               String          @id @default(cuid())
+  tenantId         String
+  title            String
+  agency           String
+  naicsCode        String
+  location         String
+  state            String?
+  summary          String          @db.Text
+  source           String?
+  sourceExternalId String?
+  expirationDate   DateTime?
+  stage            String          @default("ACTIVE")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  tenant           Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  savedContracts   SavedContract[]
+
+  @@unique([tenantId, source, sourceExternalId])
+}
+
+model SavedContract {
+  id         String   @id @default(cuid())
+  userId     String
+  contractId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contractId])
+}
+
+model StateLocalOpportunity {
+  id                   String   @id @default(cuid())
+  sourceName           String
+  stateCode            String
+  title                String
+  issuingEntity        String
+  opportunityType      String
+  status               String
+  categoryCode         String?
+  postedDate           DateTime?
+  dueDate              DateTime?
+  summary              String?  @db.Text
+  location             String?
+  sourceUrl            String?
+  registrationRequired Boolean  @default(false)
+  registrationNotes    String?  @db.Text
+  contactName          String?
+  contactEmail         String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  savedByUsers         SavedStateLocalOpportunity[]
+
+  @@index([sourceName, stateCode])
+  @@index([status, dueDate])
+}
+
+model SavedStateLocalOpportunity {
+  id            String   @id @default(cuid())
+  userId        String
+  opportunityId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity   StateLocalOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, opportunityId])
+}
+
+model SourceSyncLog {
+  id            String   @id @default(cuid())
+  sourceName    String
+  syncStatus    String
+  lastRunAt     DateTime @default(now())
+  recordsAdded  Int      @default(0)
+  recordsUpdated Int     @default(0)
+  errorMessage  String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([sourceName, lastRunAt])
+}
