@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node dist/server.js",
-    "build": "tsc",
+    "start": "tsx src/server.ts",
+    "build": "prisma generate",
     "dev": "tsx src/server.ts",
     "scrape": "tsx src/run-scrape.ts"
   },
