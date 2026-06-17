@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { InfoTip } from "@/components/info-tip";
 
 function Section({
@@ -133,11 +133,28 @@ type Props = {
 };
 
 export function StateLocalFilterSidebar(props: Props) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <aside
-      id="webs-filters"
-      className="order-2 max-h-[80vh] overflow-y-auto rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.35)] backdrop-blur xl:sticky xl:top-36 xl:order-1 xl:h-fit xl:rounded-[2rem] xl:p-5"
-    >
+    <aside id="webs-filters" className="order-2 xl:sticky xl:top-36 xl:order-1 xl:h-fit">
+      {/* Mobile toggle */}
+      <button
+        type="button"
+        onClick={() => setMobileOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-[1.5rem] border border-white/10 bg-slate-950/80 px-4 py-3.5 text-sm font-semibold text-white shadow backdrop-blur xl:hidden"
+      >
+        <span className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <line x1="2" y1="4" x2="14" y2="4" />
+            <line x1="4" y1="8" x2="12" y2="8" />
+            <line x1="6" y1="12" x2="10" y2="12" />
+          </svg>
+          Filters
+        </span>
+        <span className={`text-emerald-400 transition-transform ${mobileOpen ? "rotate-45" : ""}`}>+</span>
+      </button>
+
+      <div className={`mt-2 rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.35)] backdrop-blur xl:mt-0 xl:rounded-[2rem] xl:p-5 ${mobileOpen ? "block" : "hidden xl:block"}`}>
       <div className="mb-2">
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Narrow your results</p>
         <p className="mt-2 text-sm leading-6 text-slate-300">
@@ -230,6 +247,7 @@ export function StateLocalFilterSidebar(props: Props) {
       </Section>
 
       {props.children}
+      </div>
     </aside>
   );
 }

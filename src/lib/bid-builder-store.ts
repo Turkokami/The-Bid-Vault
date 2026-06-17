@@ -13,6 +13,13 @@ export type BidDraftRecord = {
   sourceUrl?: string;
   attachmentsUrl?: string;
   workspaceName: string;
+  // Structured bid sections
+  coverLetter?: string;
+  executiveSummary?: string;
+  technicalApproach?: string;
+  pastPerformance?: string;
+  managementPlan?: string;
+  // Legacy / shared fields
   winThemes: string;
   complianceNotes: string;
   pricingApproach: string;
@@ -33,6 +40,47 @@ export type BidRequirementItem = {
   category: "critical" | "submission" | "compliance" | "pricing" | "evaluation";
   status: BidRequirementStatus;
 };
+
+export type CompanyProfile = {
+  companyName: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  phone: string;
+  email: string;
+  website: string;
+  ueiNumber: string;
+  cageCode: string;
+  naicsCodes: string;
+  certifications: string;
+  yearsInBusiness: string;
+  pointOfContact: string;
+  pocTitle: string;
+  companyDescription: string;
+  pastPerformance: string;
+};
+
+export function readCompanyProfile(): CompanyProfile {
+  if (typeof window === "undefined") return emptyCompanyProfile();
+  const raw = window.localStorage.getItem("bid-vault-company-profile");
+  if (!raw) return emptyCompanyProfile();
+  try { return JSON.parse(raw) as CompanyProfile; } catch { return emptyCompanyProfile(); }
+}
+
+export function saveCompanyProfile(profile: CompanyProfile) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem("bid-vault-company-profile", JSON.stringify(profile));
+}
+
+function emptyCompanyProfile(): CompanyProfile {
+  return {
+    companyName: "", address: "", city: "", state: "", zip: "",
+    phone: "", email: "", website: "", ueiNumber: "", cageCode: "",
+    naicsCodes: "", certifications: "", yearsInBusiness: "",
+    pointOfContact: "", pocTitle: "", companyDescription: "", pastPerformance: "",
+  };
+}
 
 const BID_DRAFTS_KEY = "bid-vault-bid-drafts";
 

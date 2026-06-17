@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { buttonStyles } from "@/components/ui/button";
-import type { BidRequirementItem, BidRequirementStatus } from "@/lib/bid-builder-store";
-import { readBidDraft, saveBidDraft } from "@/lib/bid-builder-store";
+import type { BidRequirementItem, BidRequirementStatus, CompanyProfile } from "@/lib/bid-builder-store";
+import { readBidDraft, saveBidDraft, readCompanyProfile, saveCompanyProfile } from "@/lib/bid-builder-store";
 
 type BidBuilderClientProps = {
   draftId: string;
@@ -20,173 +20,238 @@ type BidBuilderClientProps = {
   attachmentsUrl?: string;
 };
 
-function defaultChecklist(title: string, dueDate?: string) {
-  return [
-    `Confirm exact submission deadline${dueDate ? `: ${dueDate}` : ""}`,
-    "Review all amendments and addenda",
-    "Check mandatory forms and certifications",
-    "Confirm set-aside eligibility and required registrations",
-    `Pull key technical requirements from ${title}`,
-    "Verify pricing sheet format and attachments list",
-  ].join("\n");
-}
+type AiLoadingKey =
+  | "coverLetter" | "executiveSummary" | "technicalApproach"
+  | "pastPerformance" | "managementPlan" | "winThemes"
+  | "submissionChecklist" | "pricingApproach";
 
-function buildAutoFilledSections(props: BidBuilderClientProps) {
-  return {
-    winThemes: [
-      `Relevant work type: ${props.title}`,
-      props.setAside && props.setAside !== "Not listed"
-        ? `Eligibility angle: confirm and emphasize fit for ${props.setAside}.`
-        : "",
-      props.naicsCode ? `Industry alignment: reference experience tied to NAICS ${props.naicsCode}.` : "",
-      props.agency ? `Agency familiarity: show relevant work for ${props.agency}.` : "",
-    ]
-      .filter(Boolean)
-      .join("\n"),
-    complianceNotes: [
-      props.dueDate ? `Due date to protect: ${props.dueDate}` : "",
-      props.setAside ? `Set-aside noted: ${props.setAside}` : "",
-      props.sourceName ? `Source system: ${props.sourceName}` : "",
-      props.sourceUrl ? `Original posting: ${props.sourceUrl}` : "",
-      props.attachmentsUrl ? `Attachment source: ${props.attachmentsUrl}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n"),
-    pricingApproach: [
-      "Confirm exact pricing format from the official attachment package.",
-      "Identify labor, materials, equipment, and subcontractor inputs.",
-      "Check whether alternates, unit pricing, or optional services are required.",
-    ].join("\n"),
-    questionsForAgency: [
-      "Is there a questions deadline or pre-bid event?",
-      "Are there amendments, addenda, or revised forms that must be acknowledged?",
-      "Are there file format, upload, or delivery rules that could block submission?",
-    ].join("\n"),
-  };
-}
-
-function buildPreviewDocument(params: {
-  title: string;
-  agency?: string;
-  dueDate?: string;
-  sourceName?: string;
-  winThemes: string;
-  complianceNotes: string;
-  pricingApproach: string;
-  questionsForAgency: string;
-  submissionChecklist: string;
-  teammateAssignments: string;
-  aiReviewPoints: string;
-  reviewRequirements: BidRequirementItem[];
+function AiButton({
+  loading,
+  onClick,
+  label = "Generate with AI",
+}: {
+  loading: boolean;
+  onClick: () => void;
+  label?: string;
 }) {
-  const addressed = params.reviewRequirements.filter((item) => item.status === "addressed");
-  const blocked = params.reviewRequirements.filter((item) => item.status === "blocked");
-  const pending = params.reviewRequirements.filter((item) => item.status === "needs-response");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      className="flex items-center gap-1.5 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-200 transition hover:bg-emerald-400/20 disabled:opacity-50"
+    >
+      {loading ? (
+        <>
+          <svg className="animate-spin" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="2" strokeDasharray="8 8" />
+          </svg>
+          Generating…
+        </>
+      ) : (
+        <>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M6 1l1.3 3.7H11l-3 2.2 1.1 3.7L6 8.5l-3.1 2.1L4 6.9 1 4.7h3.7z" />
+          </svg>
+          {label}
+        </>
+      )}
+    </button>
+  );
+}
 
-  return [
-    `Bid Preview: ${params.title}`,
-    `Agency: ${params.agency || "Not listed"}`,
-    `Due date: ${params.dueDate || "Not listed"}`,
-    `Source: ${params.sourceName || "Not listed"}`,
-    "",
-    "Executive positioning",
-    params.winThemes || "No win themes added yet.",
-    "",
-    "AI review points to address",
-    params.aiReviewPoints || "No AI review points saved yet.",
-    "",
-    "Compliance and scope notes",
-    params.complianceNotes || "No compliance notes added yet.",
-    "",
-    "Pricing approach",
-    params.pricingApproach || "No pricing approach added yet.",
-    "",
-    "Questions for the agency",
-    params.questionsForAgency || "No agency questions added yet.",
-    "",
-    "Submission checklist",
-    params.submissionChecklist || "No checklist added yet.",
-    "",
-    "Team assignments",
-    params.teammateAssignments || "No assignments added yet.",
-    "",
-    "Requirement tracker",
-    `Addressed: ${addressed.length}`,
-    `Needs response: ${pending.length}`,
-    `Blocked: ${blocked.length}`,
-  ].join("\n");
+function SectionHeader({
+  label,
+  children,
+}: {
+  label: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-medium text-slate-200">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  rows = 5,
+  placeholder,
+  aiKey,
+  aiLoading,
+  onAiGenerate,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  rows?: number;
+  placeholder?: string;
+  aiKey?: AiLoadingKey;
+  aiLoading?: AiLoadingKey | null;
+  onAiGenerate?: (key: AiLoadingKey) => void;
+}) {
+  return (
+    <label className="block space-y-2">
+      <SectionHeader label={label}>
+        {aiKey && onAiGenerate && (
+          <AiButton
+            loading={aiLoading === aiKey}
+            onClick={() => onAiGenerate(aiKey)}
+          />
+        )}
+      </SectionHeader>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400/50 placeholder:text-slate-600"
+      />
+    </label>
+  );
 }
 
 export function BidBuilderClient(props: BidBuilderClientProps) {
   const existingDraft = useMemo(() => readBidDraft(props.draftId), [props.draftId]);
-  const [workspaceName, setWorkspaceName] = useState(
-    () => existingDraft?.workspaceName ?? `${props.title} Bid Workspace`,
-  );
-  const [winThemes, setWinThemes] = useState(() => existingDraft?.winThemes ?? "");
-  const [complianceNotes, setComplianceNotes] = useState(
-    () => existingDraft?.complianceNotes ?? "",
-  );
-  const [pricingApproach, setPricingApproach] = useState(
-    () => existingDraft?.pricingApproach ?? "",
-  );
-  const [questionsForAgency, setQuestionsForAgency] = useState(
-    () => existingDraft?.questionsForAgency ?? "",
-  );
-  const [submissionChecklist, setSubmissionChecklist] = useState(
-    () => existingDraft?.submissionChecklist ?? defaultChecklist(props.title, props.dueDate),
-  );
-  const [teammateAssignments, setTeammateAssignments] = useState(
-    () => existingDraft?.teammateAssignments ?? "",
-  );
-  const [aiReviewPoints, setAiReviewPoints] = useState(
-    () => existingDraft?.aiReviewPoints ?? "",
-  );
-  const [reviewRequirements, setReviewRequirements] = useState<BidRequirementItem[]>(
-    () => existingDraft?.reviewRequirements ?? [],
-  );
-  const [showPreview, setShowPreview] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
 
-  const previewDocument = useMemo(
-    () =>
-      buildPreviewDocument({
-        title: props.title,
-        agency: props.agency,
-        dueDate: props.dueDate,
-        sourceName: props.sourceName,
-        winThemes,
-        complianceNotes,
-        pricingApproach,
-        questionsForAgency,
-        submissionChecklist,
-        teammateAssignments,
-        aiReviewPoints,
-        reviewRequirements,
-      }),
-    [
-      aiReviewPoints,
+  // Company profile
+  const [company, setCompany] = useState<CompanyProfile>(() => readCompanyProfile());
+  const [showCompanyProfile, setShowCompanyProfile] = useState(() => {
+    const p = readCompanyProfile();
+    return !p.companyName;
+  });
+
+  // Bid sections
+  const [workspaceName, setWorkspaceName] = useState(() => existingDraft?.workspaceName ?? `${props.title} Bid Workspace`);
+  const [coverLetter, setCoverLetter] = useState(() => existingDraft?.coverLetter ?? "");
+  const [executiveSummary, setExecutiveSummary] = useState(() => existingDraft?.executiveSummary ?? "");
+  const [technicalApproach, setTechnicalApproach] = useState(() => existingDraft?.technicalApproach ?? "");
+  const [pastPerformance, setPastPerformance] = useState(() => existingDraft?.pastPerformance ?? company.pastPerformance ?? "");
+  const [managementPlan, setManagementPlan] = useState(() => existingDraft?.managementPlan ?? "");
+  const [winThemes, setWinThemes] = useState(() => existingDraft?.winThemes ?? "");
+  const [complianceNotes, setComplianceNotes] = useState(() => existingDraft?.complianceNotes ?? "");
+  const [pricingApproach, setPricingApproach] = useState(() => existingDraft?.pricingApproach ?? "");
+  const [questionsForAgency, setQuestionsForAgency] = useState(() => existingDraft?.questionsForAgency ?? "");
+  const [submissionChecklist, setSubmissionChecklist] = useState(() => existingDraft?.submissionChecklist ?? defaultChecklist(props.title, props.dueDate));
+  const [teammateAssignments, setTeammateAssignments] = useState(() => existingDraft?.teammateAssignments ?? "");
+  const [aiReviewPoints, setAiReviewPoints] = useState(() => existingDraft?.aiReviewPoints ?? "");
+  const [reviewRequirements, setReviewRequirements] = useState<BidRequirementItem[]>(() => existingDraft?.reviewRequirements ?? []);
+
+  const [aiLoading, setAiLoading] = useState<AiLoadingKey | null>(null);
+  const [aiError, setAiError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
+
+  const saveCompanyAndProfile = useCallback(() => {
+    saveCompanyProfile(company);
+    setStatusMessage("Company profile saved.");
+    setShowCompanyProfile(false);
+  }, [company]);
+
+  const buildContext = useCallback(() => ({
+    title: props.title,
+    agency: props.agency ?? "",
+    dueDate: props.dueDate ?? "",
+    naicsCode: props.naicsCode ?? "",
+    setAside: props.setAside ?? "",
+    summary: props.summary ?? "",
+    sourceName: props.sourceName ?? "",
+    companyName: company.companyName,
+    ueiNumber: company.ueiNumber,
+    certifications: company.certifications,
+    yearsInBusiness: company.yearsInBusiness,
+    pointOfContact: company.pointOfContact,
+    pocTitle: company.pocTitle,
+    companyDescription: company.companyDescription,
+    pastPerformance: company.pastPerformance,
+  }), [props, company]);
+
+  const generateSection = useCallback(async (section: AiLoadingKey) => {
+    setAiLoading(section);
+    setAiError("");
+    try {
+      const res = await fetch("/api/bid-ai/generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ section, context: buildContext() }),
+      });
+      const data = await res.json() as { generated?: string; error?: string };
+      if (!res.ok || data.error) throw new Error(data.error ?? "AI generation failed.");
+      const setters: Record<AiLoadingKey, (v: string) => void> = {
+        coverLetter: setCoverLetter,
+        executiveSummary: setExecutiveSummary,
+        technicalApproach: setTechnicalApproach,
+        pastPerformance: setPastPerformance,
+        managementPlan: setManagementPlan,
+        winThemes: setWinThemes,
+        submissionChecklist: setSubmissionChecklist,
+        pricingApproach: setPricingApproach,
+      };
+      setters[section](data.generated ?? "");
+      setStatusMessage("AI generated content. Review and edit as needed before saving.");
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI generation failed.");
+    } finally {
+      setAiLoading(null);
+    }
+  }, [buildContext]);
+
+  const generateAll = useCallback(async () => {
+    const sections: AiLoadingKey[] = [
+      "coverLetter", "executiveSummary", "technicalApproach",
+      "managementPlan", "winThemes", "submissionChecklist", "pricingApproach",
+    ];
+    for (const section of sections) {
+      await generateSection(section);
+    }
+    setStatusMessage("All sections generated. Review everything carefully before downloading.");
+  }, [generateSection]);
+
+  const saveDraft = useCallback(() => {
+    saveBidDraft({
+      id: props.draftId,
+      title: props.title,
+      noticeId: props.noticeId,
+      agency: props.agency,
+      sourceName: props.sourceName,
+      dueDate: props.dueDate,
+      naicsCode: props.naicsCode,
+      setAside: props.setAside,
+      summary: props.summary,
+      sourceUrl: props.sourceUrl,
+      attachmentsUrl: props.attachmentsUrl,
+      workspaceName,
+      coverLetter,
+      executiveSummary,
+      technicalApproach,
+      pastPerformance,
+      managementPlan,
+      winThemes,
       complianceNotes,
       pricingApproach,
-      props.agency,
-      props.dueDate,
-      props.sourceName,
-      props.title,
       questionsForAgency,
-      reviewRequirements,
       submissionChecklist,
       teammateAssignments,
-      winThemes,
-    ],
-  );
+      aiReviewPoints,
+      reviewRequirements,
+      updatedAt: new Date().toISOString(),
+    });
+    setStatusMessage("Bid draft saved.");
+  }, [
+    props, workspaceName, coverLetter, executiveSummary, technicalApproach,
+    pastPerformance, managementPlan, winThemes, complianceNotes, pricingApproach,
+    questionsForAgency, submissionChecklist, teammateAssignments, aiReviewPoints, reviewRequirements,
+  ]);
 
-  const applyAutoFill = () => {
-    const autoFilled = buildAutoFilledSections(props);
-    setWinThemes((current) => current || autoFilled.winThemes);
-    setComplianceNotes((current) => current || autoFilled.complianceNotes);
-    setPricingApproach((current) => current || autoFilled.pricingApproach);
-    setQuestionsForAgency((current) => current || autoFilled.questionsForAgency);
-    setStatusMessage("Contract details were used to auto-fill the bid workspace.");
-  };
+  const openPdf = useCallback(() => {
+    saveDraft();
+    const url = `/bid-builder/print?id=${encodeURIComponent(props.draftId)}`;
+    window.open(url, "_blank");
+  }, [saveDraft, props.draftId]);
 
   const updateRequirementStatus = (id: string, status: BidRequirementStatus) => {
     setReviewRequirements((current) =>
@@ -194,216 +259,288 @@ export function BidBuilderClient(props: BidBuilderClientProps) {
     );
   };
 
-  const attachmentReviewHref = useMemo(() => {
-    const search = new URLSearchParams({
-      title: props.title,
-      source: props.sourceName ?? "",
-      agency: props.agency ?? "",
-      dueDate: props.dueDate ?? "",
-      sourceUrl: props.sourceUrl ?? "",
-      attachmentsUrl: props.attachmentsUrl ?? "",
-      setAside: props.setAside ?? "",
-      naics: props.naicsCode ?? "",
-      summary: props.summary ?? "",
-    });
+  const previewText = [
+    `BID PROPOSAL: ${props.title}`,
+    `Agency: ${props.agency || "Not listed"} | Due: ${props.dueDate || "TBD"} | NAICS: ${props.naicsCode || "—"}`,
+    "",
+    coverLetter && `COVER LETTER\n${coverLetter}`,
+    executiveSummary && `EXECUTIVE SUMMARY\n${executiveSummary}`,
+    technicalApproach && `TECHNICAL APPROACH\n${technicalApproach}`,
+    pastPerformance && `PAST PERFORMANCE\n${pastPerformance}`,
+    managementPlan && `MANAGEMENT PLAN\n${managementPlan}`,
+    pricingApproach && `PRICING APPROACH\n${pricingApproach}`,
+    complianceNotes && `COMPLIANCE NOTES\n${complianceNotes}`,
+    submissionChecklist && `SUBMISSION CHECKLIST\n${submissionChecklist}`,
+  ].filter(Boolean).join("\n\n");
 
-    return `/attachments/review?${search.toString()}`;
-  }, [props]);
+  const tabs = [
+    { key: "write", label: "Write" },
+    { key: "preview", label: "Preview" },
+  ] as const;
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
-        <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Bid builder</p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-          Build this bid inside The Bid Vault.
-        </h1>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-          Use this workspace to turn a contract into a real draft plan. Capture your win themes, pricing ideas, compliance notes, and submission checklist in one place.
-        </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
+        <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Bid Builder</p>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white lg:text-3xl">{props.title}</h1>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Opportunity", value: props.title },
-            { label: "Agency", value: props.agency || "Not listed" },
-            { label: "Due date", value: props.dueDate || "Not listed" },
-            { label: "Set-aside", value: props.setAside || "Not listed" },
-          ].map((item) => (
-            <article key={item.label} className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4">
-              <p className="text-sm text-slate-400">{item.label}</p>
-              <p className="mt-2 text-sm font-semibold text-white">{item.value}</p>
-            </article>
-          ))}
+            { label: "Agency", value: props.agency },
+            { label: "Due", value: props.dueDate },
+            { label: "NAICS", value: props.naicsCode },
+            { label: "Set-Aside", value: props.setAside },
+          ].map((item) => item.value && item.value !== "Not listed" ? (
+            <div key={item.label} className="rounded-[1.25rem] border border-white/8 bg-slate-950/60 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500">{item.label}</p>
+              <p className="mt-1 text-sm font-medium text-white leading-snug">{item.value}</p>
+            </div>
+          ) : null)}
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          {props.sourceUrl ? (
-            <a
-              href={props.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonStyles({ variant: "secondary", size: "md" })}
-            >
-              Open original posting
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button type="button" onClick={generateAll} disabled={aiLoading !== null}
+            className="flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/25 disabled:opacity-50">
+            <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M6 1l1.3 3.7H11l-3 2.2 1.1 3.7L6 8.5l-3.1 2.1L4 6.9 1 4.7h3.7z" />
+            </svg>
+            {aiLoading ? `Generating ${aiLoading}…` : "Generate All Sections with AI"}
+          </button>
+          <button type="button" onClick={saveDraft}
+            className={buttonStyles({ variant: "primary", size: "sm" })}>
+            Save Draft
+          </button>
+          <button type="button" onClick={openPdf}
+            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:border-emerald-400/30 hover:text-emerald-200">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M4 2h6l3 3v9H4V2z" />
+              <path d="M10 2v3h3" />
+              <line x1="6" y1="8" x2="10" y2="8" />
+              <line x1="6" y1="11" x2="10" y2="11" />
+            </svg>
+            Download PDF
+          </button>
+          {props.sourceUrl && (
+            <a href={props.sourceUrl} target="_blank" rel="noreferrer"
+              className={buttonStyles({ variant: "ghost", size: "sm" })}>
+              Original Posting ↗
             </a>
-          ) : null}
-          <button
-            type="button"
-            onClick={applyAutoFill}
-            className={buttonStyles({ variant: "secondary", size: "md" })}
-          >
-            Auto-fill from contract details
+          )}
+          <button type="button" onClick={() => setShowCompanyProfile((v) => !v)}
+            className={buttonStyles({ variant: "ghost", size: "sm" })}>
+            {showCompanyProfile ? "Hide" : "Edit"} Company Profile
           </button>
-          <button
-            type="button"
-            onClick={() => setShowPreview((current) => !current)}
-            className={buttonStyles({ variant: "ghost", size: "md" })}
-          >
-            {showPreview ? "Hide bid preview" : "Preview completed bid"}
-          </button>
-          <Link href={attachmentReviewHref} className={buttonStyles({ variant: "ghost", size: "md" })}>
-            Review attachments first
-          </Link>
         </div>
       </section>
 
-      {statusMessage ? (
+      {/* Alerts */}
+      {statusMessage && (
         <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
           {statusMessage}
         </div>
-      ) : null}
+      )}
+      {aiError && (
+        <div className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+          {aiError} — Make sure ANTHROPIC_API_KEY is set in your Vercel environment variables.
+        </div>
+      )}
 
-      {showPreview ? (
-        <section className="rounded-[2rem] border border-emerald-400/20 bg-emerald-400/[0.06] p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">Bid preview</p>
-              <h2 className="mt-3 text-2xl font-semibold text-white">Preview the current bid package narrative.</h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                void navigator.clipboard.writeText(previewDocument);
-                setStatusMessage("The current bid preview was copied to your clipboard.");
-              }}
-              className={buttonStyles({ variant: "secondary", size: "sm" })}
-            >
-              Copy preview
-            </button>
+      {/* Company Profile */}
+      {showCompanyProfile && (
+        <section className="rounded-[2rem] border border-emerald-400/20 bg-emerald-400/[0.04] p-6">
+          <p className="text-xs uppercase tracking-[0.3em] text-emerald-400/80">Company Profile</p>
+          <p className="mt-1 text-sm text-slate-400">Fill this once — it auto-fills every bid you build.</p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {[
+              { label: "Company Name", key: "companyName" as const, placeholder: "Acme Construction LLC" },
+              { label: "Point of Contact", key: "pointOfContact" as const, placeholder: "Jane Smith" },
+              { label: "POC Title", key: "pocTitle" as const, placeholder: "President / Project Manager" },
+              { label: "Email", key: "email" as const, placeholder: "jane@acme.com" },
+              { label: "Phone", key: "phone" as const, placeholder: "(555) 555-5555" },
+              { label: "Website", key: "website" as const, placeholder: "www.acme.com" },
+              { label: "Street Address", key: "address" as const, placeholder: "123 Main St" },
+              { label: "City", key: "city" as const, placeholder: "Phoenix" },
+              { label: "State", key: "state" as const, placeholder: "AZ" },
+              { label: "ZIP", key: "zip" as const, placeholder: "85001" },
+              { label: "UEI Number", key: "ueiNumber" as const, placeholder: "SAM.gov UEI (12 chars)" },
+              { label: "CAGE Code", key: "cageCode" as const, placeholder: "CAGE code" },
+              { label: "NAICS Codes", key: "naicsCodes" as const, placeholder: "236220, 238110" },
+              { label: "Years in Business", key: "yearsInBusiness" as const, placeholder: "12" },
+            ].map(({ label, key, placeholder }) => (
+              <label key={key} className="block space-y-1.5">
+                <span className="text-xs text-slate-400">{label}</span>
+                <input
+                  value={company[key]}
+                  onChange={(e) => setCompany((c) => ({ ...c, [key]: e.target.value }))}
+                  placeholder={placeholder}
+                  className="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50 placeholder:text-slate-700"
+                />
+              </label>
+            ))}
           </div>
-          <pre className="mt-5 overflow-x-auto whitespace-pre-wrap rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-5 text-sm leading-7 text-slate-200">
-            {previewDocument}
+          <div className="mt-4 space-y-4">
+            <label className="block space-y-1.5">
+              <span className="text-xs text-slate-400">Certifications (SDVOSB, 8(a), WOSB, HUBZone, etc.)</span>
+              <input
+                value={company.certifications}
+                onChange={(e) => setCompany((c) => ({ ...c, certifications: e.target.value }))}
+                placeholder="SDVOSB, Small Business"
+                className="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50 placeholder:text-slate-700"
+              />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-xs text-slate-400">Company Description (2-3 sentences for AI to use)</span>
+              <textarea
+                value={company.companyDescription}
+                onChange={(e) => setCompany((c) => ({ ...c, companyDescription: e.target.value }))}
+                rows={3}
+                placeholder="We are a veteran-owned general contractor specializing in government facility maintenance and construction with 12 years of federal and state contract experience."
+                className="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50 placeholder:text-slate-700"
+              />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-xs text-slate-400">Past Performance Summary (AI uses this for the past performance section)</span>
+              <textarea
+                value={company.pastPerformance}
+                onChange={(e) => setCompany((c) => ({ ...c, pastPerformance: e.target.value }))}
+                rows={4}
+                placeholder="List 2-3 relevant past contracts with agency name, dollar value, and brief description of work performed."
+                className="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50 placeholder:text-slate-700"
+              />
+            </label>
+          </div>
+          <button type="button" onClick={saveCompanyAndProfile}
+            className="mt-5 rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-5 py-2.5 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/25">
+            Save Company Profile
+          </button>
+        </section>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 rounded-2xl border border-white/10 bg-slate-950/60 p-1 w-fit">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveTab(tab.key)}
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+              activeTab === tab.key
+                ? "bg-emerald-500/20 text-emerald-300"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "preview" ? (
+        <section className="rounded-[2rem] border border-emerald-400/20 bg-emerald-400/[0.04] p-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-lg font-semibold text-white">Bid Preview</h2>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => { void navigator.clipboard.writeText(previewText); setStatusMessage("Copied to clipboard."); }}
+                className={buttonStyles({ variant: "secondary", size: "sm" })}>Copy Text</button>
+              <button type="button" onClick={openPdf}
+                className={buttonStyles({ variant: "primary", size: "sm" })}>Download PDF</button>
+            </div>
+          </div>
+          <pre className="overflow-x-auto whitespace-pre-wrap rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-5 text-sm leading-7 text-slate-200">
+            {previewText || "Fill in sections on the Write tab to see your bid preview here."}
           </pre>
         </section>
-      ) : null}
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-2">
+          {/* Left column */}
+          <div className="space-y-6">
+            <BidSection title="Cover Letter">
+              <Field label="Cover Letter" value={coverLetter} onChange={setCoverLetter} rows={10}
+                placeholder="A formal letter to the contracting officer expressing intent to bid and introducing your company."
+                aiKey="coverLetter" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="space-y-6">
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>Bid workspace name</span>
-              <input
-                value={workspaceName}
-                onChange={(event) => setWorkspaceName(event.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
+            <BidSection title="Executive Summary">
+              <Field label="Executive Summary" value={executiveSummary} onChange={setExecutiveSummary} rows={8}
+                placeholder="A 2-3 paragraph overview of your offer, qualifications, and commitment."
+                aiKey="executiveSummary" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
 
-            <label className="mt-5 block space-y-2 text-sm text-slate-200">
-              <span>Win themes and differentiators</span>
-              <textarea
-                value={winThemes}
-                onChange={(event) => setWinThemes(event.target.value)}
-                rows={6}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                placeholder="Why should your team win this work? Add differentiators, past performance, or special certifications."
-              />
-            </label>
+            <BidSection title="Technical Approach">
+              <Field label="Technical Approach / Scope Response" value={technicalApproach} onChange={setTechnicalApproach} rows={12}
+                placeholder="Describe how you will perform the work — methodology, key tasks, quality controls, and delivery plan."
+                aiKey="technicalApproach" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
 
-            <label className="mt-5 block space-y-2 text-sm text-slate-200">
-              <span>Compliance and scope notes</span>
-              <textarea
-                value={complianceNotes}
-                onChange={(event) => setComplianceNotes(event.target.value)}
-                rows={7}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                placeholder="Capture mandatory requirements, certifications, site visit requirements, forms, and must-have scope items."
-              />
-            </label>
-          </section>
+            <BidSection title="Past Performance">
+              <Field label="Past Performance" value={pastPerformance} onChange={setPastPerformance} rows={8}
+                placeholder="List 2-3 relevant contracts you have completed. Include agency, dollar value, description, and outcome."
+                aiKey="pastPerformance" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
 
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>Pricing approach</span>
-              <textarea
-                value={pricingApproach}
-                onChange={(event) => setPricingApproach(event.target.value)}
-                rows={6}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                placeholder="Outline your pricing strategy, assumptions, labor mix, materials, and any subcontractor inputs you need."
-              />
-            </label>
+            <BidSection title="Management Plan">
+              <Field label="Management Plan / Key Personnel" value={managementPlan} onChange={setManagementPlan} rows={8}
+                placeholder="Describe your team structure, key roles, project manager qualifications, and communication plan."
+                aiKey="managementPlan" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
+          </div>
 
-            <label className="mt-5 block space-y-2 text-sm text-slate-200">
-              <span>Questions for the agency</span>
-              <textarea
-                value={questionsForAgency}
-                onChange={(event) => setQuestionsForAgency(event.target.value)}
-                rows={5}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                placeholder="Track clarification questions, missing attachment issues, or details you need before submitting."
-              />
-            </label>
+          {/* Right column */}
+          <div className="space-y-6">
+            <BidSection title="Win Strategy">
+              <Field label="Win Themes & Differentiators" value={winThemes} onChange={setWinThemes} rows={6}
+                placeholder="Why should your company win? List your strongest competitive advantages."
+                aiKey="winThemes" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
 
-            <label className="mt-5 block space-y-2 text-sm text-slate-200">
-              <span>AI document review points to address</span>
-              <textarea
-                value={aiReviewPoints}
-                onChange={(event) => setAiReviewPoints(event.target.value)}
-                rows={8}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                placeholder="Critical items from attachment review will appear here so your team can make sure the final bid addresses them."
-              />
-            </label>
+            <BidSection title="Pricing">
+              <Field label="Pricing Approach & Strategy" value={pricingApproach} onChange={setPricingApproach} rows={7}
+                placeholder="Labor rates, materials, subcontractors, markup strategy, and final price notes."
+                aiKey="pricingApproach" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
 
-            {reviewRequirements.length > 0 ? (
-              <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-semibold text-white">Requirement tracker</p>
-                <p className="mt-2 text-sm leading-6 text-slate-400">
-                  Mark each AI-identified item so your team knows what still needs a response in the final bid.
-                </p>
-                <div className="mt-4 space-y-3">
+            <BidSection title="Compliance">
+              <Field label="Compliance & Scope Notes" value={complianceNotes} onChange={setComplianceNotes} rows={6}
+                placeholder="Mandatory certifications, forms, site visits, registrations, and hard requirements." />
+            </BidSection>
+
+            <BidSection title="Submission Checklist">
+              <Field label="Submission Checklist" value={submissionChecklist} onChange={setSubmissionChecklist} rows={8}
+                placeholder="Step-by-step checklist before submitting the final bid."
+                aiKey="submissionChecklist" aiLoading={aiLoading} onAiGenerate={generateSection} />
+            </BidSection>
+
+            <BidSection title="Questions & Team">
+              <div className="space-y-4">
+                <Field label="Questions for the Agency" value={questionsForAgency} onChange={setQuestionsForAgency} rows={4}
+                  placeholder="Clarification questions to submit before the questions deadline." />
+                <Field label="Team Assignments" value={teammateAssignments} onChange={setTeammateAssignments} rows={4}
+                  placeholder="Who is responsible for writing, pricing, forms, and submission." />
+                <Field label="AI Review Points" value={aiReviewPoints} onChange={setAiReviewPoints} rows={4}
+                  placeholder="Key points from the solicitation attachment review that must be addressed." />
+              </div>
+            </BidSection>
+
+            {reviewRequirements.length > 0 && (
+              <BidSection title="Requirement Tracker">
+                <div className="space-y-3">
                   {reviewRequirements.map((item) => (
-                    <article
-                      key={item.id}
-                      className="rounded-[1.25rem] border border-white/10 bg-slate-950/70 p-4"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
+                    <article key={item.id} className="rounded-[1.25rem] border border-white/10 bg-slate-950/70 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="font-medium text-white">{item.title}</p>
-                          <p className="mt-2 text-sm leading-6 text-slate-300">{item.detail}</p>
+                          <p className="text-sm font-medium text-white">{item.title}</p>
+                          <p className="mt-1 text-xs leading-5 text-slate-400">{item.detail}</p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {[
-                            ["needs-response", "Needs response"],
-                            ["addressed", "Addressed"],
-                            ["blocked", "Blocked"],
-                          ].map(([value, label]) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() =>
-                                updateRequirementStatus(
-                                  item.id,
-                                  value as BidRequirementStatus,
-                                )
-                              }
-                              className={buttonStyles({
-                                variant:
-                                  item.status === value ? "primary" : "ghost",
-                                size: "sm",
-                              })}
-                            >
-                              {label}
+                        <div className="flex flex-wrap gap-1.5">
+                          {(["needs-response", "addressed", "blocked"] as BidRequirementStatus[]).map((s) => (
+                            <button key={s} type="button"
+                              onClick={() => updateRequirementStatus(item.id, s)}
+                              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                                item.status === s
+                                  ? s === "addressed" ? "bg-emerald-500/30 text-emerald-200" : s === "blocked" ? "bg-red-500/30 text-red-200" : "bg-amber-500/30 text-amber-200"
+                                  : "bg-white/5 text-slate-400 hover:text-white"
+                              }`}>
+                              {s === "needs-response" ? "Pending" : s === "addressed" ? "Done" : "Blocked"}
                             </button>
                           ))}
                         </div>
@@ -411,85 +548,57 @@ export function BidBuilderClient(props: BidBuilderClientProps) {
                     </article>
                   ))}
                 </div>
+              </BidSection>
+            )}
+
+            {/* Save & actions */}
+            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5">
+              <p className="text-sm font-semibold text-white mb-3">Save & Export</p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={saveDraft}
+                  className={buttonStyles({ variant: "primary", size: "md" })}>
+                  Save Bid Draft
+                </button>
+                <button type="button" onClick={openPdf}
+                  className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:border-emerald-400/30 hover:text-emerald-200">
+                  Download PDF
+                </button>
+                <Link href="/my-codes" className={buttonStyles({ variant: "ghost", size: "md" })}>
+                  My Codes
+                </Link>
+                <Link href="/dashboard" className={buttonStyles({ variant: "ghost", size: "md" })}>
+                  Dashboard
+                </Link>
               </div>
-            ) : null}
-          </section>
-        </div>
-
-        <div className="space-y-6">
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>Submission checklist</span>
-              <textarea
-                value={submissionChecklist}
-                onChange={(event) => setSubmissionChecklist(event.target.value)}
-                rows={9}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-
-            <label className="mt-5 block space-y-2 text-sm text-slate-200">
-              <span>Team assignments</span>
-              <textarea
-                value={teammateAssignments}
-                onChange={(event) => setTeammateAssignments(event.target.value)}
-                rows={7}
-                className="w-full rounded-[1.5rem] border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                placeholder="Assign technical writing, pricing, attachment review, and final submission steps."
-              />
-            </label>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  saveBidDraft({
-                    id: props.draftId,
-                    title: props.title,
-                    noticeId: props.noticeId,
-                    agency: props.agency,
-                    sourceName: props.sourceName,
-                    dueDate: props.dueDate,
-                    naicsCode: props.naicsCode,
-                    setAside: props.setAside,
-                    summary: props.summary,
-                    sourceUrl: props.sourceUrl,
-                    attachmentsUrl: props.attachmentsUrl,
-                    workspaceName,
-                    winThemes,
-                    complianceNotes,
-                    pricingApproach,
-                    questionsForAgency,
-                    submissionChecklist,
-                    teammateAssignments,
-                    aiReviewPoints,
-                    reviewRequirements,
-                    updatedAt: new Date().toISOString(),
-                  });
-                  setStatusMessage("Bid draft saved in this browser. Your team can keep building from here.");
-                }}
-                className={buttonStyles({ variant: "primary", size: "md" })}
-              >
-                Save bid draft
-              </button>
-              <Link href="/my-codes" className={buttonStyles({ variant: "ghost", size: "md" })}>
-                Open My Codes
-              </Link>
             </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-            <h2 className="text-xl font-semibold text-white">Suggested next steps</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
-              <li>Review every attachment and pull out mandatory forms, pricing sheets, and compliance deadlines.</li>
-              <li>Confirm whether the set-aside rules fit your business before investing too much time.</li>
-              <li>Check previous winning bids and comparable contracts before finalizing pricing.</li>
-              <li>Save the AI document review points into this workspace so nothing critical gets missed in the final response.</li>
-              <li>Make sure your saved codes are applied across SAM and state/local searches for similar work.</li>
-            </ul>
-          </section>
+          </div>
         </div>
-      </section>
+      )}
     </div>
   );
+}
+
+function BidSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-5">
+      <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400/60">{title}</p>
+      {children}
+    </section>
+  );
+}
+
+function defaultChecklist(title: string, dueDate?: string) {
+  return [
+    `☐ Confirm exact submission deadline${dueDate ? `: ${dueDate}` : ""}`,
+    "☐ Verify SAM.gov registration is active and UEI is current",
+    "☐ Download all amendments and addenda",
+    "☐ Complete all mandatory forms and certifications",
+    "☐ Confirm set-aside eligibility",
+    `☐ Pull full technical requirements from "${title}"`,
+    "☐ Finalize pricing sheet in required format",
+    "☐ Prepare past performance references",
+    "☐ Submit agency questions before questions deadline",
+    "☐ Final review: all sections complete, no blanks",
+    "☐ Submit via required method before deadline",
+  ].join("\n");
 }
