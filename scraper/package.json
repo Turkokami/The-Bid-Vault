@@ -4,10 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "postinstall": "prisma generate",
-    "start": "tsx src/server.ts",
+    "start": "prisma generate && tsx src/server.ts",
     "build": "echo 'build complete'",
-    "dev": "tsx src/server.ts",
+    "dev": "prisma generate && tsx src/server.ts",
     "scrape": "tsx src/run-scrape.ts"
   },
   "dependencies": {
