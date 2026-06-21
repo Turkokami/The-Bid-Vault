@@ -7,26 +7,35 @@ export async function scrapeCaliforia(): Promise<ScrapedOpportunity[]> {
   const results: ScrapedOpportunity[] = [];
 
   try {
-    // Cal eProcure public bid list
     await page.goto(
       "https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx",
-      { waitUntil: "networkidle", timeout: 30000 }
+      { waitUntil: "networkidle", timeout: 45000 }
     );
 
-    await page.waitForSelector(".event-row, table tr, .bid-row", { timeout: 15000 }).catch(() => null);
+    // Submit empty search to show all open bids
+    const searchBtn = await page.$('input[type="submit"], button[type="submit"], button:has-text("Search"), input[value="Search"]');
+    if (searchBtn) {
+      await searchBtn.click();
+      await page.waitForTimeout(4000);
+    }
+
+    // Also try clicking any "Search" button with text
+    await page.click('button:has-text("Search")').catch(() => null);
+    await page.waitForTimeout(3000);
+
+    await page.waitForSelector("table tr, .event-row, .bid-row, tr[class*='row']", { timeout: 20000 }).catch(() => null);
 
     const rows = await page.$$eval(
-      "table tr, .event-row",
+      "table tr",
       (els) =>
         els.map((el) => {
-          const cells = Array.from(el.querySelectorAll("td, .cell")).map(
+          const cells = Array.from(el.querySelectorAll("td")).map(
             (td) => (td as HTMLElement).innerText.trim()
           );
           const link = el.querySelector("a");
           return {
             cells,
             href: link ? (link as HTMLAnchorElement).href : "",
-            text: (el as HTMLElement).innerText.trim(),
           };
         })
     );
@@ -45,6 +54,8 @@ export async function scrapeCaliforia(): Promise<ScrapedOpportunity[]> {
         sourceUrl: href || "https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx",
       });
     }
+
+    console.log(`[CA] Page title: ${await page.title()}, rows found: ${rows.length}`);
   } finally {
     await browser.close();
   }

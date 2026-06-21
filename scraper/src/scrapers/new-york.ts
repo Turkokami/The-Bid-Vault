@@ -7,13 +7,16 @@ export async function scrapeNewYork(): Promise<ScrapedOpportunity[]> {
   const results: ScrapedOpportunity[] = [];
 
   try {
-    // NY State Contract Reporter public search
     await page.goto(
       "https://www.nyscr.ny.gov/siteUser/publicSearch.cfm",
-      { waitUntil: "networkidle", timeout: 30000 }
+      { waitUntil: "networkidle", timeout: 45000 }
     );
 
-    await page.waitForSelector("table tr", { timeout: 15000 }).catch(() => null);
+    // Submit empty search to show current opportunities
+    await page.click('input[type="submit"], button[type="submit"], input[value="Search"], button:has-text("Search")').catch(() => null);
+    await page.waitForTimeout(4000);
+
+    await page.waitForSelector("table tr", { timeout: 20000 }).catch(() => null);
 
     const rows = await page.$$eval("table tr", (trs) =>
       trs.slice(1).map((tr) => {
@@ -24,6 +27,8 @@ export async function scrapeNewYork(): Promise<ScrapedOpportunity[]> {
         return { cells, href: link ? (link as HTMLAnchorElement).href : "" };
       })
     );
+
+    console.log(`[NY] Page title: ${await page.title()}, rows found: ${rows.length}`);
 
     for (const row of rows) {
       const { cells, href } = row;
