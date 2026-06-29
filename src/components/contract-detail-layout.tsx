@@ -15,7 +15,7 @@ export function ContractDetailLayout({
 }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-      <aside className="sticky top-36 h-fit rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.28)]">
+      <aside className="hidden lg:block sticky top-36 h-fit rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.28)]">
         <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/80">On this page</p>
         <nav className="mt-4 space-y-2">
           {links.map((link) => (
