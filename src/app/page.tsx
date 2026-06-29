@@ -37,7 +37,7 @@ export default function Home() {
           </div>
         </div>
 
-        <h1 className="mt-2 max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-white md:text-6xl">
+        <h1 className="mt-2 max-w-4xl text-3xl font-semibold tracking-[-0.04em] text-white sm:text-5xl md:text-6xl">
           Win more contracts without paying finder fees.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
