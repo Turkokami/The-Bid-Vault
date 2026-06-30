@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { BackButton } from "@/components/back-button";
 import { InfoTip } from "@/components/info-tip";
 import { StateLocalDetailLayout } from "@/components/state-local-detail-layout";
 import { StateLocalSavePanel } from "@/components/state-local-save-panel";
@@ -164,6 +165,9 @@ export function StateLocalDetailClient({
 
   return (
     <div className="space-y-8">
+      <div className="pt-2">
+        <BackButton />
+      </div>
       <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">State & local opportunity</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">{opportunity.title}</h1>

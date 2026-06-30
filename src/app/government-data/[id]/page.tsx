@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ContractDetailLayout } from "@/components/contract-detail-layout";
+import { BackButton } from "@/components/back-button";
 
 export function generateStaticParams() {
   // Demo contract IDs only; live SAM.gov records are fetched client-side via Vercel
@@ -206,6 +207,9 @@ export default async function GovernmentDataRecordDetailPage({
 
   return (
     <div className="space-y-8">
+      <div className="pt-2">
+        <BackButton />
+      </div>
       <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
         <div className="mb-5 flex items-center gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-[1.5rem] border border-emerald-400/30 bg-black/40">
