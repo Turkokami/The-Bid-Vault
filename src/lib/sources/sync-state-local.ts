@@ -349,7 +349,7 @@ export async function getStateLocalSyncSnapshot(options?: {
     ]);
   }
 
-  const LIVE_FETCH_TIMEOUT_MS = 8000;
+  const LIVE_FETCH_TIMEOUT_MS = 5000;
 
   const [websResult, texasResult, georgiaResult, floridaResult, oregonResult, pennsylvaniaResult] =
     await Promise.allSettled([

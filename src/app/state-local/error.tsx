@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
-import { buttonStyles } from "@/components/ui/button";
 
 export default function StateLocalError({
   error,
@@ -12,39 +10,29 @@ export default function StateLocalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    console.error("[state-local] page error:", error);
   }, [error]);
 
   return (
-    <div className="rounded-[2rem] border border-amber-400/20 bg-amber-400/10 p-8 text-amber-50">
-      <p className="text-xs uppercase tracking-[0.35em] text-amber-100/80">State & local loading issue</p>
-      <h1 className="mt-4 text-3xl font-semibold text-white">
-        We could not load this live state or local source right now.
-      </h1>
-      <p className="mt-3 max-w-2xl text-sm leading-7">
-        The page is still part of the app, but the live source may be timing out or temporarily blocking the request.
-        Try reloading, or go back to the State & Local hub and open the original government portal directly.
-      </p>
-      <div className="mt-6 flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => reset()}
-          className={buttonStyles({ variant: "primary", size: "md" })}
-        >
-          Try again
-        </button>
-        <Link href="/state-local" className={buttonStyles({ variant: "ghost", size: "md" })}>
-          Back to State & Local
-        </Link>
-        <a
-          href="https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx"
-          target="_blank"
-          rel="noreferrer"
-          className={buttonStyles({ variant: "ghost", size: "md" })}
-        >
-          Open WEBS directly
-        </a>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <div className="rounded-full bg-red-500/10 p-4">
+        <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
       </div>
+      <div>
+        <h2 className="text-xl font-semibold text-slate-100">Couldn&apos;t load opportunities</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          One or more live portals took too long to respond. Try again — results usually load on the second attempt.
+        </p>
+      </div>
+      <button
+        onClick={reset}
+        className="rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+      >
+        Try again
+      </button>
     </div>
   );
 }
