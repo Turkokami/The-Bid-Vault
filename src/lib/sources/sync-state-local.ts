@@ -338,33 +338,57 @@ export async function getStateLocalSyncSnapshot(options?: {
     updateConnectedSource(sources, opp.sourceCode, `${opp.sourceName} — loaded from Railway scraper database.`);
   }
 
-  try {
-    const raws = await fetchLiveWebsRawOpportunities();
+  // Run all live portal fetches in parallel with a per-fetch timeout so a slow
+  // or hung external site can't block the entire function and trigger a Vercel timeout.
+  function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(`Fetch timed out after ${ms}ms`)), ms),
+      ),
+    ]);
+  }
+
+  const LIVE_FETCH_TIMEOUT_MS = 8000;
+
+  const [websResult, texasResult, georgiaResult, floridaResult, oregonResult, pennsylvaniaResult] =
+    await Promise.allSettled([
+      withTimeout(fetchLiveWebsRawOpportunities(), LIVE_FETCH_TIMEOUT_MS),
+      withTimeout(fetchLiveTexasOpportunities(), LIVE_FETCH_TIMEOUT_MS),
+      withTimeout(fetchLiveGeorgiaOpportunities(), LIVE_FETCH_TIMEOUT_MS),
+      withTimeout(fetchLiveFloridaOpportunities(), LIVE_FETCH_TIMEOUT_MS),
+      withTimeout(fetchLiveOregonOpportunities(), LIVE_FETCH_TIMEOUT_MS),
+      withTimeout(fetchLivePennsylvaniaOpportunities(), LIVE_FETCH_TIMEOUT_MS),
+    ]);
+
+  // WEBS (Washington)
+  if (websResult.status === "fulfilled") {
+    const raws = websResult.value;
     const mappedWebsOpportunities = raws.map((record) => ({
-        id: `washington-${record.solicitationNumber.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-        externalId: record.solicitationNumber,
-        sourceName: "WEBS",
-        sourceCode: "washington" as const,
-        stateCode: record.stateCode,
-        title: record.title,
-        issuingEntity: record.issuingEntity,
-        opportunityType: record.opportunityType,
-        status: record.status,
-        categoryCode: record.commodityCode,
-        postedDate: record.postedDate,
-        dueDate: record.dueDate,
-        summary: record.summary,
-        description: record.description,
-        location: `${record.city}, ${record.stateCode}`,
-        sourceUrl: record.sourceUrl,
-        registrationRequired: record.registrationRequired,
-        registrationNotes: record.registrationNotes,
-        contactName: record.contactName,
-        contactEmail: record.contactEmail,
-        contactPhone: record.contactPhone,
-        createdAt: record.postedDate,
-        updatedAt: record.updatedAt,
-      }));
+      id: `washington-${record.solicitationNumber.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+      externalId: record.solicitationNumber,
+      sourceName: "WEBS",
+      sourceCode: "washington" as const,
+      stateCode: record.stateCode,
+      title: record.title,
+      issuingEntity: record.issuingEntity,
+      opportunityType: record.opportunityType,
+      status: record.status,
+      categoryCode: record.commodityCode,
+      postedDate: record.postedDate,
+      dueDate: record.dueDate,
+      summary: record.summary,
+      description: record.description,
+      location: `${record.city}, ${record.stateCode}`,
+      sourceUrl: record.sourceUrl,
+      registrationRequired: record.registrationRequired,
+      registrationNotes: record.registrationNotes,
+      contactName: record.contactName,
+      contactEmail: record.contactEmail,
+      contactPhone: record.contactPhone,
+      createdAt: record.postedDate,
+      updatedAt: record.updatedAt,
+    }));
     opportunities.push(...mappedWebsOpportunities);
     cachedWebsOpportunities = mappedWebsOpportunities;
     syncLogs.push({
@@ -377,7 +401,7 @@ export async function getStateLocalSyncSnapshot(options?: {
       recordsUpdated: 0,
       notes: "Live WEBS postings were loaded directly from Washington's public bid portal.",
     });
-  } catch {
+  } else {
     if (cachedWebsOpportunities.length > 0) {
       opportunities.push(...cachedWebsOpportunities);
       syncLogs.push({
@@ -388,8 +412,7 @@ export async function getStateLocalSyncSnapshot(options?: {
         lastRunAt: formatSyncTime(),
         recordsAdded: cachedWebsOpportunities.length,
         recordsUpdated: 0,
-        notes:
-          "WEBS live refresh did not return new records, so the app is showing the last successful Washington results instead.",
+        notes: "WEBS live refresh did not return new records, so the app is showing the last successful Washington results instead.",
       });
     } else {
       syncLogs.push({
@@ -406,8 +429,9 @@ export async function getStateLocalSyncSnapshot(options?: {
     }
   }
 
-  try {
-    const texasOpportunities = await fetchLiveTexasOpportunities();
+  // Texas ESBD
+  if (texasResult.status === "fulfilled") {
+    const texasOpportunities = texasResult.value;
     opportunities.push(...texasOpportunities);
     cachedTexasOpportunities = texasOpportunities;
     updateConnectedSource(sources, "texas");
@@ -421,14 +445,10 @@ export async function getStateLocalSyncSnapshot(options?: {
       recordsUpdated: 0,
       notes: "Live Texas ESBD opportunities were loaded directly from the public ESBD search page.",
     });
-  } catch {
+  } else {
     if (cachedTexasOpportunities.length > 0) {
       opportunities.push(...cachedTexasOpportunities);
-      updateConnectedSource(
-        sources,
-        "texas",
-        "Texas ESBD live refresh did not return new records, so the app is showing the last successful Texas results instead.",
-      );
+      updateConnectedSource(sources, "texas", "Texas ESBD live refresh did not return new records, so the app is showing the last successful Texas results instead.");
       syncLogs.push({
         id: "sync-texas-cached",
         sourceName: "Texas ESBD / TxSmartBuy",
@@ -437,15 +457,10 @@ export async function getStateLocalSyncSnapshot(options?: {
         lastRunAt: formatSyncTime(),
         recordsAdded: cachedTexasOpportunities.length,
         recordsUpdated: 0,
-        notes:
-          "Texas ESBD live refresh did not return new rows, so the app is using the last successful Texas result set.",
+        notes: "Texas ESBD live refresh did not return new rows, so the app is using the last successful Texas result set.",
       });
     } else {
-      updateConnectedSource(
-        sources,
-        "texas",
-        "Texas ESBD is configured as a live public source, but the latest fetch did not return records. Try refreshing later.",
-      );
+      updateConnectedSource(sources, "texas", "Texas ESBD is configured as a live public source, but the latest fetch did not return records. Try refreshing later.");
       syncLogs.push({
         id: "sync-texas-failed",
         sourceName: "Texas ESBD / TxSmartBuy",
@@ -461,8 +476,8 @@ export async function getStateLocalSyncSnapshot(options?: {
   }
 
   // Georgia GPR
-  try {
-    const georgiaOpportunities = await fetchLiveGeorgiaOpportunities();
+  if (georgiaResult.status === "fulfilled") {
+    const georgiaOpportunities = georgiaResult.value;
     opportunities.push(...georgiaOpportunities);
     cachedGeorgiaOpportunities = georgiaOpportunities;
     updateConnectedSource(sources, "georgia");
@@ -476,7 +491,7 @@ export async function getStateLocalSyncSnapshot(options?: {
       recordsUpdated: 0,
       notes: "Live Georgia GPR solicitations were loaded from the public procurement registry.",
     });
-  } catch {
+  } else {
     if (cachedGeorgiaOpportunities.length > 0) {
       opportunities.push(...cachedGeorgiaOpportunities);
       updateConnectedSource(sources, "georgia", "Showing last successful Georgia GPR results.");
@@ -507,8 +522,8 @@ export async function getStateLocalSyncSnapshot(options?: {
   }
 
   // Florida MFMP VBS
-  try {
-    const floridaOpportunities = await fetchLiveFloridaOpportunities();
+  if (floridaResult.status === "fulfilled") {
+    const floridaOpportunities = floridaResult.value;
     opportunities.push(...floridaOpportunities);
     cachedFloridaOpportunities = floridaOpportunities;
     updateConnectedSource(sources, "florida");
@@ -522,7 +537,7 @@ export async function getStateLocalSyncSnapshot(options?: {
       recordsUpdated: 0,
       notes: "Live Florida VBS solicitations were loaded from the MFMP Vendor Bid System.",
     });
-  } catch {
+  } else {
     if (cachedFloridaOpportunities.length > 0) {
       opportunities.push(...cachedFloridaOpportunities);
       updateConnectedSource(sources, "florida", "Showing last successful Florida VBS results.");
@@ -553,8 +568,8 @@ export async function getStateLocalSyncSnapshot(options?: {
   }
 
   // Oregon ORPIN
-  try {
-    const oregonOpportunities = await fetchLiveOregonOpportunities();
+  if (oregonResult.status === "fulfilled") {
+    const oregonOpportunities = oregonResult.value;
     opportunities.push(...oregonOpportunities);
     cachedOregonOpportunities = oregonOpportunities;
     updateConnectedSource(sources, "oregon");
@@ -568,7 +583,7 @@ export async function getStateLocalSyncSnapshot(options?: {
       recordsUpdated: 0,
       notes: "Live Oregon ORPIN bids were loaded from the public procurement network.",
     });
-  } catch {
+  } else {
     if (cachedOregonOpportunities.length > 0) {
       opportunities.push(...cachedOregonOpportunities);
       updateConnectedSource(sources, "oregon", "Showing last successful Oregon ORPIN results.");
@@ -599,8 +614,8 @@ export async function getStateLocalSyncSnapshot(options?: {
   }
 
   // Pennsylvania eMarketplace
-  try {
-    const pennsylvaniaOpportunities = await fetchLivePennsylvaniaOpportunities();
+  if (pennsylvaniaResult.status === "fulfilled") {
+    const pennsylvaniaOpportunities = pennsylvaniaResult.value;
     opportunities.push(...pennsylvaniaOpportunities);
     cachedPennsylvaniaOpportunities = pennsylvaniaOpportunities;
     updateConnectedSource(sources, "pennsylvania");
@@ -614,7 +629,7 @@ export async function getStateLocalSyncSnapshot(options?: {
       recordsUpdated: 0,
       notes: "Live Pennsylvania eMarketplace solicitations were loaded from the public portal.",
     });
-  } catch {
+  } else {
     if (cachedPennsylvaniaOpportunities.length > 0) {
       opportunities.push(...cachedPennsylvaniaOpportunities);
       updateConnectedSource(sources, "pennsylvania", "Showing last successful PA eMarketplace results.");
