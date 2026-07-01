@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { buttonStyles } from "@/components/ui/button";
+import { PrintButton } from "@/components/print-button";
 import { demoContracts, demoWinningBids, getContractById } from "@/lib/demo-data";
 import { formatCurrency, formatDate } from "@/lib/format";
 
@@ -110,12 +111,7 @@ export default async function BidsPage({ searchParams }: BidsPageProps) {
                 >
                   Open contract detail
                 </Link>
-                <Link
-                  href={`/bids/${bid.id}/download`}
-                  className={buttonStyles({ variant: "primary", size: "md" })}
-                >
-                  Download winner summary
-                </Link>
+                <PrintButton label="Download winner summary" />
               </div>
             </article>
           ))

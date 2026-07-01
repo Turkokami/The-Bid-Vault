@@ -12,7 +12,10 @@ const desktopNav = [
   { href: "/bid-builder", label: "Build Bid" },
   { href: "/dashboard", label: "My Work" },
   { href: "/tracking", label: "Tracking" },
+  { href: "/alerts", label: "Alerts" },
+  { href: "/bids", label: "Past Bids" },
   { href: "/learn", label: "Learn" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
