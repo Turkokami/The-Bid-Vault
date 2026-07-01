@@ -7,8 +7,10 @@ import {
   removeSavedStateLocalOpportunity,
   saveStateLocalOpportunity,
 } from "@/lib/demo-state-local-store";
+import type { NormalizedStateLocalOpportunity } from "@/lib/sources/types";
 
-export function StateLocalSavePanel({ opportunityId }: { opportunityId: string }) {
+export function StateLocalSavePanel({ opportunity }: { opportunity: NormalizedStateLocalOpportunity }) {
+  const opportunityId = opportunity.id;
   const defaultNotes =
     "Review this opportunity before the due date and confirm source-system registration needs.";
   const [draft, setDraft] = useState({
@@ -90,7 +92,7 @@ export function StateLocalSavePanel({ opportunityId }: { opportunityId: string }
           size="md"
           onClick={() => {
             saveStateLocalOpportunity({
-              opportunityId,
+              opportunity,
               reminderDaysBefore: Number(reminderDaysBefore),
               notes,
             });

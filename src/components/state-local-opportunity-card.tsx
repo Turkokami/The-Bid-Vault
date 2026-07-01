@@ -46,7 +46,7 @@ export function StateLocalOpportunityCard({
           <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300 sm:leading-7">{opportunity.summary}</p>
         </div>
 
-        <StateLocalSaveButton opportunityId={opportunity.id} />
+        <StateLocalSaveButton opportunity={opportunity} />
       </div>
 
       <div className="mt-5 grid gap-3 text-sm text-slate-300 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
