@@ -13,6 +13,17 @@ import {
 } from "@/lib/demo-alert-store";
 import type { StateDirectoryEntry } from "@/lib/sources/state-registry";
 
+type DbSubscription = {
+  id: string;
+  industry: string;
+  stateCode: string;
+  email: string;
+  frequency: string;
+  scopes: string;
+  countiesOrCities: string;
+  keywords: string;
+};
+
 function toggleValue<T extends string>(values: T[], value: T) {
   return values.includes(value)
     ? values.filter((item) => item !== value)
@@ -35,12 +46,21 @@ export function OpportunityAlertsClient({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [savedRules, setSavedRules] = useState<SavedAlertRule[]>([]);
+  const [dbSubs, setDbSubs] = useState<DbSubscription[]>([]);
   const [status, setStatus] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const sync = () => setSavedRules(readSavedAlertRules());
     sync();
     window.addEventListener("bid-vault-alert-rules-updated", sync);
+
+    // Load DB subscriptions
+    fetch("/api/alerts/subscriptions")
+      .then((r) => r.json())
+      .then((data: { subscriptions: DbSubscription[] }) => setDbSubs(data.subscriptions ?? []))
+      .catch(() => null);
+
     return () => window.removeEventListener("bid-vault-alert-rules-updated", sync);
   }, []);
 
@@ -213,15 +233,16 @@ export function OpportunityAlertsClient({
                   return;
                 }
 
+                setSaving(true);
+                const parsedCodes = categoryCodes.split(",").map((v) => v.trim()).filter(Boolean);
+
+                // Save to localStorage (immediate, offline-capable)
                 saveAlertRule({
                   industry: industry.trim(),
                   stateCode,
                   countiesOrCities: countiesOrCities.trim(),
                   keywords: keywords.trim(),
-                  categoryCodes: categoryCodes
-                    .split(",")
-                    .map((value) => value.trim())
-                    .filter(Boolean),
+                  categoryCodes: parsedCodes,
                   channels,
                   scopes,
                   frequency,
@@ -229,11 +250,43 @@ export function OpportunityAlertsClient({
                   phone: phone.trim(),
                 });
 
-                setStatus("Alert rule saved. This workspace is now ready for matching and future delivery.");
+                // Persist to DB if email provided
+                if (email.trim()) {
+                  fetch("/api/alerts/subscriptions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      email: email.trim(),
+                      industry: industry.trim(),
+                      stateCode,
+                      countiesOrCities: countiesOrCities.trim(),
+                      keywords: keywords.trim(),
+                      categoryCodes: parsedCodes,
+                      scopes,
+                      frequency,
+                    }),
+                  })
+                    .then((r) => r.json())
+                    .then((data: { ok: boolean; id?: string }) => {
+                      if (data.ok && data.id) {
+                        setDbSubs((prev) => [
+                          { id: data.id!, industry: industry.trim(), stateCode, email: email.trim(), frequency, scopes: scopes.join(","), countiesOrCities: countiesOrCities.trim(), keywords: keywords.trim() },
+                          ...prev,
+                        ]);
+                        setStatus("Alert saved and email delivery activated. You'll receive matching opportunities at " + email.trim() + ".");
+                      }
+                    })
+                    .catch(() => null)
+                    .finally(() => setSaving(false));
+                } else {
+                  setSaving(false);
+                  setStatus("Alert rule saved locally. Add an email address to receive email delivery.");
+                }
               }}
+              disabled={saving}
               className={buttonStyles({ variant: "primary", size: "md" })}
             >
-              Save alert rule
+              {saving ? "Saving…" : "Save alert rule"}
             </button>
             <p className="self-center text-sm text-slate-400">
               {status || "Start with one rule and we can expand from there."}
@@ -255,35 +308,39 @@ export function OpportunityAlertsClient({
 
           <article className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
             <p className="text-xs uppercase tracking-[0.28em] text-emerald-300/80">
-              Saved alert rules
+              Active email alerts
             </p>
-            {savedRules.length ? (
+            {dbSubs.length > 0 ? (
               <div className="mt-4 space-y-3">
-                {savedRules.map((rule) => (
-                  <div key={rule.id} className="rounded-[1.25rem] border border-white/10 bg-slate-950/70 p-4">
-                    <p className="text-base font-semibold text-white">{rule.industry}</p>
-                    <p className="mt-1 text-sm text-slate-400">
-                      {rule.stateCode}
-                      {rule.countiesOrCities ? ` / ${rule.countiesOrCities}` : ""}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">
-                      {rule.scopes.join(" + ")} / {rule.channels.join(" + ")} / {rule.frequency}
-                    </p>
-                    <div className="mt-4">
-                      <button
-                        type="button"
-                        onClick={() => removeAlertRule(rule.id)}
-                        className={buttonStyles({ variant: "ghost", size: "sm" })}
-                      >
-                        Remove rule
-                      </button>
+                {dbSubs.map((sub) => (
+                  <div key={sub.id} className="rounded-[1.25rem] border border-emerald-400/20 bg-emerald-400/5 p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{sub.industry}</p>
+                        <p className="mt-1 text-xs text-slate-400">{sub.stateCode} · {sub.email}</p>
+                        <p className="mt-1 text-xs text-emerald-300/80">{sub.frequency} · {sub.scopes.replace(",", " + ")}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] text-emerald-300">
+                        Active
+                      </span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        fetch(`/api/alerts/subscriptions?id=${sub.id}`, { method: "DELETE" })
+                          .then(() => setDbSubs((prev) => prev.filter((s) => s.id !== sub.id)))
+                          .catch(() => null);
+                      }}
+                      className={`mt-3 ${buttonStyles({ variant: "ghost", size: "sm" })}`}
+                    >
+                      Cancel alert
+                    </button>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="mt-4 text-sm leading-6 text-slate-400">
-                No alert rules yet. Add one for your state and industry so the app is ready to notify you when matching contracts appear.
+                No active email alerts yet. Fill in the form and add your email to start receiving matches.
               </p>
             )}
           </article>

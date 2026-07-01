@@ -63,6 +63,7 @@ model User {
   savedCategoryCodeLists SavedCategoryCodeList[]
   alertRules        AlertRule[]
   notifications     Notification[]
+  alertSubscriptions OpportunityAlertSubscription[]
 }
 
 model Tenant {
@@ -205,6 +206,27 @@ model Notification {
 
   @@index([tenantId, status])
   @@index([userId, readAt])
+}
+
+model OpportunityAlertSubscription {
+  id               String   @id @default(cuid())
+  userId           String
+  email            String
+  industry         String
+  stateCode        String
+  countiesOrCities String   @default("")
+  keywords         String   @default("")
+  categoryCodes    String   @default("")  // comma-separated
+  scopes           String   @default("sam,state-local")  // comma-separated
+  frequency        String   @default("daily")  // "as-soon-as-found" | "daily" | "weekly"
+  active           Boolean  @default(true)
+  lastSentAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([active, lastSentAt])
 }
 
 model StateLocalOpportunity {
