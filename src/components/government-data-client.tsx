@@ -714,700 +714,468 @@ export function GovernmentDataClient({
     });
   };
 
-  return (
-    <div className="space-y-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-              Search SAM
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-              Search or browse federal contracts in one clean place.
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-slate-300">
-              Start by typing what your business does, or browse all available opportunities and scroll through the list freely.
-            </p>
-          </div>
+  const hasActiveFilters =
+    !!searchKeywords.trim() ||
+    !!searchIndustry.trim() ||
+    !!searchNaics.trim() ||
+    !!searchAgency.trim() ||
+    !!searchState.trim() ||
+    searchSetAside !== "all" ||
+    searchValueBand !== "all" ||
+    searchStatus !== "all";
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setSearchKeywords("");
-                setSearchIndustry("");
-                setSearchNaics("");
-                setSearchAgency("");
-                setSearchState("");
-                setSearchStatus("available");
-                setSearchSetAside("all");
-                setSearchValueBand("all");
-                setSortBy("due-soon");
-                setBrowseAll(true);
-                setErrorMessage("");
-                applySearch({
-                  keywords: "",
-                  industry: "",
-                  naics: "",
-                  agency: "",
-                  state: "",
-                  status: "available",
-                  keywordMode: "all",
-                  setAside: "all",
-                  valueBand: "all",
-                  sort: "due-soon",
-                  browse: true,
-                });
-              }}
-              className={buttonStyles({ variant: "secondary", size: "md" })}
-            >
-              Browse all available contracts
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                void forceRefreshGovernmentData({
-                  keywords: searchKeywords,
-                  keywordMode,
-                  industry: searchIndustry,
-                  naics: searchNaics,
-                  agency: searchAgency,
-                  state: searchState,
-                  status: searchStatus,
-                  setAside: searchSetAside,
-                  valueBand: searchValueBand,
-                  sort: sortBy,
-                  browse: browseAll,
-                })
-                  .then((snapshot) => {
-                    setRecords(snapshot.records);
-                    setSources(snapshot.sources);
-                    setActivities(snapshot.activities);
-                    setLastForcedRefreshAt(snapshot.activities[0]?.ranAt);
-                    setErrorMessage(snapshot.errorMessage ?? "");
-                    setIsLiveConfigured(snapshot.liveConfigured);
-                    setStatusMessage(
-                      snapshot.errorMessage
-                        ? "SAM refresh finished with a warning."
-                        : "Live SAM records refreshed.",
-                    );
-                  })
-                  .catch(() => {
-                    setErrorMessage("We could not refresh live SAM records right now.");
-                  });
-              }}
-              className={buttonStyles({ variant: "primary", size: "md" })}
-            >
-              Refresh SAM records now
-            </button>
-          </div>
+  const clearAll = () => {
+    setSearchKeywords("");
+    setSearchIndustry("");
+    setSearchNaics("");
+    setSearchAgency("");
+    setSearchState("");
+    setSearchStatus("all");
+    setSearchSetAside("all");
+    setSearchValueBand("all");
+    setSortBy("due-soon");
+    setBrowseAll(false);
+    applySearch({
+      keywords: "", industry: "", naics: "", agency: "", state: "",
+      status: "all", keywordMode: "all", setAside: "all", valueBand: "all",
+      sort: "due-soon", browse: false,
+    });
+  };
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── SEARCH BAR + FILTERS ── */}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          setBrowseAll(true);
+          applySearch();
+        }}
+        className="space-y-3 rounded-[2rem] border border-white/10 bg-white/5 p-4 shadow-[0_0_30px_rgba(34,197,94,0.08)] backdrop-blur sm:p-6"
+      >
+        {/* Primary search input */}
+        <div className="flex gap-2">
+          <input
+            name="keywords"
+            value={searchKeywords}
+            onChange={(event) => { setSearchKeywords(event.target.value); setBrowseAll(true); }}
+            placeholder="Search contracts — pest control, roofing, IT support…"
+            className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-base text-white outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/20"
+          />
+          <button type="submit" className={buttonStyles({ variant: "primary", size: "md" })}>
+            {isNavigating ? "…" : "Search"}
+          </button>
         </div>
 
-        {statusMessage ? (
-          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-            <span>{statusMessage}</span>
-            <Link
-              href="/sam-search"
-              className={buttonStyles({ variant: "ghost", size: "sm" })}
-            >
-              Refresh this page
-            </Link>
-          </div>
-        ) : null}
-        {errorMessage ? (
-          <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span>{errorMessage}</span>
-              <a
-                href={directSamSearchUrl}
-                target="_blank"
-                rel="noreferrer"
-                className={buttonStyles({ variant: "ghost", size: "sm" })}
-              >
-                Open this search on SAM.gov
-              </a>
-            </div>
-          </div>
-        ) : null}
-      </section>
+        {/* Filter row — dropdowns + quick actions */}
+        <div className="flex flex-wrap gap-2">
+          {/* Set-aside */}
+          <select
+            value={searchSetAside}
+            onChange={(event) => { setSearchSetAside(event.target.value as SamSetAsideFilter); setBrowseAll(true); }}
+            className="rounded-full border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          >
+            <option value="all">All set-asides</option>
+            <option value="small-business">Small business</option>
+            <option value="veteran">Veteran only</option>
+            <option value="women-owned">Women-owned</option>
+            <option value="8a">8(a)</option>
+            <option value="hubzone">HUBZone</option>
+          </select>
 
-      <section className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            setBrowseAll(true);
-            applySearch();
-          }}
-          className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-                Narrow results
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Use these filters to quickly find contracts that match your business.
-              </p>
-            </div>
-            {isNavigating ? (
-              <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
-                Searching...
-              </div>
-            ) : null}
-          </div>
+          {/* Contract size */}
+          <select
+            value={searchValueBand}
+            onChange={(event) => { setSearchValueBand(event.target.value as SamContractValueBand); setBrowseAll(true); }}
+            className="rounded-full border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          >
+            <option value="all">All sizes</option>
+            <option value="under-250k">Under $250k</option>
+            <option value="under-1m">Under $1M</option>
+            <option value="1m-10m">$1M – $10M</option>
+            <option value="over-10m">Over $10M</option>
+          </select>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="space-y-2 md:col-span-2">
-              <span className="text-sm text-slate-200">Set-aside focus</span>
-              <p className="text-xs leading-5 text-slate-400">
-                Narrow the list to contract groups like small business, veteran-owned, or women-owned opportunities.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {setAsideTabs.map((tab) => (
-                  <button
-                    key={tab.value}
-                    type="button"
-                    onClick={() => {
-                      setSearchSetAside(tab.value);
-                      setBrowseAll(true);
-                    }}
-                    className={buttonStyles({
-                      variant: searchSetAside === tab.value ? "primary" : "ghost",
-                      size: "sm",
-                    })}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+          {/* Status */}
+          <select
+            value={searchStatus}
+            onChange={(event) => { setSearchStatus(event.target.value as SearchSamStatus); setBrowseAll(true); }}
+            className="rounded-full border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          >
+            <option value="all">All statuses</option>
+            <option value="available">Available now</option>
+            <option value="closing-soon">Closing soon</option>
+            <option value="needs-review">Needs review</option>
+          </select>
+
+          {/* State */}
+          <input
+            name="state"
+            value={searchState}
+            onChange={(event) => { setSearchState(event.target.value); setBrowseAll(true); }}
+            placeholder="State (WA, TX…)"
+            className="w-32 rounded-full border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          />
+
+          {/* Browse all */}
+          <button
+            type="button"
+            onClick={() => {
+              setSearchKeywords(""); setSearchIndustry(""); setSearchNaics("");
+              setSearchAgency(""); setSearchState(""); setSearchStatus("available");
+              setSearchSetAside("all"); setSearchValueBand("all");
+              setSortBy("due-soon"); setBrowseAll(true); setErrorMessage("");
+              applySearch({ keywords: "", industry: "", naics: "", agency: "",
+                state: "", status: "available", keywordMode: "all",
+                setAside: "all", valueBand: "all", sort: "due-soon", browse: true });
+            }}
+            className={buttonStyles({ variant: "secondary", size: "sm" })}
+          >
+            Browse all
+          </button>
+
+          {/* Clear — only when filters are active */}
+          {hasActiveFilters ? (
+            <button type="button" onClick={clearAll} className={buttonStyles({ variant: "ghost", size: "sm" })}>
+              Clear
+            </button>
+          ) : null}
+        </div>
+
+        {/* Advanced filters — collapsed by default */}
+        <details className="group rounded-[1.5rem] border border-white/10 bg-slate-950/60">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-slate-300 marker:hidden">
+            <span className="flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="1" y1="3" x2="13" y2="3"/><line x1="3" y1="7" x2="11" y2="7"/><line x1="5" y1="11" x2="9" y2="11"/></svg>
+              Advanced filters
+              {(searchIndustry || searchNaics || searchAgency) ? (
+                <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-xs text-emerald-200">active</span>
+              ) : null}
+            </span>
+            <span className="text-emerald-300 transition-transform group-open:rotate-45">+</span>
+          </summary>
+
+          <div className="space-y-4 border-t border-white/10 p-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="space-y-1.5 text-sm text-slate-200">
+                <span className="flex items-center gap-1.5">
+                  Industry / service type
+                  <InfoTip>Type what your business does — we&apos;ll suggest NAICS codes.</InfoTip>
+                </span>
+                <input
+                  name="industry"
+                  value={searchIndustry}
+                  onChange={(event) => { setSearchIndustry(event.target.value); setBrowseAll(true); }}
+                  placeholder="e.g. pest control, roofing"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-400/50"
+                />
+              </label>
+
+              <label className="space-y-1.5 text-sm text-slate-200">
+                <span className="flex items-center gap-1.5">
+                  NAICS Code
+                  <InfoTip>Industry code used by the government to classify work type.</InfoTip>
+                </span>
+                <input
+                  name="naics"
+                  value={searchNaics}
+                  onChange={(event) => { setSearchNaics(event.target.value); setBrowseAll(true); }}
+                  placeholder="e.g. 561710"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-400/50"
+                />
+              </label>
+
+              <label className="space-y-1.5 text-sm text-slate-200">
+                <span>Government agency</span>
+                <input
+                  name="agency"
+                  value={searchAgency}
+                  onChange={(event) => { setSearchAgency(event.target.value); setBrowseAll(true); }}
+                  placeholder="e.g. Army Corps"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-400/50"
+                />
+              </label>
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <span className="text-sm text-slate-200">Contract size</span>
-              <p className="text-xs leading-5 text-slate-400">
-                Focus on opportunities by the estimated contract value when SAM lists it.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {contractValueTabs.map((tab) => (
-                  <button
-                    key={tab.value}
-                    type="button"
-                    onClick={() => {
-                      setSearchValueBand(tab.value);
-                      setBrowseAll(true);
-                    }}
-                    className={buttonStyles({
-                      variant: searchValueBand === tab.value ? "primary" : "ghost",
-                      size: "sm",
-                    })}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
-              <span>Search words</span>
-              <p className="text-xs leading-5 text-slate-400">
-                Type what you do. Example: pest control, landscaping, roofing.
-              </p>
+            {/* Keyword match mode */}
+            <div className="space-y-1.5 text-sm text-slate-200">
+              <span>Keyword match</span>
               <div className="flex flex-wrap gap-2">
                 {[
                   { value: "all", label: "Match all words" },
                   { value: "any", label: "Match any word" },
-                  { value: "exact", label: "Match exact phrase" },
+                  { value: "exact", label: "Exact phrase" },
                 ].map((option) => (
                   <button
                     key={option.value}
                     type="button"
-                  onClick={() => setKeywordMode(option.value as SamKeywordMode)}
-                    className={buttonStyles({
-                      variant: keywordMode === option.value ? "primary" : "ghost",
-                      size: "sm",
-                    })}
+                    onClick={() => setKeywordMode(option.value as SamKeywordMode)}
+                    className={buttonStyles({ variant: keywordMode === option.value ? "primary" : "ghost", size: "sm" })}
                   >
                     {option.label}
                   </button>
                 ))}
               </div>
-              <input
-                name="keywords"
-                value={searchKeywords}
-                onChange={(event) => {
-                  setSearchKeywords(event.target.value);
-                  setBrowseAll(true);
-                }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
+            </div>
 
-            <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
-              <span className="flex items-center gap-2">
-                Industry or service type
-                <InfoTip>Type the kind of work your business does. We will suggest matching industry codes for you.</InfoTip>
-              </span>
-              <input
-                name="industry"
-                value={searchIndustry}
-                onChange={(event) => {
-                  setSearchIndustry(event.target.value);
-                  setBrowseAll(true);
-                }}
-                placeholder="Try: pest control, wildlife exclusion, bird deterrent"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-
-            <label className="space-y-2 text-sm text-slate-200">
-              <span className="flex items-center gap-2">
-                Industry Type (NAICS Code)
-                <InfoTip>This is the industry classification the government uses to describe the type of work.</InfoTip>
-              </span>
-              <input
-                name="naics"
-                value={searchNaics}
-                onChange={(event) => {
-                  setSearchNaics(event.target.value);
-                  setBrowseAll(true);
-                }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>Government agency</span>
-              <input
-                name="agency"
-                value={searchAgency}
-                onChange={(event) => {
-                  setSearchAgency(event.target.value);
-                  setBrowseAll(true);
-                }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>State</span>
-              <input
-                name="state"
-                value={searchState}
-                onChange={(event) => {
-                  setSearchState(event.target.value);
-                  setBrowseAll(true);
-                }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              />
-            </label>
-
-            <label className="space-y-2 text-sm text-slate-200">
-              <span>Status</span>
-              <select
-                name="status"
-                value={searchStatus}
-                onChange={(event) => {
-                  setSearchStatus(event.target.value as SearchSamStatus);
-                  setBrowseAll(true);
-                }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-              >
-                <option value="all">All records</option>
-                <option value="available">Available now</option>
-                <option value="closing-soon">Closing soon</option>
-                <option value="needs-review">Needs review</option>
-              </select>
-            </label>
-          </div>
-
-          {industryMatches.length > 0 ? (
-            <div className="mt-5 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-white">Recommended industry codes</p>
-                  <p className="mt-1 text-xs text-emerald-100/90">
-                    Based on &quot;{searchIndustry}&quot;, we found likely industry codes for your search.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSearchNaics(recommendedNaicsCodes.join(", "))}
-                  className={buttonStyles({ variant: "primary", size: "sm" })}
-                >
-                  Use all suggested codes
-                </button>
-              </div>
-              <div className="mt-4 space-y-3">
-                {industryMatches.map((recommendation) => (
-                  <div
-                    key={recommendation.id}
-                    className="rounded-[1.25rem] border border-white/10 bg-slate-950/50 p-4"
-                  >
-                    <p className="text-sm font-semibold text-white">{recommendation.industry}</p>
-                    <p className="mt-1 text-xs text-emerald-200">{recommendation.category}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {recommendation.codes.map((code) => (
-                        <button
-                          key={`${recommendation.id}-${code.naicsCode}`}
-                          type="button"
-                          onClick={() => {
-                            const nextCodes = Array.from(
-                              new Set([...parseMultiValue(searchNaics), code.naicsCode]),
-                            );
-                            setSearchNaics(nextCodes.join(", "));
-                          }}
-                          className={buttonStyles({ variant: "secondary", size: "sm" })}
-                        >
-                          {code.naicsCode} / use this code
-                        </button>
-                      ))}
-                    </div>
+            {/* Industry code suggestions */}
+            {industryMatches.length > 0 ? (
+              <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Recommended NAICS codes</p>
+                    <p className="mt-1 text-xs text-emerald-100/90">Based on &quot;{searchIndustry}&quot;</p>
                   </div>
-                ))}
-              </div>
-              <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-slate-950/50 p-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-end">
-                  <label className="flex-1 space-y-2 text-sm text-slate-200">
-                    <span>Save these as your code list</span>
-                    <input
-                      value={newListName}
-                      onChange={(event) => setNewListName(event.target.value)}
-                      placeholder="Example: Pest Control Search Codes"
-                      className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      saveNaicsCodeList(
-                        newListName || `${searchIndustry || "My"} search codes`,
-                        recommendedNaicsCodes,
-                      );
-                      setNewListName("");
-                    }}
-                    className={buttonStyles({ variant: "primary", size: "md" })}
-                  >
-                    Save code list
+                  <button type="button" onClick={() => setSearchNaics(recommendedNaicsCodes.join(", "))} className={buttonStyles({ variant: "primary", size: "sm" })}>
+                    Use all
                   </button>
                 </div>
-              </div>
-            </div>
-          ) : null}
-
-          {savedCodeLists.length > 0 ? (
-            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-              <p className="text-sm font-semibold text-white">Your saved code lists</p>
-              <p className="mt-1 text-xs leading-5 text-slate-400">
-                Apply a saved list to instantly reuse your preferred codes in Search SAM.
-              </p>
-              <div className="mt-4 space-y-3">
-                {savedCodeLists.map((list) => (
-                  <div
-                    key={list.id}
-                    className="rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4"
-                  >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <p className="font-medium text-white">{list.name}</p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          SAM codes: {(list.samCodes?.length ? list.samCodes : list.codes).join(", ")}
-                        </p>
-                        {list.websCodes?.length ? (
-                          <p className="mt-1 text-xs text-slate-500">
-                            Also saved for WEBS: {list.websCodes.join(", ")}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const samCodes = list.samCodes?.length ? list.samCodes : list.codes;
-                            const keywords = list.searchTerms?.length
-                              ? list.searchTerms.slice(0, 4).join(", ")
-                              : searchKeywords;
-                            setSearchNaics(samCodes.join(", "));
-                            if (list.searchTerms?.length && !searchKeywords.trim()) {
-                              setSearchKeywords(keywords);
-                            }
-                            applySearch({
-                              naics: samCodes.join(", "),
-                              keywords,
-                              setAside: searchSetAside,
-                              valueBand: searchValueBand,
-                            });
-                          }}
-                          className={buttonStyles({ variant: "secondary", size: "sm" })}
-                        >
-                          Apply to SAM
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void removeNaicsCodeList(list.id)}
-                          className={buttonStyles({ variant: "ghost", size: "sm" })}
-                        >
-                          Remove
-                        </button>
+                <div className="mt-3 space-y-3">
+                  {industryMatches.map((recommendation) => (
+                    <div key={recommendation.id} className="rounded-[1.25rem] border border-white/10 bg-slate-950/50 p-4">
+                      <p className="text-sm font-semibold text-white">{recommendation.industry}</p>
+                      <p className="mt-1 text-xs text-emerald-200">{recommendation.category}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {recommendation.codes.map((code) => (
+                          <button
+                            key={`${recommendation.id}-${code.naicsCode}`}
+                            type="button"
+                            onClick={() => {
+                              const nextCodes = Array.from(new Set([...parseMultiValue(searchNaics), code.naicsCode]));
+                              setSearchNaics(nextCodes.join(", "));
+                            }}
+                            className={buttonStyles({ variant: "secondary", size: "sm" })}
+                          >
+                            {code.naicsCode} — use
+                          </button>
+                        ))}
                       </div>
                     </div>
+                  ))}
+                </div>
+                <div className="mt-3 rounded-[1.25rem] border border-white/10 bg-slate-950/50 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <label className="flex-1 space-y-1.5 text-sm text-slate-200">
+                      <span>Save as code list</span>
+                      <input
+                        value={newListName}
+                        onChange={(event) => setNewListName(event.target.value)}
+                        placeholder="List name…"
+                        className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-400/50"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => { saveNaicsCodeList(newListName || `${searchIndustry || "My"} codes`, recommendedNaicsCodes); setNewListName(""); }}
+                      className={buttonStyles({ variant: "primary", size: "md" })}
+                    >
+                      Save list
+                    </button>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              className={buttonStyles({ variant: "primary", size: "md" })}
+            {/* Saved code lists */}
+            {savedCodeLists.length > 0 ? (
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-semibold text-white">Saved code lists</p>
+                <div className="mt-3 space-y-3">
+                  {savedCodeLists.map((list) => (
+                    <div key={list.id} className="rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="font-medium text-white">{list.name}</p>
+                          <p className="mt-1 text-xs text-slate-400">Codes: {(list.samCodes?.length ? list.samCodes : list.codes).join(", ")}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const samCodes = list.samCodes?.length ? list.samCodes : list.codes;
+                              const keywords = list.searchTerms?.length ? list.searchTerms.slice(0, 4).join(", ") : searchKeywords;
+                              setSearchNaics(samCodes.join(", "));
+                              if (list.searchTerms?.length && !searchKeywords.trim()) setSearchKeywords(keywords);
+                              applySearch({ naics: samCodes.join(", "), keywords, setAside: searchSetAside, valueBand: searchValueBand });
+                            }}
+                            className={buttonStyles({ variant: "secondary", size: "sm" })}
+                          >Apply</button>
+                          <button type="button" onClick={() => void removeNaicsCodeList(list.id)} className={buttonStyles({ variant: "ghost", size: "sm" })}>Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </details>
+
+        {/* Status / error banners */}
+        {statusMessage ? (
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+            <span>{statusMessage}</span>
+            <Link href="/sam-search" className={buttonStyles({ variant: "ghost", size: "sm" })}>Refresh page</Link>
+          </div>
+        ) : null}
+        {errorMessage ? (
+          <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span>{errorMessage}</span>
+              <a href={directSamSearchUrl} target="_blank" rel="noreferrer" className={buttonStyles({ variant: "ghost", size: "sm" })}>Open on SAM.gov</a>
+            </div>
+          </div>
+        ) : null}
+      </form>
+
+      {/* ── RESULTS ── */}
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
+        {/* Results header */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-100">
+              {filteredResults.length} {filteredResults.length === 1 ? "result" : "results"}
+            </span>
+            {records.length > 0 ? (
+              <span className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                {records.length} loaded
+              </span>
+            ) : null}
+            {searchSetAside !== "all" ? (
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
+                {setAsideTabs.find((t) => t.value === searchSetAside)?.label}
+              </span>
+            ) : null}
+            {searchValueBand !== "all" ? (
+              <span className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                {contractValueTabs.find((t) => t.value === searchValueBand)?.label}
+              </span>
+            ) : null}
+            {appliedNaicsCodes.length > 0 ? (
+              <span className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
+                NAICS: {appliedNaicsCodes.join(", ")}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={sortBy}
+              onChange={(event) => { const s = event.target.value as SearchSamSort; setSortBy(s); applySearch({ sort: s }); }}
+              className="rounded-full border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
             >
-              Search contracts
-            </button>
+              <option value="due-soon">Due soonest</option>
+              <option value="newest">Newest posted</option>
+              <option value="agency">Agency A–Z</option>
+              <option value="title">Title A–Z</option>
+            </select>
             <button
               type="button"
               onClick={() => {
-                setSearchKeywords("");
-                setSearchIndustry("");
-                setSearchNaics("");
-                setSearchAgency("");
-                setSearchState("");
-                setSearchStatus("all");
-                setSearchSetAside("all");
-                setSearchValueBand("all");
-                setSortBy("due-soon");
-                setBrowseAll(false);
-                applySearch({
-                  keywords: "",
-                  industry: "",
-                  naics: "",
-                  agency: "",
-                  state: "",
-                  status: "all",
-                  keywordMode: "all",
-                  setAside: "all",
-                  valueBand: "all",
-                  sort: "due-soon",
-                  browse: false,
-                });
+                void forceRefreshGovernmentData({ keywords: searchKeywords, keywordMode, industry: searchIndustry, naics: searchNaics, agency: searchAgency, state: searchState, status: searchStatus, setAside: searchSetAside, valueBand: searchValueBand, sort: sortBy, browse: browseAll })
+                  .then((snapshot) => {
+                    setRecords(snapshot.records); setSources(snapshot.sources); setActivities(snapshot.activities);
+                    setLastForcedRefreshAt(snapshot.activities[0]?.ranAt);
+                    setErrorMessage(snapshot.errorMessage ?? ""); setIsLiveConfigured(snapshot.liveConfigured);
+                    setStatusMessage(snapshot.errorMessage ? "SAM refresh finished with a warning." : "Live SAM records refreshed.");
+                  })
+                  .catch(() => setErrorMessage("We could not refresh live SAM records right now."));
               }}
-              className={buttonStyles({ variant: "ghost", size: "md" })}
+              className={buttonStyles({ variant: "ghost", size: "sm" })}
             >
-              Clear search
+              Refresh SAM
             </button>
           </div>
+        </div>
 
-          <p className="mt-4 text-xs text-slate-400">
-            Tip: use Browse all available contracts when you want the live federal list, or type your own search to narrow it down fast.
-          </p>
-        </form>
-
-        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">
-                Search results
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                These are current federal opportunities you may be able to bid on.
-              </p>
+        <div className="mt-5 space-y-4">
+          {!browseAll && !searchKeywords.trim() && !searchIndustry.trim() && !searchNaics.trim() && !searchAgency.trim() && !searchState.trim() ? (
+            <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-6 text-center text-sm leading-6 text-slate-400">
+              Type what your business does above, or tap <span className="font-medium text-white">Browse all</span> to load live SAM results.
             </div>
+          ) : null}
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-100">
-                {filteredResults.length} matching {filteredResults.length === 1 ? "result" : "results"}
+          {browseAll && records.length === 0 ? (
+            <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
+              <div className="space-y-3">
+                <p>{isLiveConfigured ? "No live SAM opportunities returned right now. Try refreshing, broadening filters, or searching directly on SAM.gov." : "Search SAM needs a live SAM.gov API key to load real opportunities."}</p>
+                {isLiveConfigured ? (
+                  <a href={directSamSearchUrl} target="_blank" rel="noreferrer" className={buttonStyles({ variant: "secondary", size: "sm" })}>Open on SAM.gov</a>
+                ) : null}
               </div>
-              {records.length > 0 ? (
-                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
-                  Live records loaded: {records.length}
-                </div>
-              ) : null}
-              {appliedNaicsCodes.length > 0 ? (
-                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
-                  Using codes: {appliedNaicsCodes.join(", ")}
-                </div>
-              ) : null}
-              {searchSetAside !== "all" ? (
-                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
-                  Set-aside: {setAsideTabs.find((tab) => tab.value === searchSetAside)?.label}
-                </div>
-              ) : null}
-              {searchValueBand !== "all" ? (
-                <div className="rounded-full border border-white/10 bg-slate-950 px-3 py-1 text-xs text-slate-300">
-                  Size: {contractValueTabs.find((tab) => tab.value === searchValueBand)?.label}
-                </div>
-              ) : null}
-
-              <label className="space-y-1 text-sm text-slate-200">
-                <span className="sr-only">Sort results</span>
-                <select
-                  name="sort"
-                  value={sortBy}
-                  onChange={(event) => {
-                    const nextSort = event.target.value as SearchSamSort;
-                    setSortBy(nextSort);
-                    applySearch({ sort: nextSort });
-                  }}
-                  className="rounded-full border border-white/10 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
-                >
-                  <option value="due-soon">Sort: due soonest</option>
-                  <option value="newest">Sort: newest due date</option>
-                  <option value="agency">Sort: agency</option>
-                  <option value="title">Sort: title</option>
-                </select>
-              </label>
             </div>
-          </div>
+          ) : null}
 
-          <div className="mt-5 space-y-4">
-            {!browseAll &&
-            !searchKeywords.trim() &&
-            !searchIndustry.trim() &&
-            !searchNaics.trim() &&
-            !searchAgency.trim() &&
-            !searchState.trim() ? (
-              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
-                Start by typing what your business does, or click <span className="font-medium text-white">Browse all available contracts</span> to load live SAM results.
+          {visibleResults.map((result) => (
+            <Link
+              key={result.id}
+              href={buildSamDetailHref(result, currentSearchHref)}
+              scroll={false}
+              className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base font-semibold text-white sm:text-lg">{result.title}</h2>
+                  <p className="mt-1 text-sm text-slate-400">{result.agency} / {result.location}</p>
+                </div>
+                <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium ${availabilityBadgeClass(result.availabilityStatus)}`}>
+                  {result.availabilityStatus}
+                </span>
               </div>
-            ) : null}
 
-            {browseAll && records.length === 0 ? (
-              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
-                <div className="space-y-3">
-                  <p>
-                    {isLiveConfigured
-                      ? "No live SAM opportunities were returned right now. Try refreshing the page, broadening your filters, or opening the same search directly on SAM.gov."
-                      : "Search SAM needs a live SAM.gov API key before it can load real federal opportunities."}
-                  </p>
-                  {isLiveConfigured ? (
-                    <a
-                      href={directSamSearchUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={buttonStyles({ variant: "secondary", size: "sm" })}
-                    >
-                      Open this search on SAM.gov
-                    </a>
-                  ) : null}
-                </div>
+              <div className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-3">
+                <div><p className="text-slate-500">Type</p><p className="mt-0.5 text-white">{result.opportunityType}</p></div>
+                <div><p className="text-slate-500">NAICS</p><p className="mt-0.5 text-white">{result.naicsCode}</p></div>
+                <div><p className="text-slate-500">Due</p><p className="mt-0.5 text-white">{result.responseDeadline}</p></div>
               </div>
-            ) : null}
 
-            {visibleResults.map((result) => (
-              <Link
-                key={result.id}
-                href={buildSamDetailHref(result, currentSearchHref)}
-                scroll={false}
-                className="block rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 transition hover:border-emerald-400/30 hover:bg-emerald-400/5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="max-w-3xl">
-                    <h2 className="text-lg font-semibold text-white">{result.title}</h2>
-                    <p className="mt-2 text-sm text-slate-400">
-                      {result.agency} / {result.location}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs font-medium ${availabilityBadgeClass(result.availabilityStatus)}`}
-                  >
-                    {result.availabilityStatus}
-                  </span>
-                </div>
-
-                <div className="mt-4 grid gap-3 text-sm text-slate-300 md:grid-cols-3">
-                  <div>
-                    <p className="text-slate-500">Type of opportunity</p>
-                    <p className="mt-1 text-white">{result.opportunityType}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-500">Industry Type (NAICS Code)</p>
-                    <p className="mt-1 text-white">{result.naicsCode}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-500">Due date</p>
-                    <p className="mt-1 text-white">{result.responseDeadline}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                  {result.setAside && result.setAside !== "Not listed" ? (
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 font-medium text-emerald-100">
-                      {result.setAside}
-                    </span>
-                  ) : null}
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-medium text-slate-200">
-                    Estimated size: {result.estimatedValueLabel}
-                  </span>
-                </div>
-
-                <p className="mt-4 text-sm leading-6 text-slate-400">{result.synopsis}</p>
-                <p className="mt-4 text-sm text-emerald-200">Open SAM Search detail</p>
-              </Link>
-            ))}
-
-            {(browseAll || searchKeywords.trim() || searchIndustry.trim() || searchNaics.trim() || searchAgency.trim() || searchState.trim()) &&
-            records.length > 0 &&
-            filteredResults.length === 0 ? (
-              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
-                No results yet. Try broad terms like &quot;cleaning&quot;, &quot;construction&quot;, or &quot;pest control&quot;, or use Browse all available contracts.
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                {result.setAside && result.setAside !== "Not listed" ? (
+                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 font-medium text-emerald-100">{result.setAside}</span>
+                ) : null}
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-medium text-slate-200">Est. {result.estimatedValueLabel}</span>
               </div>
-            ) : null}
 
-            {filteredResults.length > resultsPageSize ? (
-              <section className="flex flex-col gap-4 rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm text-slate-300">
-                  Page {currentResultsPage} of {resultsTotalPages}
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    disabled={currentResultsPage <= 1}
-                    onClick={() => setResultsPage((current) => Math.max(1, current - 1))}
-                    className={buttonStyles({ variant: "ghost", size: "sm" })}
-                  >
-                    Previous page
-                  </button>
-                  <button
-                    type="button"
-                    disabled={currentResultsPage >= resultsTotalPages}
-                    onClick={() =>
-                      setResultsPage((current) => Math.min(resultsTotalPages, current + 1))
-                    }
-                    className={buttonStyles({ variant: "secondary", size: "sm" })}
-                  >
-                    Next page
-                  </button>
-                </div>
-              </section>
-            ) : null}
-          </div>
-        </section>
+              <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-400">{result.synopsis}</p>
+              <p className="mt-3 text-sm font-medium text-emerald-300">View details →</p>
+            </Link>
+          ))}
+
+          {hasActiveFilters && records.length > 0 && filteredResults.length === 0 ? (
+            <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-5 text-sm leading-6 text-slate-400">
+              No results for these filters. Try broader terms or tap <span className="font-medium text-white">Clear</span> to reset.
+            </div>
+          ) : null}
+
+          {filteredResults.length > resultsPageSize ? (
+            <div className="flex flex-col gap-4 rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm text-slate-300">Page {currentResultsPage} of {resultsTotalPages}</span>
+              <div className="flex gap-3">
+                <button type="button" disabled={currentResultsPage <= 1} onClick={() => setResultsPage((c) => Math.max(1, c - 1))} className={buttonStyles({ variant: "ghost", size: "sm" })}>← Previous</button>
+                <button type="button" disabled={currentResultsPage >= resultsTotalPages} onClick={() => setResultsPage((c) => Math.min(resultsTotalPages, c + 1))} className={buttonStyles({ variant: "secondary", size: "sm" })}>Next →</button>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </section>
 
+      {/* ── STATS ── */}
       <section className="grid gap-4 md:grid-cols-3">
         <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Available to browse now</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Available now</p>
           <p className="mt-3 text-3xl font-semibold text-white">{availableCount}</p>
-          <p className="mt-2 text-sm text-slate-400">
-            Use Browse all available contracts to scroll the full active list.
-          </p>
+          <p className="mt-2 text-sm text-slate-400">Tap Browse all to scroll the full active federal list.</p>
         </article>
         <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Connected federal sources</p>
-          <p className="mt-3 text-3xl font-semibold text-white">
-            {sources.filter((source) => source.status === "Connected").length}
-          </p>
-          <p className="mt-2 text-sm text-slate-400">
-            Federal sources currently ready for search in this preview.
-          </p>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Connected sources</p>
+          <p className="mt-3 text-3xl font-semibold text-white">{sources.filter((s) => s.status === "Connected").length}</p>
+          <p className="mt-2 text-sm text-slate-400">Federal sources ready for search.</p>
         </article>
         <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Last manual refresh</p>
-          <p className="mt-3 text-sm font-medium text-emerald-100">
-            {lastForcedRefreshAt ?? activities[0]?.ranAt ?? "No manual refresh run yet"}
-          </p>
-          <p className="mt-2 text-sm text-slate-400">
-            Refresh anytime when you want the newest source preview.
-          </p>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Last refresh</p>
+          <p className="mt-3 text-sm font-medium text-emerald-100">{lastForcedRefreshAt ?? activities[0]?.ranAt ?? "Not yet refreshed"}</p>
+          <p className="mt-2 text-sm text-slate-400">Use Refresh SAM to pull the latest records.</p>
         </article>
       </section>
     </div>
