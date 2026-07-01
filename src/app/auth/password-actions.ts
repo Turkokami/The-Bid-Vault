@@ -9,7 +9,12 @@ export type PasswordActionState = {
   success?: string;
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY is not set.");
+  return new Resend(key);
+}
+
 const FROM = process.env.ALERT_FROM_EMAIL ?? "alerts@thebidvault.com";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://thebidvault.com";
 
@@ -27,7 +32,7 @@ export async function requestPasswordResetAction(
 
     if (token) {
       const resetUrl = `${APP_URL}/reset-password?token=${token}`;
-      await resend.emails.send({
+      await getResend().emails.send({
         from: FROM,
         to: email.data,
         subject: "Reset your Bid Vault password",
