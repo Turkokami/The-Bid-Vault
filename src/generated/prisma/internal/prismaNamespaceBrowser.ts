@@ -60,6 +60,8 @@ export const ModelName = {
   RebidPrediction: 'RebidPrediction',
   AlertRule: 'AlertRule',
   Notification: 'Notification',
+  PasswordResetToken: 'PasswordResetToken',
+  OpportunityAlertSubscription: 'OpportunityAlertSubscription',
   StateLocalOpportunity: 'StateLocalOpportunity',
   SourceSyncLog: 'SourceSyncLog',
   SavedStateLocalOpportunity: 'SavedStateLocalOpportunity',
@@ -221,6 +223,38 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const OpportunityAlertSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  industry: 'industry',
+  stateCode: 'stateCode',
+  countiesOrCities: 'countiesOrCities',
+  keywords: 'keywords',
+  categoryCodes: 'categoryCodes',
+  scopes: 'scopes',
+  frequency: 'frequency',
+  active: 'active',
+  lastSentAt: 'lastSentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OpportunityAlertSubscriptionScalarFieldEnum = (typeof OpportunityAlertSubscriptionScalarFieldEnum)[keyof typeof OpportunityAlertSubscriptionScalarFieldEnum]
 
 
 export const StateLocalOpportunityScalarFieldEnum = {

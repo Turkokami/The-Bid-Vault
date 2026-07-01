@@ -197,6 +197,8 @@ export type UserWhereInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListListRelationFilter
   alertRules?: Prisma.AlertRuleListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -213,6 +215,8 @@ export type UserOrderByWithRelationInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListOrderByRelationAggregateInput
   alertRules?: Prisma.AlertRuleOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionOrderByRelationAggregateInput
+  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -232,6 +236,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListListRelationFilter
   alertRules?: Prisma.AlertRuleListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -272,6 +278,8 @@ export type UserCreateInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -288,6 +296,8 @@ export type UserUncheckedCreateInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -304,6 +314,8 @@ export type UserUpdateInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -320,6 +332,8 @@ export type UserUncheckedUpdateInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -449,6 +463,34 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, Prisma.UserUpdateWithoutPasswordResetTokensInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserCreateNestedOneWithoutAlertSubscriptionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAlertSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAlertSubscriptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAlertSubscriptionsInput
+  upsert?: Prisma.UserUpsertWithoutAlertSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAlertSubscriptionsInput, Prisma.UserUpdateWithoutAlertSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutAlertSubscriptionsInput>
+}
+
 export type UserCreateNestedOneWithoutSavedStateLocalOpportunitiesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutSavedStateLocalOpportunitiesInput, Prisma.UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedStateLocalOpportunitiesInput
@@ -504,6 +546,8 @@ export type UserCreateWithoutMembershipsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -519,6 +563,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -550,6 +596,8 @@ export type UserUpdateWithoutMembershipsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -565,6 +613,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavedContractsInput = {
@@ -580,6 +630,8 @@ export type UserCreateWithoutSavedContractsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavedContractsInput = {
@@ -595,6 +647,8 @@ export type UserUncheckedCreateWithoutSavedContractsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavedContractsInput = {
@@ -626,6 +680,8 @@ export type UserUpdateWithoutSavedContractsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavedContractsInput = {
@@ -641,6 +697,8 @@ export type UserUncheckedUpdateWithoutSavedContractsInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAlertRulesInput = {
@@ -656,6 +714,8 @@ export type UserCreateWithoutAlertRulesInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAlertRulesInput = {
@@ -671,6 +731,8 @@ export type UserUncheckedCreateWithoutAlertRulesInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAlertRulesInput = {
@@ -702,6 +764,8 @@ export type UserUpdateWithoutAlertRulesInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAlertRulesInput = {
@@ -717,6 +781,8 @@ export type UserUncheckedUpdateWithoutAlertRulesInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -732,6 +798,8 @@ export type UserCreateWithoutNotificationsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -747,6 +815,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -778,6 +848,8 @@ export type UserUpdateWithoutNotificationsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -793,6 +865,176 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpsertWithoutPasswordResetTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAlertSubscriptionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAlertSubscriptionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  passwordHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  savedContracts?: Prisma.SavedContractUncheckedCreateNestedManyWithoutUserInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
+  alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAlertSubscriptionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+}
+
+export type UserUpsertWithoutAlertSubscriptionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutAlertSubscriptionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAlertSubscriptionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutAlertSubscriptionsInput>
+}
+
+export type UserUpdateWithoutAlertSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAlertSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  savedContracts?: Prisma.SavedContractUncheckedUpdateManyWithoutUserNestedInput
+  savedStateLocalOpportunities?: Prisma.SavedStateLocalOpportunityUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
+  savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
+  alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavedStateLocalOpportunitiesInput = {
@@ -808,6 +1050,8 @@ export type UserCreateWithoutSavedStateLocalOpportunitiesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput = {
@@ -823,6 +1067,8 @@ export type UserUncheckedCreateWithoutSavedStateLocalOpportunitiesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavedStateLocalOpportunitiesInput = {
@@ -854,6 +1100,8 @@ export type UserUpdateWithoutSavedStateLocalOpportunitiesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavedStateLocalOpportunitiesInput = {
@@ -869,6 +1117,8 @@ export type UserUncheckedUpdateWithoutSavedStateLocalOpportunitiesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavedCategoryCodesInput = {
@@ -884,6 +1134,8 @@ export type UserCreateWithoutSavedCategoryCodesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavedCategoryCodesInput = {
@@ -899,6 +1151,8 @@ export type UserUncheckedCreateWithoutSavedCategoryCodesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavedCategoryCodesInput = {
@@ -930,6 +1184,8 @@ export type UserUpdateWithoutSavedCategoryCodesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavedCategoryCodesInput = {
@@ -945,6 +1201,8 @@ export type UserUncheckedUpdateWithoutSavedCategoryCodesInput = {
   savedCategoryCodeLists?: Prisma.SavedCategoryCodeListUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavedCategoryCodeListsInput = {
@@ -960,6 +1218,8 @@ export type UserCreateWithoutSavedCategoryCodeListsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavedCategoryCodeListsInput = {
@@ -975,6 +1235,8 @@ export type UserUncheckedCreateWithoutSavedCategoryCodeListsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedCreateNestedManyWithoutUserInput
   alertRules?: Prisma.AlertRuleUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavedCategoryCodeListsInput = {
@@ -1006,6 +1268,8 @@ export type UserUpdateWithoutSavedCategoryCodeListsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavedCategoryCodeListsInput = {
@@ -1021,6 +1285,8 @@ export type UserUncheckedUpdateWithoutSavedCategoryCodeListsInput = {
   savedCategoryCodes?: Prisma.UserSavedCategoryCodeUncheckedUpdateManyWithoutUserNestedInput
   alertRules?: Prisma.AlertRuleUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.OpportunityAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1036,6 +1302,8 @@ export type UserCountOutputType = {
   savedCategoryCodeLists: number
   alertRules: number
   notifications: number
+  alertSubscriptions: number
+  passwordResetTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1046,6 +1314,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   savedCategoryCodeLists?: boolean | UserCountOutputTypeCountSavedCategoryCodeListsArgs
   alertRules?: boolean | UserCountOutputTypeCountAlertRulesArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  alertSubscriptions?: boolean | UserCountOutputTypeCountAlertSubscriptionsArgs
+  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
 }
 
 /**
@@ -1107,6 +1377,20 @@ export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.NotificationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAlertSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OpportunityAlertSubscriptionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetTokenWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1122,6 +1406,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   savedCategoryCodeLists?: boolean | Prisma.User$savedCategoryCodeListsArgs<ExtArgs>
   alertRules?: boolean | Prisma.User$alertRulesArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  alertSubscriptions?: boolean | Prisma.User$alertSubscriptionsArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1161,6 +1447,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   savedCategoryCodeLists?: boolean | Prisma.User$savedCategoryCodeListsArgs<ExtArgs>
   alertRules?: boolean | Prisma.User$alertRulesArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  alertSubscriptions?: boolean | Prisma.User$alertSubscriptionsArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1176,6 +1464,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     savedCategoryCodeLists: Prisma.$SavedCategoryCodeListPayload<ExtArgs>[]
     alertRules: Prisma.$AlertRulePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    alertSubscriptions: Prisma.$OpportunityAlertSubscriptionPayload<ExtArgs>[]
+    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1585,6 +1875,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   savedCategoryCodeLists<T extends Prisma.User$savedCategoryCodeListsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedCategoryCodeListsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedCategoryCodeListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   alertRules<T extends Prisma.User$alertRulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alertRulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alertSubscriptions<T extends Prisma.User$alertSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alertSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OpportunityAlertSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2178,6 +2470,54 @@ export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.alertSubscriptions
+ */
+export type User$alertSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OpportunityAlertSubscription
+   */
+  select?: Prisma.OpportunityAlertSubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OpportunityAlertSubscription
+   */
+  omit?: Prisma.OpportunityAlertSubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OpportunityAlertSubscriptionInclude<ExtArgs> | null
+  where?: Prisma.OpportunityAlertSubscriptionWhereInput
+  orderBy?: Prisma.OpportunityAlertSubscriptionOrderByWithRelationInput | Prisma.OpportunityAlertSubscriptionOrderByWithRelationInput[]
+  cursor?: Prisma.OpportunityAlertSubscriptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OpportunityAlertSubscriptionScalarFieldEnum | Prisma.OpportunityAlertSubscriptionScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetTokens
+ */
+export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetToken
+   */
+  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetToken
+   */
+  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetTokenWhereInput
+  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
 }
 
 /**

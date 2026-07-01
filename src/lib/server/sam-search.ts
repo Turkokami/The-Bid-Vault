@@ -426,9 +426,15 @@ function buildAvailabilityStatus(dueDate: string) {
 }
 
 function buildAgency(record: Record<string, unknown>) {
+  const fullPath = pickString(record.fullParentPathName, record.organizationHierarchy);
+  if (fullPath) {
+    // fullParentPathName is dot-separated: "DEPT OF X.DEPT OF X.OFFICE Y" — deduplicate and show last 2
+    const parts = fullPath.split(".").map((p) => p.trim()).filter(Boolean);
+    const unique = parts.filter((p, i) => parts.indexOf(p) === i);
+    return unique.slice(-2).join(" › ") || fullPath;
+  }
   return (
     pickString(
-      record.fullParentPathName,
       record.department,
       record.departmentName,
       record.organizationName,
@@ -452,11 +458,12 @@ function buildSynopsis(record: Record<string, unknown>, title: string, agency: s
   const raw = pickString(
     record.description,
     record.summary,
-    record.uiLink,
-    record.solicitationNumber,
   );
 
-  if (raw && raw !== title) {
+  // Reject values that look like raw URLs — they come from uiLink/link fields leaking in
+  const isUrl = (s: string) => /^https?:\/\//i.test(s.trim());
+
+  if (raw && raw !== title && !isUrl(raw)) {
     return raw.slice(0, 320);
   }
 
@@ -730,9 +737,9 @@ function mapSamRecord(record: Record<string, unknown>): SamOpportunityRecord {
       record.summary,
       record.additionalInfo,
     ) || buildSynopsis(record, title, agency);
+  // Prefer noticeId for stable IDs; never use a raw URL as the seed — it produces broken slugs
   const stableIdSeed =
     noticeId ||
-    sourceUrl ||
     `${title}|${agency}|${pickString(record.naicsCode, record.naics, record.classificationCode)}|${location}`;
 
   return {

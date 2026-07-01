@@ -63,6 +63,16 @@ export type AlertRule = Prisma.AlertRuleModel
  */
 export type Notification = Prisma.NotificationModel
 /**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model OpportunityAlertSubscription
+ * 
+ */
+export type OpportunityAlertSubscription = Prisma.OpportunityAlertSubscriptionModel
+/**
  * Model StateLocalOpportunity
  * 
  */
