@@ -6,11 +6,91 @@ import { fetchLivePennsylvaniaOpportunities } from "@/lib/sources/pennsylvania-l
 import { stateDirectory } from "@/lib/sources/state-registry";
 import { websSourceSummary } from "@/lib/sources/webs";
 import { fetchLiveWebsRawOpportunities } from "@/lib/sources/webs-live";
+import { db } from "@/lib/db";
 import type {
   NormalizedStateLocalOpportunity,
+  StateLocalOpportunityStatus,
+  StateLocalOpportunityType,
   StateLocalSourceSummary,
   StateLocalSourceSyncLog,
 } from "@/lib/sources/types";
+
+const SCRAPER_SOURCE_NAMES = [
+  "california-caleprocure",
+  "new-york-nyscr",
+  "washington-webs",
+  "colorado-bids",
+] as const;
+
+const SCRAPER_SOURCE_META: Record<string, { sourceCode: string; stateCode: string; label: string }> = {
+  "california-caleprocure": { sourceCode: "california", stateCode: "CA", label: "California Cal eProcure" },
+  "new-york-nyscr": { sourceCode: "new-york", stateCode: "NY", label: "New York State Contract Reporter" },
+  "washington-webs": { sourceCode: "washington", stateCode: "WA", label: "Washington WEBS" },
+  "colorado-bids": { sourceCode: "colorado", stateCode: "CO", label: "Colorado Bids" },
+};
+
+async function fetchScraperDbOpportunities(): Promise<{
+  opportunities: NormalizedStateLocalOpportunity[];
+  logs: StateLocalSourceSyncLog[];
+}> {
+  try {
+    const rows = await db.stateLocalOpportunity.findMany({
+      where: { sourceName: { in: [...SCRAPER_SOURCE_NAMES] } },
+      orderBy: { dueDate: "asc" },
+      take: 500,
+    });
+
+    const opportunities: NormalizedStateLocalOpportunity[] = rows.map((row) => {
+      const meta = SCRAPER_SOURCE_META[row.sourceName] ?? { sourceCode: row.sourceName, stateCode: row.stateCode, label: row.sourceName };
+      return {
+        id: row.id,
+        externalId: row.id,
+        sourceName: meta.label,
+        sourceCode: meta.sourceCode,
+        stateCode: row.stateCode,
+        title: row.title,
+        issuingEntity: row.issuingEntity,
+        opportunityType: (row.opportunityType as StateLocalOpportunityType) ?? "Open for Bids",
+        status: (row.status as StateLocalOpportunityStatus) ?? "Open",
+        categoryCode: row.categoryCode ?? "",
+        postedDate: row.postedDate ? row.postedDate.toISOString() : row.createdAt.toISOString(),
+        dueDate: row.dueDate ? row.dueDate.toISOString() : "",
+        summary: row.summary ?? "",
+        description: row.summary ?? "",
+        location: row.location ?? row.stateCode,
+        sourceUrl: row.sourceUrl ?? "",
+        registrationRequired: row.registrationRequired,
+        registrationNotes: row.registrationNotes ?? "",
+        contactName: row.contactName ?? "",
+        contactEmail: row.contactEmail ?? "",
+        contactPhone: "",
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+      };
+    });
+
+    const countsBySource: Record<string, number> = {};
+    for (const opp of opportunities) {
+      countsBySource[opp.sourceCode] = (countsBySource[opp.sourceCode] ?? 0) + 1;
+    }
+
+    const logs: StateLocalSourceSyncLog[] = Object.entries(countsBySource).map(([sourceCode, count]) => ({
+      id: `sync-db-${sourceCode}-${count}`,
+      sourceName: SCRAPER_SOURCE_META[Object.keys(SCRAPER_SOURCE_META).find((k) => SCRAPER_SOURCE_META[k].sourceCode === sourceCode)!]?.label ?? sourceCode,
+      sourceCode,
+      syncStatus: "Success" as const,
+      lastRunAt: formatSyncTime(),
+      recordsAdded: count,
+      recordsUpdated: 0,
+      notes: `${count} records loaded from Railway scraper database.`,
+    }));
+
+    return { opportunities, logs };
+  } catch (err) {
+    console.error("[sync-state-local] DB fetch failed:", err);
+    return { opportunities: [], logs: [] };
+  }
+}
 
 let cachedWebsOpportunities: NormalizedStateLocalOpportunity[] = [];
 let cachedTexasOpportunities: NormalizedStateLocalOpportunity[] = [];
@@ -248,6 +328,15 @@ export async function getStateLocalSyncSnapshot(options?: {
   const opportunities: NormalizedStateLocalOpportunity[] = [];
   const syncLogs: StateLocalSourceSyncLog[] = [];
   const sources = getStateLocalSourceCatalog();
+
+  // Load Railway scraper results from Neon DB
+  const { opportunities: dbOpps, logs: dbLogs } = await fetchScraperDbOpportunities();
+  opportunities.push(...dbOpps);
+  syncLogs.push(...dbLogs);
+  // Mark DB-sourced states as connected in the source catalog
+  for (const opp of dbOpps) {
+    updateConnectedSource(sources, opp.sourceCode, `${opp.sourceName} — loaded from Railway scraper database.`);
+  }
 
   try {
     const raws = await fetchLiveWebsRawOpportunities();
