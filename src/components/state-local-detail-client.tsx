@@ -229,7 +229,7 @@ export function StateLocalDetailClient({
               </div>
             </article>
 
-            <StateLocalSavePanel opportunityId={opportunity.id} />
+            <StateLocalSavePanel opportunity={opportunity} />
           </div>
         </section>
 
