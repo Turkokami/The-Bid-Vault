@@ -22,7 +22,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const viewer = await getViewerContext();
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.18),_transparent_24%),linear-gradient(180deg,#050816_0%,#08101d_50%,#0b1324_100%)] text-slate-100">
+    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.18),_transparent_24%),linear-gradient(180deg,#050816_0%,#08101d_50%,#0b1324_100%)] text-slate-100">
       <div className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-slate-950/78 shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/62">
         <div className="mx-auto w-full max-w-7xl px-2 py-2 sm:px-4 lg:px-8 lg:py-3">
           <header className="overflow-hidden rounded-[1.1rem] border border-white/10 bg-slate-950/88 shadow-[0_0_40px_rgba(34,197,94,0.08)] lg:rounded-[1.5rem]">
