@@ -73,8 +73,15 @@ export function AuthForm({
             />
           </label>
 
-          <label className="space-y-2 text-sm text-slate-200">
-            <span>Password</span>
+          <div className="space-y-2 text-sm text-slate-200">
+            <div className="flex items-center justify-between">
+              <span>Password</span>
+              {mode === "sign-in" && (
+                <Link href="/forgot-password" className="text-xs text-emerald-400 hover:text-emerald-300">
+                  Forgot password?
+                </Link>
+              )}
+            </div>
             <input
               name="password"
               type="password"
@@ -82,7 +89,7 @@ export function AuthForm({
               className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-400/50"
               placeholder="At least 8 characters"
             />
-          </label>
+          </div>
         </div>
 
         <button

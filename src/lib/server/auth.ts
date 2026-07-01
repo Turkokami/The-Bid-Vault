@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 
@@ -157,6 +157,48 @@ export async function createUserAccount(input: {
 
   await setAuthCookie(user.id);
   return user;
+}
+
+function hashToken(raw: string) {
+  return createHash("sha256").update(raw).digest("hex");
+}
+
+export async function createPasswordResetToken(email: string): Promise<string | null> {
+  const user = await db.user.findUnique({ where: { email: email.trim().toLowerCase() } });
+  if (!user) return null; // Don't reveal whether email exists
+
+  // Invalidate any existing tokens for this user
+  await db.passwordResetToken.updateMany({
+    where: { userId: user.id, usedAt: null },
+    data: { usedAt: new Date() },
+  });
+
+  const raw = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+  await db.passwordResetToken.create({
+    data: { userId: user.id, tokenHash: hashToken(raw), expiresAt },
+  });
+
+  return raw;
+}
+
+export async function resetPasswordWithToken(token: string, newPassword: string): Promise<void> {
+  const record = await db.passwordResetToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+    include: { user: true },
+  });
+
+  if (!record || record.usedAt || record.expiresAt < new Date()) {
+    throw new Error("This reset link has expired or already been used. Request a new one.");
+  }
+
+  const passwordHash = createPasswordHash(newPassword);
+
+  await db.$transaction([
+    db.user.update({ where: { id: record.userId }, data: { passwordHash } }),
+    db.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+  ]);
 }
 
 export async function authenticateUser(email: string, password: string) {
