@@ -11,9 +11,9 @@ import { buttonStyles } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import {
   getSamOpportunityById,
-  getSamSearchSnapshot,
   type SamOpportunityRecord,
 } from "@/lib/server/sam-search";
+import { samLiveConfigured } from "@/lib/sources/source-runtime";
 import { getContractsIndex } from "@/lib/server/contracts";
 
 export const dynamic = "force-dynamic";
@@ -173,21 +173,12 @@ export default async function GovernmentDataRecordDetailPage({
     );
   }
 
+  const liveConfigured = samLiveConfigured();
   let contracts: Awaited<ReturnType<typeof getContractsIndex>>["contracts"] = [];
-  let snapshot: Awaited<ReturnType<typeof getSamSearchSnapshot>> = {
-    records: [],
-    sources: [],
-    activities: [],
-    liveConfigured: false,
-  };
 
   try {
-    const [contractsIndex, searchSnapshot] = await Promise.all([
-      getContractsIndex(),
-      getSamSearchSnapshot(),
-    ]);
+    const contractsIndex = await getContractsIndex();
     contracts = contractsIndex.contracts;
-    snapshot = searchSnapshot;
   } catch {
     contracts = [];
   }
@@ -386,7 +377,7 @@ export default async function GovernmentDataRecordDetailPage({
                 Open original SAM posting
               </a>
             </div>
-            {!snapshot.liveConfigured ? (
+            {!liveConfigured ? (
               <p className="mt-4 text-sm leading-6 text-amber-100">
                 Search SAM is not fully live until a SAM.gov API key is configured in the app environment.
               </p>
