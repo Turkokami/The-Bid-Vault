@@ -3,7 +3,11 @@ import { DashboardClient } from "@/components/dashboard-client";
 import { getDashboardData } from "@/lib/server/contracts";
 
 export default async function DashboardPage() {
-  const dashboard = await getDashboardData();
+  const dashboard = await getDashboardData().catch(() => ({
+    groups: [],
+    stats: { total: 0, active: 0, expiringSoon: 0, won: 0 },
+    mode: "demo" as const,
+  }));
 
   return (
     <div className="space-y-8">

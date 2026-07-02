@@ -104,6 +104,7 @@ function buildSummary(text: string, title: string) {
 export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunity[]> {
   const response = await fetch(WEBS_BID_CALENDAR_URL, {
     cache: "no-store",
+    signal: AbortSignal.timeout(7000),
     headers: {
       "user-agent": "The Bid Vault/1.0",
       accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

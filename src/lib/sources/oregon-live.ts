@@ -51,6 +51,7 @@ function buildStatus(dueDate: string): NormalizedStateLocalOpportunity["status"]
 export async function fetchLiveOregonOpportunities(): Promise<NormalizedStateLocalOpportunity[]> {
   const response = await fetch(OREGON_ORPIN_URL, {
     next: { revalidate: 1800 },
+    signal: AbortSignal.timeout(7000),
     headers: {
       "user-agent": "The Bid Vault/1.0",
       accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

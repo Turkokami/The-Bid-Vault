@@ -52,6 +52,7 @@ export async function fetchLivePennsylvaniaOpportunities(): Promise<
 > {
   const response = await fetch(PENN_SOLICITATIONS_URL, {
     next: { revalidate: 1800 },
+    signal: AbortSignal.timeout(7000),
     headers: {
       "user-agent": "The Bid Vault/1.0",
       accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

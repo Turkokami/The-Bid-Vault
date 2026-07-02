@@ -70,6 +70,7 @@ function inferOpportunityType(statusText: string, title: string) {
 export async function fetchLiveTexasOpportunities(): Promise<NormalizedStateLocalOpportunity[]> {
   const response = await fetch(TEXAS_ESBD_URL, {
     next: { revalidate: 1800 },
+    signal: AbortSignal.timeout(7000),
     headers: {
       "user-agent": "The Bid Vault/1.0",
     },

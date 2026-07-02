@@ -869,6 +869,7 @@ async function fetchSamRecords(options?: {
 
     const response = await fetch(url.toString(), {
       next: { revalidate: 900 },
+      signal: AbortSignal.timeout(7000),
       headers: {
         "user-agent": "The Bid Vault/1.0",
         accept: "application/json",
