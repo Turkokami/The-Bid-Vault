@@ -110,7 +110,6 @@ export async function fetchLiveWebsRawOpportunities(): Promise<RawWebsOpportunit
       accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       "accept-language": "en-US,en;q=0.9",
     },
-    signal: AbortSignal.timeout(20000),
   });
 
   if (!response.ok) {
