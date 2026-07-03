@@ -146,7 +146,13 @@ export default async function GovernmentDataRecordDetailPage({
   const queryParams = (await searchParams) ?? {};
   const lookupId = pickParam(queryParams, "noticeId") || id;
   const returnTo = readReturnTo(queryParams);
-  const liveRecord = await getSamOpportunityById(lookupId);
+  // Run SAM lookup and DB fetch in parallel so their latencies don't stack
+  const [samResult, contractsResult] = await Promise.allSettled([
+    getSamOpportunityById(lookupId),
+    getContractsIndex(),
+  ]);
+
+  const liveRecord = samResult.status === "fulfilled" ? samResult.value : null;
   const fallbackRecord = buildFallbackRecord(id, queryParams);
   const record = liveRecord ?? fallbackRecord;
 
@@ -174,14 +180,7 @@ export default async function GovernmentDataRecordDetailPage({
   }
 
   const liveConfigured = samLiveConfigured();
-  let contracts: Awaited<ReturnType<typeof getContractsIndex>>["contracts"] = [];
-
-  try {
-    const contractsIndex = await getContractsIndex();
-    contracts = contractsIndex.contracts;
-  } catch {
-    contracts = [];
-  }
+  const contracts = contractsResult.status === "fulfilled" ? contractsResult.value.contracts : [];
 
   const keyTerms = Array.isArray(record.keyTerms) ? record.keyTerms : [];
   const sourceHref = buildSafeFederalSourceUrl(record);
