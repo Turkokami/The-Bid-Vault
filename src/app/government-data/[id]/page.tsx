@@ -168,12 +168,14 @@ export default async function GovernmentDataRecordDetailPage({
           <Link href={returnTo} className={buttonStyles({ variant: "primary", size: "md" })}>
             Back to previous results
           </Link>
-          <Link
+          <a
             href={`https://sam.gov/search/?index=opp&keywords=${encodeURIComponent(lookupId)}`}
+            target="_blank"
+            rel="noreferrer"
             className={buttonStyles({ variant: "ghost", size: "md" })}
           >
             Search this notice on SAM.gov
-          </Link>
+          </a>
         </div>
       </div>
     );
