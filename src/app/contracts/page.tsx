@@ -73,7 +73,9 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
         </Link>
       </section>
 
-      <DemoResetButton />
+      {contractsIndex.mode === "demo" && process.env.NODE_ENV !== "production" ? (
+        <DemoResetButton />
+      ) : null}
 
       <ContractsClient
         initialContracts={contractsIndex.contracts}

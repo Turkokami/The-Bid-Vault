@@ -3,11 +3,12 @@ export function allowDemoSourceData() {
 }
 
 export function getSamApiKey() {
+  // Only read server-side env vars — never NEXT_PUBLIC_ names, which would
+  // expose the key in the client bundle if ever set under that prefix.
   return (
     process.env.SAM_GOV_API_KEY?.trim() ||
     process.env.SAM_API_KEY?.trim() ||
     process.env.SAM_API_TOKEN?.trim() ||
-    process.env.NEXT_PUBLIC_SAM_GOV_API_KEY?.trim() ||
     ""
   );
 }

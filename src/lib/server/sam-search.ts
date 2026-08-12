@@ -97,6 +97,8 @@ function buildSnapshotCacheKey(query: SamSearchQuery) {
     status: query.status ?? "all",
     sort: query.sort ?? "due-soon",
     browseAll: !!query.browseAll,
+    setAside: query.setAside ?? "all",
+    valueBand: query.valueBand ?? "all",
   });
 }
 

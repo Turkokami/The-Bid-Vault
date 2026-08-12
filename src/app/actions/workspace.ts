@@ -14,6 +14,7 @@ export async function setActiveWorkspace(slug: string) {
   cookieStore.set(ACTIVE_WORKSPACE_COOKIE, slug, {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });

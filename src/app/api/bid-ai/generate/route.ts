@@ -1,7 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import { getAuthenticatedUser } from "@/lib/server/auth";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// Max characters for any single context field — prevents prompt inflation
+const MAX_FIELD_LENGTH = 1000;
+
+function truncate(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.slice(0, MAX_FIELD_LENGTH);
+}
 
 const SECTION_PROMPTS: Record<string, (ctx: BidContext) => string> = {
   coverLetter: (ctx) => `Write a professional government contract bid cover letter for the following opportunity. Be concise (3-4 short paragraphs), formal, and compelling.
@@ -134,13 +143,22 @@ type BidContext = {
 };
 
 export async function POST(request: Request) {
+  // Require authentication — this route calls a paid external API
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: "Sign in to use the AI bid builder." },
+      { status: 401 },
+    );
+  }
+
   try {
-    const body = await request.json() as { section: string; context: BidContext };
+    const body = (await request.json()) as { section: string; context: Record<string, unknown> };
     const { section, context } = body;
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY is not configured. Add it to your Vercel environment variables." },
+        { error: "AI generation is not available right now. Please try again later." },
         { status: 503 },
       );
     }
@@ -150,7 +168,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Unknown section: ${section}` }, { status: 400 });
     }
 
-    const prompt = promptBuilder(context);
+    // Sanitize and cap every field so no single request can inflate token cost
+    const safeContext: BidContext = {
+      title: truncate(context.title),
+      agency: truncate(context.agency),
+      dueDate: truncate(context.dueDate),
+      naicsCode: truncate(context.naicsCode),
+      setAside: truncate(context.setAside),
+      summary: truncate(context.summary),
+      sourceName: truncate(context.sourceName),
+      companyName: truncate(context.companyName),
+      ueiNumber: truncate(context.ueiNumber),
+      certifications: truncate(context.certifications),
+      yearsInBusiness: truncate(context.yearsInBusiness),
+      pointOfContact: truncate(context.pointOfContact),
+      pocTitle: truncate(context.pocTitle),
+      companyDescription: truncate(context.companyDescription),
+      pastPerformance: truncate(context.pastPerformance),
+    };
+
+    const prompt = promptBuilder(safeContext);
 
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
@@ -165,7 +202,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ generated });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "AI generation failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[bid-ai] generation error:", error);
+    return NextResponse.json({ error: "AI generation failed. Please try again." }, { status: 500 });
   }
 }

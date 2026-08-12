@@ -329,8 +329,17 @@ export async function getStateLocalSyncSnapshot(options?: {
   const syncLogs: StateLocalSourceSyncLog[] = [];
   const sources = getStateLocalSourceCatalog();
 
-  // Load Railway scraper results from Neon DB
-  const { opportunities: dbOpps, logs: dbLogs } = await fetchScraperDbOpportunities();
+  // Load Railway scraper results from Neon DB — bounded so a cold Neon start
+  // can't run the full function past the Vercel 10s limit.
+  const DB_FETCH_TIMEOUT_MS = 3000;
+  const dbResult = await Promise.race([
+    fetchScraperDbOpportunities(),
+    new Promise<{ opportunities: NormalizedStateLocalOpportunity[]; logs: StateLocalSourceSyncLog[] }>(
+      (_, reject) => setTimeout(() => reject(new Error("DB fetch timed out")), DB_FETCH_TIMEOUT_MS),
+    ),
+  ]).catch(() => ({ opportunities: [] as NormalizedStateLocalOpportunity[], logs: [] as StateLocalSourceSyncLog[] }));
+
+  const { opportunities: dbOpps, logs: dbLogs } = dbResult;
   opportunities.push(...dbOpps);
   syncLogs.push(...dbLogs);
   // Mark DB-sourced states as connected in the source catalog
