@@ -66,18 +66,19 @@ const fipsToStateCode: Record<string, string> = {
 
 function getStateClasses(state: StateDirectoryEntry, isActive: boolean) {
   if (isActive) {
-    return "fill-emerald-300 stroke-white stroke-[1.6] drop-shadow-[0_0_16px_rgba(110,231,183,0.5)]";
+    return "fill-emerald-300 stroke-white stroke-[1.6] drop-shadow-[0_0_18px_rgba(110,231,183,0.6)]";
   }
 
   if (state.connectionMode === "live") {
-    return "fill-emerald-500/90 stroke-slate-950 stroke-[1.1] hover:fill-emerald-400";
+    return "fill-emerald-500/90 stroke-slate-900 stroke-[1.1] drop-shadow-[0_0_6px_rgba(52,211,153,0.25)] hover:fill-emerald-400 hover:drop-shadow-[0_0_14px_rgba(52,211,153,0.5)]";
   }
 
   if (state.connectionMode === "portal-assisted") {
-    return "fill-amber-400/90 stroke-slate-950 stroke-[1.1] hover:fill-amber-300";
+    return "fill-amber-400/85 stroke-slate-900 stroke-[1.1] drop-shadow-[0_0_6px_rgba(251,191,36,0.25)] hover:fill-amber-300 hover:drop-shadow-[0_0_14px_rgba(251,191,36,0.5)]";
   }
 
-  return "fill-slate-700 stroke-slate-950 stroke-[1.1] hover:fill-slate-600";
+  // Planned — sky blue so every state reads as part of the same glowing map
+  return "fill-sky-700/70 stroke-slate-900/70 stroke-[1.1] drop-shadow-[0_0_4px_rgba(14,165,233,0.15)] hover:fill-sky-500/80 hover:drop-shadow-[0_0_12px_rgba(14,165,233,0.4)]";
 }
 
 export function UsStateTileMap({
@@ -165,8 +166,8 @@ export function UsStateTileMap({
               Portal-assisted
             </span>
             <span className="inline-flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-slate-600" />
-              Portal ready
+              <span className="h-3 w-3 rounded-full bg-sky-600" />
+              Coming soon
             </span>
           </div>
         </div>
